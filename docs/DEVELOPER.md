@@ -133,11 +133,30 @@ Oglindește structura de foldere din `DOCS.md` secțiunea 2. Secțiuni:
 
 *(gol deocamdată — ex. viitoare: `getMonthlyTransactions()`, `getDashboardSummary()`, `getCategories()`)*
 
+## 3b. Auth / user curent (`/lib/auth`)
+
+#### `getCurrentUser()` / `getCurrentMembership()`
+- **Fișier:** lib/auth/current-user.ts (`server-only`)
+- **Ce face:** `getCurrentUser` întoarce userul autentificat (validat cu serverul Supabase) sau null. `getCurrentMembership` întoarce prima apartenență la gospodărie (`household_id`, `role`, `households(name)`) sau null → semn că trebuie onboarding.
+- **Atinge:** `auth.getUser()`; tabelul `household_members` (prin RLS).
+
 ## 4. Scrieri de date / Server Actions (`/lib/actions`)
 
 > Toate operațiunile de scriere. Rulează pe server. Validează input și apartenența la gospodărie.
 
-*(gol deocamdată — ex. viitoare: `createTransaction()`, `updateTransaction()`, `softDeleteTransaction()`, `restoreTransaction()`)*
+#### `signInAction` / `signUpAction` / `signOutAction`
+- **Fișier:** lib/actions/auth.ts (`"use server"`)
+- **Ce face:** login / register / logout prin Supabase Auth. Semnătură `(prevState, FormData) => AuthActionState` pentru `useActionState`. Validează credențialele cu Zod (`credentialsSchema`) în interiorul action-ului.
+- **Întoarce:** `{ error }` la eșec, altfel `redirect` (login→`/`, signup cu sesiune→`/onboarding`, logout→`/login`).
+- **De evitat / capcane:** signup fără sesiune (confirmare email ON) întoarce mesaj, nu redirect.
+
+#### `createHouseholdAction`
+- **Fișier:** lib/actions/household.ts (`"use server"`)
+- **Ce face:** creează gospodăria + owner atomic prin RPC `create_household`. Reverifică userul (redirect /login dacă lipsește), validează numele (`householdNameSchema`).
+- **Atinge:** RPC `create_household`. `revalidatePath("/", "layout")` apoi `redirect("/")`.
+
+#### Scheme Zod
+- **Fișier:** lib/schemas/auth.ts — `credentialsSchema` (email + parolă ≥6), `householdNameSchema` (1–80 caractere).
 
 ## 5. Helpere / utilitare (`/lib/utils`)
 

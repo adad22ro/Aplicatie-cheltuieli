@@ -51,6 +51,15 @@
 - Tipuri generate în `types/database.ts` (`npm run db:types`).
 - **Urmează:** test de izolare RLS cu 2 conturi în gospodării diferite; apoi auth + onboarding (pasul 3).
 
+### 2026-07-04 — Auth + onboarding (pasul 3)
+- **Design system pus la punct:** tokeni semantici în `globals.css` (DESIGN.md §3), dark mode pe strategia `class` cu `@custom-variant` (Tailwind v4), script anti-flash în layout, font Nunito, `lang="ro"`. Componentele folosesc DOAR clase mapate pe tokeni (bg-surface, text-foreground, text-expense…), zero culori fixe.
+- **Sesiune:** `proxy.ts` (Next 16 a redenumit `middleware`→`proxy`) + `lib/supabase/proxy.ts` (`updateSession`) — reîmprospătează token-ul și protejează rutele (neautentificat→/login, autentificat pe /login|/register→/).
+- **Auth:** Server Actions `signInAction`/`signUpAction`/`signOutAction` (Zod pe server), pagini `(auth)/login` + `(auth)/register` cu `AuthForm` (client, `useActionState`).
+- **Onboarding:** `createHouseholdAction` apelează RPC `create_household`; pagina `/onboarding` redirect dacă userul are deja gospodărie. Dashboard placeholder în `(app)/page.tsx` (redirect la /onboarding dacă nu e membru).
+- **Structură rute:** grupuri `(app)` și `(auth)` (nu schimbă URL-ul). Verificat: `/`→307 `/login`, `/login` & `/register`→200.
+- **Punct de decizie deschis:** confirmarea email Supabase e ON implicit → signup nu dă sesiune imediat. De decis dacă o dezactivăm pentru flux instant (aplicație de cuplu). Codul suportă ambele.
+- **Urmează:** test izolare RLS cu 2 conturi (necesită conturi reale — acum posibil prin UI); apoi CRUD categorii + metode de plată (pasul 4).
+
 ---
 
 ## De făcut (viu — se actualizează)
