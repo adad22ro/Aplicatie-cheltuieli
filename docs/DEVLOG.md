@@ -44,6 +44,13 @@
 - Config aliniat la regulile de bază: `noUncheckedIndexedAccess` în tsconfig, `.env.example` (cu `service_role` marcat rezervat faza 2, NU se folosește pe Profil B în faza 1), excepție `!.env.example` în `.gitignore`, script `typecheck`.
 - **De făcut imediat:** `lib/env.ts` (validare fail-fast, cu Zod) + clienți Supabase (`@supabase/ssr`), după ce sunt disponibile URL-ul și cheia anon din proiectul Supabase.
 
+### 2026-07-04 — Schema DB + RLS aplicate
+- Supabase CLI instalat (dev dep) + `supabase init` + proiect legat (`db push`/`db:types` funcționale).
+- Migrarea `20260704150519_schema_initial.sql`: toate cele 10 tabele (PLAN §5) + enum-uri + indexuri + RLS pe toate + politici.
+- **Decizie RLS:** funcții helper `is_household_member()` / `is_household_owner()` **SECURITY DEFINER** (ocolesc RLS pe `household_members` ca să evite recursiunea infinită în politici). Crearea gospodăriei prin RPC `create_household()` (SECURITY DEFINER) — bootstrap atomic al primului owner, care altfel ar fi blocat de politici. `households` NU are politică INSERT (creare doar prin RPC).
+- Tipuri generate în `types/database.ts` (`npm run db:types`).
+- **Urmează:** test de izolare RLS cu 2 conturi în gospodării diferite; apoi auth + onboarding (pasul 3).
+
 ---
 
 ## De făcut (viu — se actualizează)
