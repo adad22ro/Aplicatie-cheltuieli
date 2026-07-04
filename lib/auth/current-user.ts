@@ -32,3 +32,13 @@ export async function getCurrentMembership() {
 
   return data;
 }
+
+/**
+ * ID-ul gospodăriei active a userului curent (prima apartenență), sau null dacă nu e
+ * membru al niciuneia. Folosit de Server Actions ca să știe pe ce gospodărie scriu.
+ * RLS impune oricum izolarea; acesta doar evită un round-trip suplimentar.
+ */
+export async function getActiveHouseholdId() {
+  const membership = await getCurrentMembership();
+  return membership?.household_id ?? null;
+}

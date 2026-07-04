@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { getCurrentMembership, getCurrentUser } from "@/lib/auth/current-user";
@@ -27,14 +28,22 @@ export default async function DashboardPage() {
           <p className="text-sm text-muted">Gospodărie</p>
           <h1 className="text-2xl font-bold">{household?.name ?? "—"}</h1>
         </div>
-        <form action={signOutAction}>
-          <button
-            type="submit"
+        <div className="flex items-center gap-2">
+          <Link
+            href="/settings"
             className="rounded-xl border border-border px-3 py-2 text-sm font-medium hover:bg-background"
           >
-            Ieși
-          </button>
-        </form>
+            Setări
+          </Link>
+          <form action={signOutAction}>
+            <button
+              type="submit"
+              className="rounded-xl border border-border px-3 py-2 text-sm font-medium hover:bg-background"
+            >
+              Ieși
+            </button>
+          </form>
+        </div>
       </header>
 
       <div className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
