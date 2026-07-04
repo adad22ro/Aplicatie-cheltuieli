@@ -32,7 +32,9 @@ Ultima actualizare: 2026-07-04
 - ⬜ CRUD categorii + metode de plată (pasul 4)
 
 ## Punct de decizie deschis
-- Confirmarea email Supabase = **OFF intenționat** (decis 2026-07-04) pentru signup instant în teste. ⚠️ DE REACTIVAT înainte de lansare (Authentication → Providers → Email). Codul suportă ambele fluxuri.
+- Confirmarea email Supabase = **OFF** (`mailer_autoconfirm: true`, setat prin Management API 2026-07-04) pentru signup instant. ⚠️ DE REACTIVAT + SMTP custom (Resend) înainte de lansare — SMTP built-in are limită 2 emailuri/oră. Codul suportă ambele fluxuri.
+- Deploy live pe Vercel (branch `main`, PR #1). Auth + onboarding testate live: register → onboarding → dashboard OK.
+- Unealtă nouă: `npm run debug` (raport erori Supabase/Vercel).
 
 ## Probleme cunoscute / de rezolvat
 - Nimic blocant. `supabase db push` necesită confirmare manuală a userului (blocat în auto mode) — normal.
