@@ -30,7 +30,8 @@ Ultima actualizare: 2026-07-04
 - ✅ Dashboard placeholder `app/(app)/page.tsx` (verificat: /→/login, /login & /register 200)
 - ✅ Test izolare RLS (2 conturi, script anon+service_role) — 10/10 OK (izolare select/insert cross-tenant, auto-adăugare membru blocată, INSERT direct households blocat). Useri de test șterși după.
 - ✅ CRUD categorii + metode de plată (pasul 4) — `/settings` hub + `/settings/categories` (income/expense, icon emoji + culoare din paletă) + `/settings/payment-methods`. Server Actions cu Zod, soft delete, revalidatePath. Test funcțional 13/13 OK.
-- ⬜ Tranzacții manuale CRUD + UX rapid (pasul 5)
+- ✅ Tranzacții manuale CRUD + UX rapid (pasul 5) — `/transactions` (listă grupată pe zile, sume colorate, autor), `/transactions/new` (formular rapid: focus sumă, tastatură numerică, toggle venit/cheltuială filtrează categoriile, dată=azi), `/transactions/[id]/edit`. Undo la ștergere (soft-delete + restore), duplică, FAB + linkuri din dashboard. Test funcțional 14/14 OK (inclusiv RLS user_id + izolare).
+- ⬜ Dashboard lunar: total venituri/cheltuieli/sold + carry-over + filtrări (pasul 6) — capăt Faza 1
 
 ## Punct de decizie deschis
 - Confirmarea email Supabase = **OFF** (`mailer_autoconfirm: true`, setat prin Management API 2026-07-04) pentru signup instant. ⚠️ DE REACTIVAT + SMTP custom (Resend) înainte de lansare — SMTP built-in are limită 2 emailuri/oră. Codul suportă ambele fluxuri.

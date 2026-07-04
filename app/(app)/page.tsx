@@ -54,8 +54,24 @@ export default async function DashboardPage() {
         </p>
       </div>
 
+      <div className="flex flex-col gap-2">
+        <Link
+          href="/transactions"
+          className="flex items-center justify-between rounded-2xl border border-border bg-surface p-4 shadow-sm transition-colors hover:bg-background"
+        >
+          <span className="font-semibold">Tranzacții</span>
+          <span aria-hidden className="text-muted">→</span>
+        </Link>
+        <Link
+          href="/transactions/new"
+          className="rounded-2xl bg-primary p-4 text-center font-semibold text-white transition-colors hover:bg-primary-hover"
+        >
+          + Adaugă tranzacție
+        </Link>
+      </div>
+
       <div className="rounded-2xl border border-dashed border-border p-5 text-center text-sm text-muted">
-        Dashboard-ul cu venituri, cheltuieli și sold vine în curând.
+        Sumarul lunar cu venituri, cheltuieli și sold vine la pasul următor.
       </div>
     </main>
   );
