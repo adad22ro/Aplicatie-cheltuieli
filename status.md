@@ -28,11 +28,11 @@ Ultima actualizare: 2026-07-04
 - ✅ Auth: `lib/actions/auth.ts`, `lib/schemas/auth.ts`, `lib/auth/current-user.ts`, `components/AuthForm.tsx`, pagini `(auth)/login` + `(auth)/register`
 - ✅ Onboarding: `lib/actions/household.ts`, `components/OnboardingForm.tsx`, `app/onboarding/`
 - ✅ Dashboard placeholder `app/(app)/page.tsx` (verificat: /→/login, /login & /register 200)
-- ⬜ Test izolare RLS (2 conturi) — acum posibil prin UI
+- ✅ Test izolare RLS (2 conturi, script anon+service_role) — 10/10 OK (izolare select/insert cross-tenant, auto-adăugare membru blocată, INSERT direct households blocat). Useri de test șterși după.
 - ⬜ CRUD categorii + metode de plată (pasul 4)
 
 ## Punct de decizie deschis
-- Confirmarea email Supabase e ON implicit → signup nu dă sesiune imediat (userul vede „verifică emailul"). De decis dacă o dezactivăm (Authentication → Providers → Email) pentru flux instant. Codul suportă ambele.
+- Confirmarea email Supabase = **OFF intenționat** (decis 2026-07-04) pentru signup instant în teste. ⚠️ DE REACTIVAT înainte de lansare (Authentication → Providers → Email). Codul suportă ambele fluxuri.
 
 ## Probleme cunoscute / de rezolvat
 - Nimic blocant. `supabase db push` necesită confirmare manuală a userului (blocat în auto mode) — normal.
