@@ -29,16 +29,25 @@ function todayLocal() {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
+export type TransactionPrefill = {
+  amount?: string;
+  type?: EntryType;
+  category_id?: string;
+  note?: string;
+};
+
 export function TransactionForm({
   mode,
   categories,
   methods,
   initial,
+  prefill,
 }: {
   mode: "create" | "edit";
   categories: Category[];
   methods: PaymentMethod[];
   initial?: TransactionInitial;
+  prefill?: TransactionPrefill;
 }) {
   const action =
     mode === "create" ? createTransactionAction : updateTransactionAction;
@@ -47,8 +56,10 @@ export function TransactionForm({
     FormData
   >(action, undefined);
 
-  const [type, setType] = useState<EntryType>(initial?.type ?? "expense");
-  const [categoryId, setCategoryId] = useState<string>(initial?.category_id ?? "");
+  const [type, setType] = useState<EntryType>(initial?.type ?? prefill?.type ?? "expense");
+  const [categoryId, setCategoryId] = useState<string>(
+    initial?.category_id ?? prefill?.category_id ?? "",
+  );
 
   // Categoriile afișate depind de tipul selectat (venit vs cheltuială).
   const visibleCategories = useMemo(
@@ -88,7 +99,7 @@ export function TransactionForm({
           inputMode="decimal"
           required
           autoFocus
-          defaultValue={initial ? String(initial.amount) : ""}
+          defaultValue={initial ? String(initial.amount) : (prefill?.amount ?? "")}
           placeholder="0,00"
           className="rounded-xl border border-border bg-surface px-4 py-3 text-2xl font-semibold tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-primary"
         />
@@ -202,7 +213,7 @@ export function TransactionForm({
           name="note"
           rows={2}
           maxLength={200}
-          defaultValue={initial?.note ?? ""}
+          defaultValue={initial?.note ?? prefill?.note ?? ""}
           placeholder="ex: cumpărături săptămânale"
           className="resize-none rounded-xl border border-border bg-surface px-3 py-2.5 outline-none focus-visible:ring-2 focus-visible:ring-primary"
         />

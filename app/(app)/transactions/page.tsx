@@ -29,6 +29,7 @@ export default async function TransactionsPage({
     category?: string;
     method?: string;
     person?: string;
+    q?: string;
   }>;
 }) {
   const [sp, householdId, user] = await Promise.all([
@@ -45,8 +46,11 @@ export default async function TransactionsPage({
     categoryId: sp.category || undefined,
     paymentMethodId: sp.method || undefined,
     userId: sp.person || undefined,
+    search: sp.q || undefined,
   };
-  const hasFilters = Boolean(sp.month || sp.type || sp.category || sp.method || sp.person);
+  const hasFilters = Boolean(
+    sp.month || sp.type || sp.category || sp.method || sp.person || sp.q,
+  );
 
   const [items, categories, methods, members, authors] = await Promise.all([
     listTransactions(filters),
@@ -73,6 +77,14 @@ export default async function TransactionsPage({
 
       {/* Filtre — form GET nativ */}
       <form method="GET" className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-3">
+        <input
+          name="q"
+          type="search"
+          defaultValue={sp.q ?? ""}
+          placeholder="Caută în notă sau după sumă…"
+          aria-label="Caută"
+          className="rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        />
         <div className="grid grid-cols-2 gap-2">
           <select name="month" defaultValue={sp.month ?? ""} aria-label="Lună" className={selectCls}>
             <option value="">Toate lunile</option>

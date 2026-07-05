@@ -9,6 +9,7 @@ export type TransactionFilters = {
   categoryId?: string;
   paymentMethodId?: string;
   userId?: string;
+  search?: string; // caută în notă (+ sumă exactă dacă e numeric)
 };
 
 export type TransactionListItem = {
@@ -50,6 +51,16 @@ export async function listTransactions(
     query = query.eq("payment_method_id", filters.paymentMethodId);
   }
   if (filters.userId) query = query.eq("user_id", filters.userId);
+  if (filters.search) {
+    // Sanitizăm ca să nu spargem sintaxa `.or` din PostgREST (virgule/paranteze).
+    const q = filters.search.replace(/[,()]/g, " ").trim();
+    if (q) {
+      const parts = [`note.ilike.%${q}%`];
+      const n = Number(q.replace(",", "."));
+      if (Number.isFinite(n)) parts.push(`amount.eq.${n}`);
+      query = query.or(parts.join(","));
+    }
+  }
 
   const { data } = await query
     .order("date", { ascending: false })
@@ -71,6 +82,53 @@ export async function listTransactions(
     category: one(t.category),
     payment_method: one(t.payment_method),
   }));
+}
+
+export type QuickSuggestion = {
+  type: "income" | "expense";
+  category_id: string;
+  category_name: string;
+  icon: string | null;
+  amount: number;
+  note: string | null;
+};
+
+/**
+ * Sugestii pentru adăugare rapidă („la fel ca data trecută"): combinații distincte recente
+ * de (tip, categorie, sumă, notă). Refolosite ca butoane care precompletează formularul.
+ */
+export async function frequentTransactions(limit = 6): Promise<QuickSuggestion[]> {
+  const supabase = await createServerSupabaseClient();
+  const { data } = await supabase
+    .from("transactions")
+    .select("type, amount, note, category_id, category:categories(name, icon)")
+    .is("deleted_at", null)
+    .order("created_at", { ascending: false })
+    .limit(80);
+
+  const one = <T>(v: T | T[] | null): T | null =>
+    Array.isArray(v) ? (v[0] ?? null) : v;
+
+  const seen = new Set<string>();
+  const out: QuickSuggestion[] = [];
+  for (const t of data ?? []) {
+    if (!t.category_id) continue;
+    const amount = typeof t.amount === "string" ? Number(t.amount) : t.amount;
+    const key = `${t.type}|${t.category_id}|${amount}|${t.note ?? ""}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const cat = one(t.category);
+    out.push({
+      type: t.type,
+      category_id: t.category_id,
+      category_name: cat?.name ?? "—",
+      icon: cat?.icon ?? null,
+      amount,
+      note: t.note,
+    });
+    if (out.length >= limit) break;
+  }
+  return out;
 }
 
 /** O singură tranzacție (pentru pagina de editare). Null dacă nu există / nu e vizibilă. */
