@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ro">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Offline — Gospodărie</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        font-family: system-ui, -apple-system, sans-serif;
+        background: #faf9f7;
+        color: #1a1a1e;
+        text-align: center;
+        padding: 24px;
+      }
+      h1 { margin: 0; font-size: 1.25rem; }
+      p { margin: 0; color: #6b7280; }
+      button {
+        margin-top: 8px;
+        border: 0;
+        border-radius: 12px;
+        background: #2db3a6;
+        color: #fff;
+        font-weight: 600;
+        padding: 10px 18px;
+        font-size: 0.95rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Ești offline</h1>
+    <p>Nu am putut încărca pagina. Verifică conexiunea și încearcă din nou.</p>
+    <button onclick="location.reload()">Reîncearcă</button>
+  </body>
+</html>

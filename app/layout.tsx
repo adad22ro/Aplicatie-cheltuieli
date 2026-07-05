@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Nunito } from "next/font/google";
 import "./globals.css";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 
 // Nunito — sans-serif cald și rotund, potrivit direcției „prietenos" (DESIGN.md §4).
 const nunito = Nunito({
@@ -12,6 +13,20 @@ const nunito = Nunito({
 export const metadata: Metadata = {
   title: "Gospodărie — finanțe",
   description: "Evidența veniturilor și cheltuielilor gospodăriei.",
+  applicationName: "Gospodărie",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Gospodărie",
+  },
+  icons: {
+    icon: "/favicon-32.png",
+    apple: "/apple-touch-icon.png",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#2db3a6",
 };
 
 /**
@@ -42,6 +57,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         {children}
+        <ServiceWorkerRegister />
       </body>
     </html>
   );

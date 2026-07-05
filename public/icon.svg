@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2db3a6"/>
+      <stop offset="1" stop-color="#249488"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <!-- Casă -->
+  <path d="M256 128 L400 248 L368 248 L368 384 L144 384 L144 248 L112 248 Z" fill="#ffffff"/>
+  <!-- Monedă „lei" -->
+  <circle cx="256" cy="316" r="58" fill="#249488"/>
+  <text x="256" y="332" text-anchor="middle" font-family="Nunito, Arial, sans-serif" font-size="46" font-weight="800" fill="#ffffff">lei</text>
+</svg>
