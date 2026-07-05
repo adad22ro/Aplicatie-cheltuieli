@@ -5,16 +5,16 @@ import { z } from "zod";
  * în DB e hex-ul. UI-ul alege dintre acestea; schema validează că e una permisă.
  */
 export const CATEGORY_COLORS = [
-  "#16a34a", // verde (income-friendly)
-  "#dc2626", // roșu (expense)
-  "#ea580c", // portocaliu
-  "#d97706", // ambră
-  "#ca8a04", // galben-auriu
-  "#0891b2", // cyan
-  "#2563eb", // albastru
-  "#7c3aed", // violet
-  "#db2777", // roz
-  "#475569", // gri-ardezie
+  "#FF6B4A", // mâncare
+  "#3B82F6", // transport
+  "#A855F7", // distracție
+  "#EC4899", // sănătate
+  "#14B8A6", // facturi
+  "#F59E0B", // cumpărături
+  "#B45309", // cafea
+  "#22C55E", // salariu (venit)
+  "#7C3AED", // violet (primar)
+  "#DC2626", // roșu
 ] as const;
 
 const entryType = z.enum(["income", "expense"]);
@@ -34,9 +34,15 @@ const categoryFields = {
     .max(4, "Iconul e prea lung")
     .optional()
     .transform((v) => (v && v.length > 0 ? v : null)),
-  // Culoare opțională; dacă e prezentă trebuie să fie din paletă.
+  // Culoare opțională; dacă e prezentă trebuie să fie un hex valid (#RGB/#RRGGBB).
+  // Acceptăm orice hex (nu doar paleta curentă) ca să nu rupem categoriile vechi la editare.
   color: z
-    .union([z.enum(CATEGORY_COLORS), z.literal(""), z.undefined(), z.null()])
+    .union([
+      z.string().regex(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/, "Culoare invalidă"),
+      z.literal(""),
+      z.undefined(),
+      z.null(),
+    ])
     .transform((v) => (v ? v : null)),
 };
 

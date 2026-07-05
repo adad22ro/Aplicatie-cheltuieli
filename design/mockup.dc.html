@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:#f0eee9;font-family:'Nunito',system-ui,sans-serif}
+  .dv-turn{padding:40px 44px 60px}
+  .dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 6px}
+  .dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}
+  .dv-tname{font:700 15px/1.2 'Nunito',sans-serif;color:#1a1a1a}
+  .dv-sub{font:400 13px/1.5 'Nunito',sans-serif;color:rgba(0,0,0,.55);margin:0 0 26px;max-width:640px}
+  .dv-opts{display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start}
+  .dv-opt{flex:none;display:flex;flex-direction:column;gap:12px;scroll-margin-top:16px}
+  .dv-oid{font:700 11px ui-monospace,Menlo,monospace;padding:3px 8px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}
+  .dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 12px/1.3 'Nunito',sans-serif;color:rgba(0,0,0,.55)}
+  .tabbtn{border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;transition:all .15s}
+  .navicon{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;border:none;background:none;font-family:'Nunito',sans-serif}
+</style>
+</helmet>
+
+<section class="dv-turn" id="t1">
+  <div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Machetă aplicație cheltuieli — colorată, mobile-first (varianta 1a)</span></div>
+  <p class="dv-sub">Bazat pe structura reală a app-ului (dashboard, tranzacții, adăugare, bugete). Interactiv — apasă pe file (Acasă / Tranzacții / Adaugă / Bugete) și pe 🌙/☀️ pentru mod întunecat.</p>
+  <div class="dv-opts">
+
+    <div class="dv-opt" id="1a">
+      <div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Carduri vii — indigo + categorii curcubeu</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="{{ aHeaderTitle }}" dark="{{ aDark }}" hint-size="390,844">
+        <div style="{{ aRootStyle }}">
+          <div style="{{ aHeaderStyle }}">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div>
+                <div style="{{ aMutedTextStyle }}">Gospodărie</div>
+                <div style="{{ aTitleTextStyle }}">Familia Popescu</div>
+              </div>
+              <button class="tabbtn" onClick="{{ aToggleDark }}" style="{{ aDarkBtnStyle }}">{{ aDarkIcon }}</button>
+            </div>
+          </div>
+
+          <div style="{{ aTabBarStyle }}">
+            <button class="tabbtn" onClick="{{ aGoTab_dashboard }}" style="{{ aTabBtnStyle_dashboard }}">Acasă</button>
+            <button class="tabbtn" onClick="{{ aGoTab_transactions }}" style="{{ aTabBtnStyle_transactions }}">Tranzacții</button>
+            <button class="tabbtn" onClick="{{ aGoTab_add }}" style="{{ aTabBtnStyle_add }}">Adaugă</button>
+            <button class="tabbtn" onClick="{{ aGoTab_budgets }}" style="{{ aTabBtnStyle_budgets }}">Bugete</button>
+          </div>
+
+          <div style="{{ aScrollStyle }}">
+            <sc-if value="{{ aIsDashboard }}" hint-placeholder-val="{{ true }}">
+              <div style="{{ aMonthSelStyle }}">
+                <span style="opacity:.6">←</span>
+                <span style="font-weight:800">Iulie 2026</span>
+                <span style="opacity:.25">→</span>
+              </div>
+              <div style="{{ aSummaryGridStyle }}">
+                <div style="{{ aIncomeCardStyle }}">
+                  <div style="{{ aCardLabelStyle }}">Venituri</div>
+                  <div style="{{ aIncomeAmountStyle }}">{{ aIncomeFmt }}</div>
+                </div>
+                <div style="{{ aExpenseCardStyle }}">
+                  <div style="{{ aCardLabelStyle }}">Cheltuieli</div>
+                  <div style="{{ aExpenseAmountStyle }}">{{ aExpenseFmt }}</div>
+                </div>
+              </div>
+              <div style="{{ aBalanceCardStyle }}">
+                <div style="display:flex;align-items:baseline;justify-content:space-between">
+                  <div style="{{ aCardLabelStyle }}">Sold la final de lună</div>
+                  <div style="{{ aBalanceAmountStyle }}">{{ aBalanceFmt }}</div>
+                </div>
+                <div style="{{ aMutedTextStyle }};margin-top:4px">Report: {{ aCarryFmt }}</div>
+              </div>
+              <div style="{{ aQuickGridStyle }}">
+                <sc-for list="{{ aQuickLinks }}" as="ql" hint-placeholder-count="4">
+                  <div style="{{ ql.style }}">
+                    <div style="font-size:22px">{{ ql.icon }}</div>
+                    <div style="font-weight:800;font-size:13px;margin-top:6px">{{ ql.label }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="{{ aSectionTitleStyle }}">Tranzacții recente</div>
+              <sc-for list="{{ aRecentTx }}" as="tx" hint-placeholder-count="3">
+                <div style="{{ tx.rowStyle }}">
+                  <div style="{{ tx.iconWrapStyle }}">{{ tx.icon }}</div>
+                  <div style="flex:1;min-width:0">
+                    <div style="{{ aRowTitleStyle }}">{{ tx.name }}</div>
+                    <div style="{{ aMutedTextStyle }}">{{ tx.method }} · {{ tx.author }}</div>
+                  </div>
+                  <div style="{{ tx.amountStyle }}">{{ tx.amountFmt }}</div>
+                </div>
+              </sc-for>
+            </sc-if>
+
+            <sc-if value="{{ aIsTransactions }}" hint-placeholder-val="{{ false }}">
+              <div style="{{ aFilterRowStyle }}">
+                <sc-for list="{{ aFilters }}" as="f" hint-placeholder-count="4">
+                  <div style="{{ f.style }}">{{ f.label }}</div>
+                </sc-for>
+              </div>
+              <sc-for list="{{ aTxGroups }}" as="grp" hint-placeholder-count="3">
+                <div style="{{ aSectionTitleStyle }}">{{ grp.day }}</div>
+                <sc-for list="{{ grp.items }}" as="tx" hint-placeholder-count="2">
+                  <div style="{{ tx.rowStyle }}">
+                    <div style="{{ tx.iconWrapStyle }}">{{ tx.icon }}</div>
+                    <div style="flex:1;min-width:0">
+                      <div style="{{ aRowTitleStyle }}">{{ tx.name }}</div>
+                      <div style="{{ aMutedTextStyle }}">{{ tx.method }} · {{ tx.author }}</div>
+                    </div>
+                    <div style="{{ tx.amountStyle }}">{{ tx.amountFmt }}</div>
+                  </div>
+                </sc-for>
+              </sc-for>
+            </sc-if>
+
+            <sc-if value="{{ aIsAdd }}" hint-placeholder-val="{{ false }}">
+              <div style="{{ aAddTypeRowStyle }}">
+                <div style="{{ aAddTypeExpenseStyle }}">Cheltuială</div>
+                <div style="{{ aAddTypeIncomeStyle }}">Venit</div>
+              </div>
+              <div style="{{ aAmountBoxStyle }}">
+                <div style="{{ aMutedTextStyle }}">Sumă</div>
+                <div style="{{ aBigAmountStyle }}">248,50 <span style="font-size:.5em">RON</span></div>
+              </div>
+              <div style="{{ aSectionTitleStyle }}">Categorie</div>
+              <div style="{{ aCatGridStyle }}">
+                <sc-for list="{{ aCatChips }}" as="c" hint-placeholder-count="8">
+                  <div style="{{ c.style }}">
+                    <div style="{{ c.circleStyle }}">{{ c.icon }}</div>
+                    <div style="font-size:11px;font-weight:700;text-align:center">{{ c.name }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="{{ aSectionTitleStyle }}">Metodă de plată</div>
+              <div style="{{ aMethodRowStyle }}">
+                <sc-for list="{{ aMethods }}" as="m" hint-placeholder-count="3">
+                  <div style="{{ m.style }}">{{ m.label }}</div>
+                </sc-for>
+              </div>
+              <button class="tabbtn" style="{{ aSaveBtnStyle }}">Salvează tranzacția</button>
+            </sc-if>
+
+            <sc-if value="{{ aIsBudgets }}" hint-placeholder-val="{{ false }}">
+              <div style="{{ aDonutWrapStyle }}">
+                <div style="{{ aDonutStyle }}">
+                  <div style="{{ aDonutHoleStyle }}">
+                    <div style="{{ aMutedTextStyle }}">Total cheltuit</div>
+                    <div style="font-weight:900;font-size:18px">{{ aExpenseFmt }}</div>
+                  </div>
+                </div>
+              </div>
+              <div style="{{ aSectionTitleStyle }}">Bugete pe categorii</div>
+              <sc-for list="{{ aBudgetRows }}" as="b" hint-placeholder-count="4">
+                <div style="{{ b.cardStyle }}">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                    <div style="display:flex;align-items:center;gap:8px">
+                      <div style="{{ b.iconStyle }}">{{ b.icon }}</div>
+                      <div style="font-weight:800">{{ b.name }}</div>
+                    </div>
+                    <div style="{{ b.textStyle }}">{{ b.spentFmt }} / {{ b.limitFmt }}</div>
+                  </div>
+                  <div style="{{ b.trackStyle }}">
+                    <div style="{{ b.fillStyle }}"></div>
+                  </div>
+                </div>
+              </sc-for>
+            </sc-if>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <div class="dv-opt" id="1b" style="display:none">
+      <div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Gradient jucăuș — magenta + chip-uri gradient</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" title="{{ bHeaderTitle }}" dark="{{ bDark }}" hint-size="390,844">
+        <div style="{{ bRootStyle }}">
+          <div style="{{ bHeaderStyle }}">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div>
+                <div style="{{ bMutedTextStyle }}">Gospodărie</div>
+                <div style="{{ bTitleTextStyle }}">Familia Popescu</div>
+              </div>
+              <button class="tabbtn" onClick="{{ bToggleDark }}" style="{{ bDarkBtnStyle }}">{{ bDarkIcon }}</button>
+            </div>
+          </div>
+
+          <div style="{{ bTabBarStyle }}">
+            <button class="tabbtn" onClick="{{ bGoTab_dashboard }}" style="{{ bTabBtnStyle_dashboard }}">Acasă</button>
+            <button class="tabbtn" onClick="{{ bGoTab_transactions }}" style="{{ bTabBtnStyle_transactions }}">Tranzacții</button>
+            <button class="tabbtn" onClick="{{ bGoTab_add }}" style="{{ bTabBtnStyle_add }}">Adaugă</button>
+            <button class="tabbtn" onClick="{{ bGoTab_budgets }}" style="{{ bTabBtnStyle_budgets }}">Bugete</button>
+          </div>
+
+          <div style="{{ bScrollStyle }}">
+            <sc-if value="{{ bIsDashboard }}" hint-placeholder-val="{{ true }}">
+              <div style="{{ bMonthSelStyle }}">
+                <span style="opacity:.7">←</span>
+                <span style="font-weight:800">Iulie 2026</span>
+                <span style="opacity:.3">→</span>
+              </div>
+              <div style="{{ bSummaryGridStyle }}">
+                <div style="{{ bIncomeCardStyle }}">
+                  <div style="{{ bCardLabelStyleOnColor }}">Venituri</div>
+                  <div style="{{ bIncomeAmountStyle }}">{{ bIncomeFmt }}</div>
+                </div>
+                <div style="{{ bExpenseCardStyle }}">
+                  <div style="{{ bCardLabelStyleOnColor }}">Cheltuieli</div>
+                  <div style="{{ bExpenseAmountStyle }}">{{ bExpenseFmt }}</div>
+                </div>
+              </div>
+              <div style="{{ bBalanceCardStyle }}">
+                <div style="display:flex;align-items:baseline;justify-content:space-between">
+                  <div style="{{ bCardLabelStyle }}">Sold la final de lună</div>
+                  <div style="{{ bBalanceAmountStyle }}">{{ bBalanceFmt }}</div>
+                </div>
+                <div style="{{ bMutedTextStyle }};margin-top:4px">Report: {{ bCarryFmt }}</div>
+              </div>
+              <div style="{{ bQuickGridStyle }}">
+                <sc-for list="{{ bQuickLinks }}" as="ql" hint-placeholder-count="4">
+                  <div style="{{ ql.style }}">
+                    <div style="font-size:22px">{{ ql.icon }}</div>
+                    <div style="font-weight:800;font-size:13px;margin-top:6px;color:#fff">{{ ql.label }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="{{ bSectionTitleStyle }}">Tranzacții recente</div>
+              <sc-for list="{{ bRecentTx }}" as="tx" hint-placeholder-count="3">
+                <div style="{{ tx.rowStyle }}">
+                  <div style="{{ tx.iconWrapStyle }}">{{ tx.icon }}</div>
+                  <div style="flex:1;min-width:0">
+                    <div style="{{ bRowTitleStyle }}">{{ tx.name }}</div>
+                    <div style="{{ bMutedTextStyle }}">{{ tx.method }} · {{ tx.author }}</div>
+                  </div>
+                  <div style="{{ tx.amountStyle }}">{{ tx.amountFmt }}</div>
+                </div>
+              </sc-for>
+            </sc-if>
+
+            <sc-if value="{{ bIsTransactions }}" hint-placeholder-val="{{ false }}">
+              <div style="{{ bFilterRowStyle }}">
+                <sc-for list="{{ bFilters }}" as="f" hint-placeholder-count="4">
+                  <div style="{{ f.style }}">{{ f.label }}</div>
+                </sc-for>
+              </div>
+              <sc-for list="{{ bTxGroups }}" as="grp" hint-placeholder-count="3">
+                <div style="{{ bSectionTitleStyle }}">{{ grp.day }}</div>
+                <sc-for list="{{ grp.items }}" as="tx" hint-placeholder-count="2">
+                  <div style="{{ tx.rowStyle }}">
+                    <div style="{{ tx.iconWrapStyle }}">{{ tx.icon }}</div>
+                    <div style="flex:1;min-width:0">
+                      <div style="{{ bRowTitleStyle }}">{{ tx.name }}</div>
+                      <div style="{{ bMutedTextStyle }}">{{ tx.method }} · {{ tx.author }}</div>
+                    </div>
+                    <div style="{{ tx.amountStyle }}">{{ tx.amountFmt }}</div>
+                  </div>
+                </sc-for>
+              </sc-for>
+            </sc-if>
+
+            <sc-if value="{{ bIsAdd }}" hint-placeholder-val="{{ false }}">
+              <div style="{{ bAddTypeRowStyle }}">
+                <div style="{{ bAddTypeExpenseStyle }}">Cheltuială</div>
+                <div style="{{ bAddTypeIncomeStyle }}">Venit</div>
+              </div>
+              <div style="{{ bAmountBoxStyle }}">
+                <div style="{{ bMutedTextStyleOnColor }}">Sumă</div>
+                <div style="{{ bBigAmountStyle }}">248,50 <span style="font-size:.5em">RON</span></div>
+              </div>
+              <div style="{{ bSectionTitleStyle }}">Categorie</div>
+              <div style="{{ bCatGridStyle }}">
+                <sc-for list="{{ bCatChips }}" as="c" hint-placeholder-count="8">
+                  <div style="{{ c.style }}">
+                    <div style="font-size:20px">{{ c.icon }}</div>
+                    <div style="font-size:11px;font-weight:800;text-align:center;color:#fff">{{ c.name }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="{{ bSectionTitleStyle }}">Metodă de plată</div>
+              <div style="{{ bMethodRowStyle }}">
+                <sc-for list="{{ bMethods }}" as="m" hint-placeholder-count="3">
+                  <div style="{{ m.style }}">{{ m.label }}</div>
+                </sc-for>
+              </div>
+              <button class="tabbtn" style="{{ bSaveBtnStyle }}">Salvează tranzacția</button>
+            </sc-if>
+
+            <sc-if value="{{ bIsBudgets }}" hint-placeholder-val="{{ false }}">
+              <div style="{{ bDonutWrapStyle }}">
+                <div style="{{ bDonutStyle }}">
+                  <div style="{{ bDonutHoleStyle }}">
+                    <div style="{{ bMutedTextStyle }}">Total cheltuit</div>
+                    <div style="font-weight:900;font-size:18px">{{ bExpenseFmt }}</div>
+                  </div>
+                </div>
+              </div>
+              <div style="{{ bSectionTitleStyle }}">Bugete pe categorii</div>
+              <sc-for list="{{ bBudgetRows }}" as="b" hint-placeholder-count="4">
+                <div style="{{ b.cardStyle }}">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                    <div style="display:flex;align-items:center;gap:8px">
+                      <div style="{{ b.iconStyle }}">{{ b.icon }}</div>
+                      <div style="font-weight:800">{{ b.name }}</div>
+                    </div>
+                    <div style="{{ b.textStyle }}">{{ b.spentFmt }} / {{ b.limitFmt }}</div>
+                  </div>
+                  <div style="{{ b.trackStyle }}">
+                    <div style="{{ b.fillStyle }}"></div>
+                  </div>
+                </div>
+              </sc-for>
+            </sc-if>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+  </div>
+  <p style="font:400 12px/1.5 'Nunito',sans-serif;color:rgba(0,0,0,.5);margin-top:22px;max-width:640px">
+    Spune-mi ce direcție preferi (<a class="dv-oid" href="#1a">1a</a> sau <a class="dv-oid" href="#1b">1b</a>), sau combină elemente din amândouă — ex. "vreau capetele gradient din 1b dar bugetele din 1a".
+  </p>
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const CATEGORIES = {
+  food:    { name:'Mâncare',       icon:'🍔', color:'#FF6B4A' },
+  transport:{ name:'Transport',    icon:'🚗', color:'#3B82F6' },
+  fun:     { name:'Distracție',    icon:'🎉', color:'#A855F7' },
+  health:  { name:'Sănătate',      icon:'💊', color:'#EC4899' },
+  bills:   { name:'Facturi',       icon:'💡', color:'#14B8A6' },
+  shopping:{ name:'Cumpărături',   icon:'🛍️', color:'#F59E0B' },
+  coffee:  { name:'Cafea',         icon:'☕', color:'#B45309' },
+  salary:  { name:'Salariu',       icon:'💰', color:'#22C55E' },
+};
+
+const TX_GROUPS = [
+  { day: 'Azi, 5 iul', items: [
+    { cat:'food',   amount:-84.5,  method:'Card',     author:'M' },
+    { cat:'coffee', amount:-14,    method:'Card',     author:'A' },
+  ]},
+  { day: 'Ieri, 4 iul', items: [
+    { cat:'transport', amount:-32,  method:'Cash',     author:'M' },
+    { cat:'salary',    amount:4200, method:'Transfer', author:'A' },
+  ]},
+  { day: '2 iul', items: [
+    { cat:'shopping', amount:-156.9, method:'Card',     author:'M' },
+    { cat:'bills',    amount:-220,   method:'Transfer', author:'A' },
+  ]},
+];
+
+const BUDGETS = [
+  { cat:'food',     spent:620, limit:800 },
+  { cat:'transport',spent:310, limit:300 },
+  { cat:'fun',      spent:120, limit:400 },
+  { cat:'shopping', spent:410, limit:500 },
+];
+
+const QUICK_LINKS = [
+  { icon:'🔁', label:'Recurențe' },
+  { icon:'💳', label:'Rate' },
+  { icon:'🎯', label:'Bugete' },
+  { icon:'🐷', label:'Obiective' },
+];
+
+const FILTERS = ['Iulie', 'Toate categoriile', 'Toți', 'Toate metodele'];
+const METHODS = ['Card', 'Cash', 'Transfer'];
+
+const ron = new Intl.NumberFormat('ro-RO', { style:'currency', currency:'RON', maximumFractionDigits:0 });
+
+class Component extends DCLogic {
+  state = {
+    aTab: 'dashboard', aDark: false,
+    bTab: 'dashboard', bDark: false,
+  };
+
+  buildInstance(prefix, tab, dark, palette) {
+    const isDash = tab === 'dashboard';
+    const isTx = tab === 'transactions';
+    const isAdd = tab === 'add';
+    const isBudgets = tab === 'budgets';
+
+    const bg = dark ? palette.bgDark : palette.bg;
+    const surface = dark ? palette.surfaceDark : palette.surface;
+    const border = dark ? palette.borderDark : palette.border;
+    const text = dark ? palette.textDark : palette.text;
+    const muted = dark ? palette.mutedDark : palette.muted;
+    const primary = palette.primary;
+    const primary2 = palette.primary2 || palette.primary;
+
+    const income = dark ? '#4ADE80' : '#16A34A';
+    const expense = dark ? '#FB7185' : '#DC2626';
+    const warning = '#F59E0B';
+
+    const rootStyle = `background:${bg};min-height:100%;font-family:'Nunito',sans-serif;color:${text};display:flex;flex-direction:column`;
+    const headerStyle = palette.gradientHeader
+      ? `background:linear-gradient(135deg,${primary},${primary2});padding:18px 18px 14px;color:#fff`
+      : `background:${bg};padding:18px 18px 10px`;
+    const mutedTextStyle = `font-size:12px;color:${palette.gradientHeader ? 'rgba(255,255,255,.8)' : muted};font-weight:600`;
+    const titleTextStyle = `font-size:19px;font-weight:800;color:${palette.gradientHeader ? '#fff' : text}`;
+    const darkBtnStyle = `width:34px;height:34px;border-radius:12px;background:${palette.gradientHeader ? 'rgba(255,255,255,.25)' : surface};border:1px solid ${palette.gradientHeader ? 'transparent' : border};font-size:15px;display:flex;align-items:center;justify-content:center`;
+
+    const tabBarStyle = `display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px 14px;background:${surface};margin:0 12px;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);position:relative;top:-8px;z-index:1`;
+    const tabBtnStyle = (name) => {
+      const active = tab === name;
+      return `padding:8px 4px;border-radius:10px;font-size:11.5px;background:${active ? primary : 'transparent'};color:${active ? '#fff' : muted}`;
+    };
+
+    const scrollStyle = `flex:1;overflow-y:auto;padding:14px 16px 28px;display:flex;flex-direction:column;gap:14px`;
+    const monthSelStyle = `display:flex;align-items:center;justify-content:space-between;background:${surface};border:1px solid ${border};border-radius:14px;padding:10px 16px;font-size:14px`;
+    const summaryGridStyle = `display:grid;grid-template-columns:1fr 1fr;gap:10px`;
+
+    const cardLabelStyle = `font-size:12px;font-weight:700;color:${muted}`;
+    const cardLabelStyleOnColor = `font-size:12px;font-weight:700;color:rgba(255,255,255,.85)`;
+
+    const incomeCardStyle = palette.tintedCards
+      ? `background:${dark ? 'rgba(74,222,128,.16)' : '#EAFBF0'};border-radius:18px;padding:14px;border:1px solid ${dark ? 'rgba(74,222,128,.25)' : '#CFF3DA'}`
+      : `background:linear-gradient(135deg,${income},#0EA671);border-radius:18px;padding:14px`;
+    const expenseCardStyle = palette.tintedCards
+      ? `background:${dark ? 'rgba(251,113,133,.16)' : '#FDECEC'};border-radius:18px;padding:14px;border:1px solid ${dark ? 'rgba(251,113,133,.25)' : '#F8D2D2'}`
+      : `background:linear-gradient(135deg,${expense},#B91C1C);border-radius:18px;padding:14px`;
+    const incomeAmountStyle = `margin-top:4px;font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;color:${palette.tintedCards ? income : '#fff'}`;
+    const expenseAmountStyle = `margin-top:4px;font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;color:${palette.tintedCards ? expense : '#fff'}`;
+    const balanceCardStyle = `background:${surface};border:1px solid ${border};border-radius:18px;padding:16px`;
+    const balanceAmountStyle = `font-size:24px;font-weight:900;font-variant-numeric:tabular-nums`;
+
+    const quickGridStyle = `display:grid;grid-template-columns:repeat(4,1fr);gap:8px`;
+    const quickLinks = QUICK_LINKS.map((q, i) => ({
+      icon: q.icon, label: q.label,
+      style: `background:${palette.quickGradients ? palette.quickGradients[i % palette.quickGradients.length] : surface};border:1px solid ${palette.quickGradients ? 'transparent' : border};border-radius:16px;padding:12px 6px;text-align:center;color:${palette.quickGradients ? '#fff' : text}`,
+    }));
+
+    const sectionTitleStyle = `font-size:14px;font-weight:800;margin-top:2px`;
+    const rowTitleStyle = `font-size:14px;font-weight:700`;
+
+    const mkRow = (tx) => {
+      const c = CATEGORIES[tx.cat];
+      const isIncome = tx.amount > 0;
+      return {
+        icon: c.icon,
+        name: c.name,
+        method: tx.method,
+        author: tx.author,
+        amountFmt: (isIncome ? '+' : '') + ron.format(tx.amount),
+        rowStyle: `display:flex;align-items:center;gap:10px;background:${surface};border:1px solid ${border};border-radius:14px;padding:10px 12px`,
+        iconWrapStyle: `width:38px;height:38px;border-radius:12px;background:${c.color};display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0`,
+        amountStyle: `font-weight:800;font-variant-numeric:tabular-nums;color:${isIncome ? income : text};font-size:14px`,
+      };
+    };
+
+    const recentTx = TX_GROUPS.flatMap(g => g.items).slice(0, 3).map(mkRow);
+    const txGroups = TX_GROUPS.map(g => ({ day: g.day, items: g.items.map(mkRow) }));
+
+    const filterRowStyle = `display:flex;gap:8px;flex-wrap:wrap`;
+    const filters = FILTERS.map(f => ({
+      label: f,
+      style: `padding:7px 12px;border-radius:10px;background:${surface};border:1px solid ${border};font-size:12px;font-weight:700;color:${muted}`,
+    }));
+
+    const addTypeRowStyle = `display:grid;grid-template-columns:1fr 1fr;gap:8px;background:${surface};border:1px solid ${border};border-radius:14px;padding:5px`;
+    const addTypeExpenseStyle = `text-align:center;padding:9px;border-radius:10px;font-weight:800;font-size:13px;background:${expense};color:#fff`;
+    const addTypeIncomeStyle = `text-align:center;padding:9px;border-radius:10px;font-weight:800;font-size:13px;color:${muted}`;
+
+    const amountBoxStyle = palette.gradientHeader
+      ? `background:linear-gradient(135deg,${primary},${primary2});border-radius:18px;padding:22px;text-align:center`
+      : `background:${surface};border:1px solid ${border};border-radius:18px;padding:22px;text-align:center`;
+    const mutedTextStyleOnColor = `font-size:12px;font-weight:700;color:rgba(255,255,255,.85)`;
+    const bigAmountStyle = `font-size:34px;font-weight:900;margin-top:4px;font-variant-numeric:tabular-nums;color:${palette.gradientHeader ? '#fff' : text}`;
+
+    const catGridStyle = `display:grid;grid-template-columns:repeat(4,1fr);gap:10px`;
+    const catChips = Object.entries(CATEGORIES).map(([id, c]) => ({
+      icon: c.icon, name: c.name,
+      style: palette.gradientHeader
+        ? `display:flex;flex-direction:column;align-items:center;gap:5px;background:${c.color};border-radius:16px;padding:12px 4px`
+        : `display:flex;flex-direction:column;align-items:center;gap:5px;background:${surface};border:1px solid ${border};border-radius:16px;padding:10px 4px`,
+      circleStyle: `width:36px;height:36px;border-radius:11px;background:${c.color};display:flex;align-items:center;justify-content:center;font-size:17px`,
+    }));
+
+    const methodRowStyle = `display:flex;gap:8px`;
+    const methods = METHODS.map((m, i) => ({
+      label: m,
+      style: `flex:1;text-align:center;padding:10px;border-radius:12px;font-weight:800;font-size:13px;background:${i === 0 ? primary : surface};color:${i === 0 ? '#fff' : muted};border:1px solid ${i === 0 ? 'transparent' : border}`,
+    }));
+
+    const saveBtnStyle = `margin-top:6px;background:${palette.gradientHeader ? `linear-gradient(135deg,${primary},${primary2})` : primary};color:#fff;border-radius:16px;padding:15px;font-size:15px;text-align:center;box-shadow:0 6px 16px ${primary}55`;
+
+    const totalSpent = BUDGETS.reduce((s, b) => s + b.spent, 0);
+    let acc = 0;
+    const donutSlices = BUDGETS.map(b => {
+      const c = CATEGORIES[b.cat];
+      const pct = b.spent / totalSpent * 100;
+      const slice = `${c.color} ${acc}% ${acc + pct}%`;
+      acc += pct;
+      return slice;
+    });
+    const donutWrapStyle = `display:flex;justify-content:center;padding:6px 0`;
+    const donutStyle = `width:150px;height:150px;border-radius:50%;background:conic-gradient(${donutSlices.join(',')});display:flex;align-items:center;justify-content:center;position:relative`;
+    const donutHoleStyle = `width:96px;height:96px;border-radius:50%;background:${bg};display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center`;
+
+    const budgetRows = BUDGETS.map(b => {
+      const c = CATEGORIES[b.cat];
+      const pct = Math.min(100, b.spent / b.limit * 100);
+      const over = b.spent > b.limit;
+      const near = !over && pct > 80;
+      const fillColor = over ? expense : near ? warning : c.color;
+      return {
+        icon: c.icon, name: c.name,
+        spentFmt: ron.format(b.spent), limitFmt: ron.format(b.limit),
+        cardStyle: `background:${surface};border:1px solid ${border};border-radius:16px;padding:14px`,
+        iconStyle: `width:30px;height:30px;border-radius:9px;background:${c.color};display:flex;align-items:center;justify-content:center;font-size:14px`,
+        textStyle: `font-size:12px;font-weight:700;color:${over ? expense : muted}`,
+        trackStyle: `height:8px;border-radius:8px;background:${border};overflow:hidden`,
+        fillStyle: `height:100%;width:${pct}%;background:${fillColor};border-radius:8px`,
+      };
+    });
+
+    return {
+      [`${prefix}HeaderTitle`]: isDash ? 'Acasă' : isTx ? 'Tranzacții' : isAdd ? 'Adaugă' : 'Bugete',
+      [`${prefix}Dark`]: dark,
+      [`${prefix}DarkIcon`]: dark ? '☀️' : '🌙',
+      [`${prefix}ToggleDark`]: () => this.setState(s => ({ [`${prefix}Dark`]: !s[`${prefix}Dark`] })),
+      [`${prefix}IsDashboard`]: isDash,
+      [`${prefix}IsTransactions`]: isTx,
+      [`${prefix}IsAdd`]: isAdd,
+      [`${prefix}IsBudgets`]: isBudgets,
+      [`${prefix}GoTab_dashboard`]: () => this.setState({ [`${prefix}Tab`]: 'dashboard' }),
+      [`${prefix}GoTab_transactions`]: () => this.setState({ [`${prefix}Tab`]: 'transactions' }),
+      [`${prefix}GoTab_add`]: () => this.setState({ [`${prefix}Tab`]: 'add' }),
+      [`${prefix}GoTab_budgets`]: () => this.setState({ [`${prefix}Tab`]: 'budgets' }),
+      [`${prefix}RootStyle`]: rootStyle,
+      [`${prefix}HeaderStyle`]: headerStyle,
+      [`${prefix}MutedTextStyle`]: mutedTextStyle,
+      [`${prefix}TitleTextStyle`]: titleTextStyle,
+      [`${prefix}DarkBtnStyle`]: darkBtnStyle,
+      [`${prefix}TabBarStyle`]: tabBarStyle,
+      [`${prefix}TabBtnStyle_dashboard`]: tabBtnStyle('dashboard'),
+      [`${prefix}TabBtnStyle_transactions`]: tabBtnStyle('transactions'),
+      [`${prefix}TabBtnStyle_add`]: tabBtnStyle('add'),
+      [`${prefix}TabBtnStyle_budgets`]: tabBtnStyle('budgets'),
+      [`${prefix}ScrollStyle`]: scrollStyle,
+      [`${prefix}MonthSelStyle`]: monthSelStyle,
+      [`${prefix}SummaryGridStyle`]: summaryGridStyle,
+      [`${prefix}CardLabelStyle`]: cardLabelStyle,
+      [`${prefix}CardLabelStyleOnColor`]: cardLabelStyleOnColor,
+      [`${prefix}IncomeCardStyle`]: incomeCardStyle,
+      [`${prefix}ExpenseCardStyle`]: expenseCardStyle,
+      [`${prefix}IncomeAmountStyle`]: incomeAmountStyle,
+      [`${prefix}ExpenseAmountStyle`]: expenseAmountStyle,
+      [`${prefix}IncomeFmt`]: ron.format(6400),
+      [`${prefix}ExpenseFmt`]: ron.format(totalSpent + 2000),
+      [`${prefix}BalanceFmt`]: ron.format(3280),
+      [`${prefix}CarryFmt`]: ron.format(400),
+      [`${prefix}BalanceCardStyle`]: balanceCardStyle,
+      [`${prefix}BalanceAmountStyle`]: balanceAmountStyle,
+      [`${prefix}QuickGridStyle`]: quickGridStyle,
+      [`${prefix}QuickLinks`]: quickLinks,
+      [`${prefix}SectionTitleStyle`]: sectionTitleStyle,
+      [`${prefix}RowTitleStyle`]: rowTitleStyle,
+      [`${prefix}RecentTx`]: recentTx,
+      [`${prefix}TxGroups`]: txGroups,
+      [`${prefix}FilterRowStyle`]: filterRowStyle,
+      [`${prefix}Filters`]: filters,
+      [`${prefix}AddTypeRowStyle`]: addTypeRowStyle,
+      [`${prefix}AddTypeExpenseStyle`]: addTypeExpenseStyle,
+      [`${prefix}AddTypeIncomeStyle`]: addTypeIncomeStyle,
+      [`${prefix}AmountBoxStyle`]: amountBoxStyle,
+      [`${prefix}MutedTextStyleOnColor`]: mutedTextStyleOnColor,
+      [`${prefix}BigAmountStyle`]: bigAmountStyle,
+      [`${prefix}CatGridStyle`]: catGridStyle,
+      [`${prefix}CatChips`]: catChips,
+      [`${prefix}MethodRowStyle`]: methodRowStyle,
+      [`${prefix}Methods`]: methods,
+      [`${prefix}SaveBtnStyle`]: saveBtnStyle,
+      [`${prefix}DonutWrapStyle`]: donutWrapStyle,
+      [`${prefix}DonutStyle`]: donutStyle,
+      [`${prefix}DonutHoleStyle`]: donutHoleStyle,
+      [`${prefix}BudgetRows`]: budgetRows,
+    };
+  }
+
+  renderVals() {
+    const paletteA = {
+      bg:'#FBF8FF', surface:'#FFFFFF', border:'#EAE3F7', text:'#241B33', muted:'#7A7186',
+      bgDark:'#171220', surfaceDark:'#231A32', borderDark:'#382A4B', textDark:'#F3EEFA', mutedDark:'#A99CBC',
+      primary:'#7C3AED', tintedCards:true,
+      quickGradients:['#FDECEC','#E8F4FF','#F3E8FF','#E6FBF2'],
+    };
+    const paletteB = {
+      bg:'#FFF7FB', surface:'#FFFFFF', border:'#FBE1EE', text:'#2B1522', muted:'#8A6478',
+      bgDark:'#1D1017', surfaceDark:'#2B1721', borderDark:'#452334', textDark:'#FBEFF5', mutedDark:'#C79AAF',
+      primary:'#DB2777', primary2:'#F97316', gradientHeader:true,
+      quickGradients:['linear-gradient(135deg,#DB2777,#F97316)','linear-gradient(135deg,#7C3AED,#DB2777)','linear-gradient(135deg,#14B8A6,#3B82F6)','linear-gradient(135deg,#F59E0B,#EC4899)'],
+    };
+
+    return {
+      ...this.buildInstance('a', this.state.aTab, this.state.aDark, paletteA),
+      ...this.buildInstance('b', this.state.bTab, this.state.bDark, paletteB),
+    };
+  }
+}
+
+</script>
+</body>
+</html>
