@@ -504,6 +504,7 @@ export type Database = {
       create_household: { Args: { p_name: string }; Returns: string }
       is_household_member: { Args: { hid: string }; Returns: boolean }
       is_household_owner: { Args: { hid: string }; Returns: boolean }
+      redeem_invite: { Args: { p_code: string }; Returns: string }
     }
     Enums: {
       entry_type: "income" | "expense"

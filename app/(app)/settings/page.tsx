@@ -11,6 +11,7 @@ export default async function SettingsPage() {
   const items = [
     { href: "/settings/categories", title: "Categorii", desc: "Venituri și cheltuieli, cu icon și culoare" },
     { href: "/settings/payment-methods", title: "Metode de plată", desc: "Cash, card, Revolut etc." },
+    { href: "/settings/household", title: "Gospodărie", desc: "Membri și invitații" },
   ];
 
   return (
