@@ -89,6 +89,73 @@ async function authProbe() {
   }
 }
 
+// --- Securitate: loguri, audit, RLS, integritate -----------------------------
+async function security() {
+  header("SECURITATE — loguri & verificări");
+  if (!URL || !SERVICE) { line("URL sau SERVICE_ROLE lipsește — sar peste."); return; }
+  const sb = createClient(URL, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } });
+
+  // 1) security_events: contoare pe 24h + ultimele 15
+  try {
+    const since = new Date(Date.now() - 24 * 3600_000).toISOString();
+    const kinds = ["login_failed", "login_success", "register_failed", "register_success", "admin_access_denied", "rate_limited"];
+    line("Evenimente securitate (ultimele 24h):");
+    for (const k of kinds) {
+      const { count } = await sb.from("security_events").select("*", { count: "exact", head: true }).eq("event_type", k).gte("created_at", since);
+      const flag = (["login_failed", "admin_access_denied", "rate_limited"].includes(k) && (count ?? 0) > 0) ? "  ⚠️" : "";
+      line(`  ${k.padEnd(20)} ${count ?? 0}${flag}`);
+    }
+    const { data: recent } = await sb.from("security_events").select("event_type, email, ip, created_at").order("created_at", { ascending: false }).limit(15);
+    if (recent?.length) {
+      line("Ultimele evenimente:");
+      for (const e of recent) line(`  [${e.event_type}] ${e.email ?? "—"} ${e.ip ?? ""} · ${new Date(e.created_at).toLocaleString("ro-RO")}`);
+    } else {
+      line("  (niciun eveniment încă)");
+    }
+  } catch (e) { line(`security_events EROARE: ${e.message ?? e} (ai rulat migrarea de securitate?)`); }
+
+  // 2) admin_audit: ultimele acțiuni de admin
+  try {
+    const { data: audit } = await sb.from("admin_audit").select("action, created_at").order("created_at", { ascending: false }).limit(8);
+    line("Ultimele acțiuni admin:");
+    if (audit?.length) for (const a of audit) line(`  ${a.action} · ${new Date(a.created_at).toLocaleString("ro-RO")}`);
+    else line("  (niciuna)");
+  } catch (e) { line(`admin_audit EROARE: ${e.message ?? e}`); }
+
+  // 3) Acoperire RLS: semnalează tabele fără RLS sau fără politici
+  try {
+    const { data: rls, error } = await sb.rpc("rls_status");
+    if (error) throw error;
+    // Problemă reală = RLS DEZACTIVAT. RLS activ + 0 politici = deny-all intenționat
+    // (tabele doar-service_role: admin_audit, security_events, signup_codes).
+    const bad = (rls ?? []).filter((r) => !r.rls_enabled);
+    const denyAll = (rls ?? []).filter((r) => r.rls_enabled && r.policy_count === 0);
+    if (bad.length === 0) line(`RLS: ✅ toate cele ${rls.length} tabele au RLS activ`);
+    else {
+      line(`RLS: ⚠️ ${bad.length} tabel(e) cu RLS DEZACTIVAT:`);
+      for (const r of bad) line(`  ${r.table_name}: RLS DEZACTIVAT`);
+    }
+    if (denyAll.length) line(`  (deny-all, doar service_role: ${denyAll.map((r) => r.table_name).join(", ")})`);
+  } catch (e) { line(`rls_status EROARE: ${e.message ?? e} (rulează migrarea de securitate)`); }
+
+  // 4) Integritate rapidă
+  try {
+    const now = new Date().toISOString();
+    const { data: users } = await sb.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    const { data: members } = await sb.from("household_members").select("user_id, household_id");
+    const { data: households } = await sb.from("households").select("id").is("deleted_at", null);
+    const memberIds = new Set((members ?? []).map((m) => m.user_id));
+    const liveHh = new Set((households ?? []).map((h) => h.id));
+    const noHousehold = (users?.users ?? []).filter((u) => !memberIds.has(u.id)).length;
+    const orphanMembers = (members ?? []).filter((m) => !liveHh.has(m.household_id)).length;
+    const { count: expiredCodes } = await sb.from("signup_codes").select("*", { count: "exact", head: true }).is("used_at", null).not("expires_at", "is", null).lt("expires_at", now);
+    line("Integritate:");
+    line(`  useri fără gospodărie: ${noHousehold}${noHousehold > 0 ? "  ⚠️" : ""}`);
+    line(`  membri orfani (gospodărie ștearsă): ${orphanMembers}${orphanMembers > 0 ? "  ⚠️" : ""}`);
+    line(`  coduri expirate nefolosite: ${expiredCodes ?? 0}`);
+  } catch (e) { line(`integritate EROARE: ${e.message ?? e}`); }
+}
+
 // --- Vercel: deploys + loguri deploy eșuat -----------------------------------
 async function vercel() {
   header("VERCEL");
@@ -128,5 +195,6 @@ line("RAPORT DEBUG — " + new Date().toLocaleString("ro-RO"));
 envCheck();
 await supabase();
 await authProbe();
+await security();
 await vercel();
 line();

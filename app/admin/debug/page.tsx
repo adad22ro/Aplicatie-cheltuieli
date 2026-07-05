@@ -43,7 +43,10 @@ export default async function AdminDebugPage() {
     getIntegrityChecks(),
     Promise.resolve(getConfigOverview()),
   ]);
-  const rlsProblems = rls.filter((r) => !r.rls_enabled || r.policy_count === 0);
+  // Problemă reală = RLS dezactivat. RLS activ + 0 politici = deny-all intenționat
+  // (admin_audit, security_events, signup_codes — accesibile doar prin service_role).
+  const rlsProblems = rls.filter((r) => !r.rls_enabled);
+  const rlsDenyAll = rls.filter((r) => r.rls_enabled && r.policy_count === 0);
   const integrityRows: { label: string; value: number; bad: boolean }[] = [
     { label: "Useri fără gospodărie", value: integrity.usersWithoutHousehold, bad: integrity.usersWithoutHousehold > 0 },
     { label: "Membri orfani (gospodărie ștearsă)", value: integrity.orphanMembers, bad: integrity.orphanMembers > 0 },
@@ -62,12 +65,12 @@ export default async function AdminDebugPage() {
           </p>
         ) : rlsProblems.length === 0 ? (
           <p className="rounded-lg border border-income/40 bg-income/5 px-3 py-2 text-sm font-medium text-income">
-            ✅ Toate cele {rls.length} tabele au RLS activ și cel puțin o politică.
+            ✅ Toate cele {rls.length} tabele au RLS activ.
           </p>
         ) : (
           <div className="flex flex-col gap-1.5">
             <p className="rounded-lg border border-expense/40 bg-expense/5 px-3 py-2 text-sm font-medium text-expense">
-              ⚠️ {rlsProblems.length} tabel(e) fără RLS sau fără politici:
+              ⚠️ {rlsProblems.length} tabel(e) cu RLS dezactivat:
             </p>
             <ul className="flex flex-col gap-1">
               {rlsProblems.map((r) => (
@@ -76,14 +79,18 @@ export default async function AdminDebugPage() {
                   className="flex items-center justify-between rounded-lg border border-border bg-surface px-3 py-2 text-sm"
                 >
                   <span className="font-mono text-xs">{r.table_name}</span>
-                  <span className="text-xs text-expense">
-                    {!r.rls_enabled ? "RLS dezactivat" : "0 politici"}
-                  </span>
+                  <span className="text-xs text-expense">RLS dezactivat</span>
                 </li>
               ))}
             </ul>
           </div>
         )}
+        {rlsDenyAll.length > 0 ? (
+          <p className="text-xs text-muted">
+            Deny-all (RLS activ, 0 politici → doar service_role):{" "}
+            <span className="font-mono">{rlsDenyAll.map((r) => r.table_name).join(", ")}</span>
+          </p>
+        ) : null}
       </section>
 
       {/* Integritate date */}
