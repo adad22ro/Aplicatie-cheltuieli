@@ -1,6 +1,14 @@
 import "server-only";
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { monthStart, nextMonthStart } from "@/lib/utils/month";
+
+export type TransactionFilters = {
+  month?: string;
+  type?: "income" | "expense";
+  categoryId?: string;
+  paymentMethodId?: string;
+};
 
 export type TransactionListItem = {
   id: string;
@@ -18,14 +26,30 @@ export type TransactionListItem = {
  * atașate. Ordonate descrescător pe dată (apoi pe momentul creării). Filtrarea pe lună
  * vine la dashboard (pasul 6); aici listăm recentele.
  */
-export async function listTransactions(limit = 200): Promise<TransactionListItem[]> {
+export async function listTransactions(
+  filters: TransactionFilters = {},
+  limit = 200,
+): Promise<TransactionListItem[]> {
   const supabase = await createServerSupabaseClient();
-  const { data } = await supabase
+  let query = supabase
     .from("transactions")
     .select(
       "id, amount, type, date, note, user_id, category:categories(name, icon, color), payment_method:payment_methods(name)",
     )
-    .is("deleted_at", null)
+    .is("deleted_at", null);
+
+  if (filters.month) {
+    query = query
+      .gte("date", monthStart(filters.month))
+      .lt("date", nextMonthStart(filters.month));
+  }
+  if (filters.type) query = query.eq("type", filters.type);
+  if (filters.categoryId) query = query.eq("category_id", filters.categoryId);
+  if (filters.paymentMethodId) {
+    query = query.eq("payment_method_id", filters.paymentMethodId);
+  }
+
+  const { data } = await query
     .order("date", { ascending: false })
     .order("created_at", { ascending: false })
     .limit(limit);

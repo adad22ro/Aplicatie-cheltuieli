@@ -1,5 +1,5 @@
 # Status proiect: Gospodărie — gestiune financiară
-Ultima actualizare: 2026-07-04
+Ultima actualizare: 2026-07-05
 
 ## Profil și decizii de bază
 - Profil: **B** (multi-tenant pe gospodărie) | Auth: **Supabase Auth** (RLS pe `auth.uid()`)
@@ -31,7 +31,7 @@ Ultima actualizare: 2026-07-04
 - ✅ Test izolare RLS (2 conturi, script anon+service_role) — 10/10 OK (izolare select/insert cross-tenant, auto-adăugare membru blocată, INSERT direct households blocat). Useri de test șterși după.
 - ✅ CRUD categorii + metode de plată (pasul 4) — `/settings` hub + `/settings/categories` (income/expense, icon emoji + culoare din paletă) + `/settings/payment-methods`. Server Actions cu Zod, soft delete, revalidatePath. Test funcțional 13/13 OK.
 - ✅ Tranzacții manuale CRUD + UX rapid (pasul 5) — `/transactions` (listă grupată pe zile, sume colorate, autor), `/transactions/new` (formular rapid: focus sumă, tastatură numerică, toggle venit/cheltuială filtrează categoriile, dată=azi), `/transactions/[id]/edit`. Undo la ștergere (soft-delete + restore), duplică, FAB + linkuri din dashboard. Test funcțional 14/14 OK (inclusiv RLS user_id + izolare).
-- ⬜ Dashboard lunar: total venituri/cheltuieli/sold + carry-over + filtrări (pasul 6) — capăt Faza 1
+- ✅ Dashboard lunar: sold cu carry-over + selector lună + filtrări (pasul 6) — **capăt Faza 1**. `app/(app)/page.tsx` (carduri venituri/cheltuieli/sold, report cumulat din luni anterioare, nav pe luni, tranzacții recente), filtre pe `/transactions` (lună/tip/categorie/metodă, form GET). `lib/data/dashboard.ts`, `lib/utils/month.ts`. Test funcțional 10/10 (carry-over pe 3 luni + filtre).
 
 ## Punct de decizie deschis
 - Confirmarea email Supabase = **OFF** (`mailer_autoconfirm: true`, setat prin Management API 2026-07-04) pentru signup instant. ⚠️ DE REACTIVAT + SMTP custom (Resend) înainte de lansare — SMTP built-in are limită 2 emailuri/oră. Codul suportă ambele fluxuri.
