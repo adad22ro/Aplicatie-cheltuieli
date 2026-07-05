@@ -50,6 +50,53 @@ export async function getExpenseByCategory(month: string): Promise<CategorySlice
     .sort((a, b) => b.value - a.value);
 }
 
+export type CategoryDelta = {
+  label: string;
+  current: number;
+  previous: number;
+  delta: number; // current - previous
+  pct: number | null; // % schimbare vs. luna trecută (null dacă luna trecută = 0)
+};
+
+/**
+ * Comparație a cheltuielilor pe categorie: luna `month` vs. luna anterioară.
+ * Ordonată după mărimea schimbării absolute (ce a variat cel mai mult).
+ */
+export async function getCategoryComparison(month: string): Promise<{
+  prevLabel: string;
+  totalCurrent: number;
+  totalPrevious: number;
+  rows: CategoryDelta[];
+}> {
+  const prev = prevMonth(month);
+  const [cur, old] = await Promise.all([
+    getExpenseByCategory(month),
+    getExpenseByCategory(prev),
+  ]);
+
+  const curMap = new Map(cur.map((c) => [c.label, c.value]));
+  const oldMap = new Map(old.map((c) => [c.label, c.value]));
+  const labels = new Set([...curMap.keys(), ...oldMap.keys()]);
+
+  const rows: CategoryDelta[] = [...labels]
+    .map((label) => {
+      const current = curMap.get(label) ?? 0;
+      const previous = oldMap.get(label) ?? 0;
+      const delta = Math.round((current - previous) * 100) / 100;
+      const pct = previous > 0 ? Math.round((delta / previous) * 100) : null;
+      return { label, current, previous, delta, pct };
+    })
+    .filter((r) => r.current !== 0 || r.previous !== 0)
+    .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+
+  return {
+    prevLabel: monthLabel(prev),
+    totalCurrent: cur.reduce((s, c) => s + c.value, 0),
+    totalPrevious: old.reduce((s, c) => s + c.value, 0),
+    rows,
+  };
+}
+
 /** Evoluția venituri/cheltuieli pe ultimele `months` luni (cronologic). */
 export async function getMonthlyTrend(month: string, months = 6): Promise<MonthPoint[]> {
   const supabase = await createServerSupabaseClient();

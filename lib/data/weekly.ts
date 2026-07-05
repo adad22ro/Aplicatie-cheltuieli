@@ -2,6 +2,8 @@ import "server-only";
 
 import { listTransactions, type TransactionListItem } from "@/lib/data/transactions";
 
+export type CategoryTotal = { name: string; icon: string | null; amount: number };
+
 export type WeekBucket = {
   index: number; // 0-based
   label: string; // „Săptămâna 1"
@@ -9,6 +11,7 @@ export type WeekBucket = {
   income: number;
   expense: number;
   net: number;
+  topCategories: CategoryTotal[]; // top cheltuieli pe categorie (max 3)
   items: TransactionListItem[];
 };
 
@@ -37,9 +40,13 @@ export async function getWeeklyBreakdown(month: string): Promise<WeekBucket[]> {
       income: 0,
       expense: 0,
       net: 0,
+      topCategories: [],
       items: [],
     };
   });
+
+  // Cheltuieli pe categorie, per bloc (pentru „unde s-au dus banii").
+  const catByBlock: Map<string, CategoryTotal>[] = buckets.map(() => new Map());
 
   for (const t of items) {
     const day = Number(t.date.slice(8, 10));
@@ -47,10 +54,25 @@ export async function getWeeklyBreakdown(month: string): Promise<WeekBucket[]> {
     const b = buckets[bi];
     if (!b) continue;
     b.items.push(t);
-    if (t.type === "income") b.income += t.amount;
-    else b.expense += t.amount;
+    if (t.type === "income") {
+      b.income += t.amount;
+    } else {
+      b.expense += t.amount;
+      const name = t.category?.name ?? "Fără categorie";
+      const m = catByBlock[bi]!;
+      const cur = m.get(name) ?? { name, icon: t.category?.icon ?? null, amount: 0 };
+      cur.amount += t.amount;
+      m.set(name, cur);
+    }
   }
-  for (const b of buckets) b.net = b.income - b.expense;
+
+  for (let i = 0; i < buckets.length; i++) {
+    const b = buckets[i]!;
+    b.net = b.income - b.expense;
+    b.topCategories = [...catByBlock[i]!.values()]
+      .sort((a, c) => c.amount - a.amount)
+      .slice(0, 3);
+  }
 
   return buckets;
 }

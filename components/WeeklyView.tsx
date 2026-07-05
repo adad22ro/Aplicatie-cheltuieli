@@ -59,6 +59,22 @@ export function WeeklyView({
                 <span className="font-semibold text-expense">{ron.format(w.expense)}</span>
               </span>
             </div>
+
+            {/* Unde s-au dus banii — top categorii ale săptămânii */}
+            {w.topCategories.length > 0 ? (
+              <div className="mb-3 flex flex-wrap gap-1.5">
+                {w.topCategories.map((c) => (
+                  <span
+                    key={c.name}
+                    className="rounded-full bg-background px-2.5 py-1 text-xs text-muted"
+                  >
+                    {c.icon ? `${c.icon} ` : ""}
+                    {c.name}{" "}
+                    <span className="font-semibold text-foreground">{ron.format(c.amount)}</span>
+                  </span>
+                ))}
+              </div>
+            ) : null}
             {w.items.length > 0 ? (
               <TransactionsList
                 items={w.items}
