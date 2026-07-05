@@ -313,6 +313,44 @@ export type Database = {
           },
         ]
       }
+      monthly_plans: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          household_id: string
+          id: string
+          month: string
+          note: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          household_id: string
+          id?: string
+          month: string
+          note?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          household_id?: string
+          id?: string
+          month?: string
+          note?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monthly_plans_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_methods: {
         Row: {
           deleted_at: string | null
@@ -338,6 +376,158 @@ export type Database = {
             columns: ["household_id"]
             isOneToOne: false
             referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_allocations: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          deleted_at: string | null
+          household_id: string
+          id: string
+          is_paid: boolean
+          label: string | null
+          paid_transaction_id: string | null
+          plan_id: string
+          planned_amount: number
+          recurring_id: string | null
+          sort_order: number
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          household_id: string
+          id?: string
+          is_paid?: boolean
+          label?: string | null
+          paid_transaction_id?: string | null
+          plan_id: string
+          planned_amount: number
+          recurring_id?: string | null
+          sort_order?: number
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          household_id?: string
+          id?: string
+          is_paid?: boolean
+          label?: string | null
+          paid_transaction_id?: string | null
+          plan_id?: string
+          planned_amount?: number
+          recurring_id?: string | null
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_allocations_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_allocations_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_allocations_paid_transaction_id_fkey"
+            columns: ["paid_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_allocations_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "monthly_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_allocations_recurring_id_fkey"
+            columns: ["recurring_id"]
+            isOneToOne: false
+            referencedRelation: "recurring_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_incomes: {
+        Row: {
+          amount: number
+          created_at: string
+          deleted_at: string | null
+          household_id: string
+          id: string
+          is_confirmed: boolean
+          label: string
+          plan_id: string
+          recurring_id: string | null
+          sort_order: number
+          transaction_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          deleted_at?: string | null
+          household_id: string
+          id?: string
+          is_confirmed?: boolean
+          label: string
+          plan_id: string
+          recurring_id?: string | null
+          sort_order?: number
+          transaction_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          deleted_at?: string | null
+          household_id?: string
+          id?: string
+          is_confirmed?: boolean
+          label?: string
+          plan_id?: string
+          recurring_id?: string | null
+          sort_order?: number
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_incomes_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_incomes_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "monthly_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_incomes_recurring_id_fkey"
+            columns: ["recurring_id"]
+            isOneToOne: false
+            referencedRelation: "recurring_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_incomes_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
             referencedColumns: ["id"]
           },
         ]
@@ -605,7 +795,7 @@ export type Database = {
       entry_type: "income" | "expense"
       household_role: "owner" | "member"
       recurring_frequency: "monthly"
-      transaction_source: "manual" | "recurring" | "installment"
+      transaction_source: "manual" | "recurring" | "installment" | "plan"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -739,7 +929,7 @@ export const Constants = {
       entry_type: ["income", "expense"],
       household_role: ["owner", "member"],
       recurring_frequency: ["monthly"],
-      transaction_source: ["manual", "recurring", "installment"],
+      transaction_source: ["manual", "recurring", "installment", "plan"],
     },
   },
 } as const

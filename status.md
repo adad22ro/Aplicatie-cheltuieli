@@ -59,7 +59,16 @@ Ultima actualizare: 2026-07-05
 ## Migrări aplicate (remote)
 `20260704150519` schema+RLS · `20260705120000` redeem_invite · `20260705140000` generate_due_recurring · `20260705160000` generate_due_installments · `20260705180000` signup_codes+admin_audit · `20260705200000` profiles+shares_household
 
-## Ce urmează
+## ✅ „Plan lunar" (alocare venit + planificare lună viitoare) — implementat 2026-07-06
+Concept unificat: pagină `/plan` cu selector de lună. Luna curentă = aloci venitul intrat; luna viitoare = planifici.
+- **Model „Plan + confirmi «plătit»"**: alocarea NU devine cheltuială reală până nu bifezi „plătit" → abia atunci se creează o `transactions` (source='plan', source_id=alocare) legată prin `paid_transaction_id`. Debifare/ștergere alocare → soft-delete tranzacția.
+- **Migrare aplicată**: `20260706100000_monthly_plans.sql` — `monthly_plans`, `plan_incomes`, `plan_allocations` (RLS is_household_member + soft delete) + enum `transaction_source += 'plan'`.
+- **Fișiere**: `lib/schemas/plan.ts`, `lib/data/plan.ts`, `lib/plan/ensure-plan.ts` (ensurePlan seedează din recurențe active + linkIncomeToPlan), `lib/actions/plan.ts`, `app/(app)/plan/page.tsx`, `components/plan/PlanEditor.tsx`. Card pe dashboard + `createTransactionAction` la venit → linkează în plan și redirect la `/plan`.
+- **Surse de venit recurente**: bifa „recurent" pe un venit din plan creează o recurență de tip venit (gestionată din `/recurring`).
+  - ✅ **DECIS**: venit recurent = doar sursă de precompletare a planului (fără tranzacție auto). Migrare `20260706110000_recurring_expense_only.sql` filtrează `type='expense'` în `generate_due_recurring`.
+    - ⬜ **DE APLICAT de user**: `npm run db:push` (migrarea 20260706110000 e scrisă dar NEAPLICATĂ).
+- ✅ Test funcțional DB + RLS: 15/15 OK (seed din recurență, totaluri Venit/Alocat/Nealocat, enum source='plan', toggle plătit→tranzacție legată, izolare RLS cross-tenant, cascade delete). Useri/date de test șterși după.
+
 - **Ajustările userului** la ce s-a construit (le va comunica).
 - **Grafică / design** (o va face ulterior — direcție vizuală, polish UI).
 - Idei opționale rămase: extinderi admin (redenumire gospodării, export), simplificare onboarding (scoate „join cu cod gospodărie" redundant cu codurile de admin).

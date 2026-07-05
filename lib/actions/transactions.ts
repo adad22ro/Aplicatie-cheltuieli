@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getCurrentUser, getActiveHouseholdId } from "@/lib/auth/current-user";
+import { linkIncomeToPlan } from "@/lib/plan/ensure-plan";
 import {
   createTransactionSchema,
   updateTransactionSchema,
@@ -47,17 +48,39 @@ export async function createTransactionAction(
   }
 
   const supabase = await createServerSupabaseClient();
-  const { error } = await supabase.from("transactions").insert({
-    household_id: householdId,
-    user_id: user.id,
-    source: "manual",
-    ...parsed.data,
-  });
-  if (error) {
+  const { data: created, error } = await supabase
+    .from("transactions")
+    .insert({
+      household_id: householdId,
+      user_id: user.id,
+      source: "manual",
+      ...parsed.data,
+    })
+    .select("id")
+    .single();
+  if (error || !created) {
     return { error: "Nu am putut salva tranzacția. Încearcă din nou." };
   }
 
   revalidateAll();
+
+  // La un venit: îl legăm în planul lunii și mergem la ecranul de alocare.
+  if (parsed.data.type === "income") {
+    const month = parsed.data.date.slice(0, 7);
+    const { data: cat } = await supabase
+      .from("categories")
+      .select("name")
+      .eq("id", parsed.data.category_id)
+      .maybeSingle();
+    await linkIncomeToPlan(householdId, month, {
+      label: parsed.data.note ?? cat?.name ?? "Venit",
+      amount: parsed.data.amount,
+      transactionId: created.id,
+    });
+    revalidatePath("/plan");
+    redirect(`/plan?month=${month}`);
+  }
+
   redirect("/transactions");
 }
 

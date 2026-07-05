@@ -151,6 +151,18 @@ export default async function DashboardPage({
         </div>
       </div>
 
+      {/* Plan lunar — alocare venit + planificare */}
+      <Link
+        href="/plan"
+        className="flex items-center justify-between rounded-2xl border border-primary/30 bg-primary/5 p-4 shadow-sm transition-colors hover:bg-primary/10"
+      >
+        <span className="flex items-center gap-2 font-semibold">
+          🗓️ Plan lunar
+          <span className="text-xs font-normal text-muted">alocă venitul & planifică</span>
+        </span>
+        <span aria-hidden className="text-primary">→</span>
+      </Link>
+
       {/* Navigare rapidă */}
       <div className="grid grid-cols-2 gap-2">
         <Link
