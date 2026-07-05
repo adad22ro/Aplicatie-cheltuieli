@@ -75,6 +75,13 @@ Concept unificat: pagină `/plan` cu selector de lună. Luna curentă = aloci ve
   - **D (admin & onboarding)**: `/admin/households` (redenumire + membri/tranzacții, audit), export CSV `/admin/export` (BOM Excel). Onboarding simplificat: ecran curat doar creare; alăturare doar prin link `?invite=`. Fără migrare.
 - ✅ **Vizualizare săptămânală (2026-07-06)** — toggle lunar/săptămânal pe dashboard (`?view=weekly`). Luna spartă în blocuri fixe de 7 zile (1–7, 8–14, …); fiecare săptămână: venituri/cheltuieli/sold + tranzacții desfășurabile (`<details>`, refolosește `TransactionsList`). `lib/data/weekly.ts` (grupare pură pe date, fără migrare) + `components/WeeklyView.tsx`.
   - Idee viitoare discutată: alocare a planului pe săptămâni (pas 2, mai complex) — neînceput.
+- ✅ **Funcții utile — grupuri E/F/G (2026-07-06)**, toate live:
+  - **E**: căutare liberă tranzacții (notă ilike + sumă) pe `/transactions`; adăugare rapidă „la fel ca data trecută" (chips din combinații recente → prefill) pe `/transactions/new`. Test 4/4.
+  - **F**: top 3 categorii/săptămână în vizualizarea săptămânală; comparație lună-la-lună pe `/reports` (`getCategoryComparison`, delta + %).
+  - **G**: alocare din plan către un obiectiv de economisire (`plan_allocations.savings_goal_id`, migrare `20260706140000`). Bifat „plătit" → crește obiectivul (fără tranzacție); debifat/șters → scade. ⚠️ testat doar build/tsc, nu runtime cu script.
+- ⬜ **RĂMASE (sesiune nouă)** din lista de funcții utile cerute (1,2,3,4,6,7,8; sărite 5,9,10,11):
+  - **Grup I — #2 digest în-app pe dashboard**: card „ți-au intrat X, ai Y recurente de plătit, sold Z". (push real = ulterior)
+  - **Grup H — #8 plan pe săptămâni**: împarte planul lunar (nu doar tracking-ul) pe săptămâni. Cel mai complex.
 
 - **Ajustările userului** la ce s-a construit (le va comunica).
 - **Grafică / design** (o va face ulterior — direcție vizuală, polish UI).
