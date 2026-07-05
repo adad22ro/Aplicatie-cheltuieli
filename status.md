@@ -40,7 +40,7 @@ Ultima actualizare: 2026-07-05
 - ✅ Dashboard lunar: sold cu carry-over + selector lună + filtrări (pasul 6) — **capăt Faza 1**. `app/(app)/page.tsx` (carduri venituri/cheltuieli/sold, report cumulat din luni anterioare, nav pe luni, tranzacții recente), filtre pe `/transactions` (lună/tip/categorie/metodă, form GET). `lib/data/dashboard.ts`, `lib/utils/month.ts`. Test funcțional 10/10 (carry-over pe 3 luni + filtre).
 
 ## Punct de decizie deschis
-- Confirmarea email Supabase = **OFF** (`mailer_autoconfirm: true`, setat prin Management API 2026-07-04) pentru signup instant. ⚠️ DE REACTIVAT + SMTP custom (Resend) înainte de lansare — SMTP built-in are limită 2 emailuri/oră. Codul suportă ambele fluxuri.
+- Confirmarea email Supabase = **ON** (`mailer_autoconfirm: false`, reactivat 2026-07-05). ⚠️ Mai lipsește **SMTP custom (Resend)** — built-in are limită 2 emailuri/oră, blochează signup-urile reale >2/oră. De configurat înainte ca partenera să se înregistreze / înainte de lansare. Codul suportă ambele fluxuri.
 - Deploy live pe Vercel (branch `main`, PR #1). Auth + onboarding testate live: register → onboarding → dashboard OK.
 - Unealtă nouă: `npm run debug` (raport erori Supabase/Vercel).
 
