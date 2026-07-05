@@ -342,6 +342,27 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       recurring_transactions: {
         Row: {
           amount: number
@@ -578,6 +599,7 @@ export type Database = {
       is_household_member: { Args: { hid: string }; Returns: boolean }
       is_household_owner: { Args: { hid: string }; Returns: boolean }
       redeem_invite: { Args: { p_code: string }; Returns: string }
+      shares_household: { Args: { other: string }; Returns: boolean }
     }
     Enums: {
       entry_type: "income" | "expense"

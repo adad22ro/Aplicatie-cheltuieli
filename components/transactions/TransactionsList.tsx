@@ -38,11 +38,11 @@ function dayLabel(dateStr: string) {
 export function TransactionsList({
   items,
   currentUserId,
-  currentUserEmail,
+  authors,
 }: {
   items: TransactionListItem[];
   currentUserId: string;
-  currentUserEmail: string;
+  authors: Record<string, string>;
 }) {
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [toast, setToast] = useState<{ id: string } | null>(null);
@@ -89,7 +89,8 @@ export function TransactionsList({
     });
   };
 
-  const ownInitial = (currentUserEmail[0] ?? "?").toUpperCase();
+  const authorLabel = (userId: string) =>
+    authors[userId] ?? (userId === currentUserId ? "Eu" : "Membru");
 
   if (visible.length === 0) {
     return (
@@ -114,7 +115,7 @@ export function TransactionsList({
           </h2>
           <ul className="flex flex-col gap-2">
             {rows.map((t) => {
-              const isOwn = t.user_id === currentUserId;
+              const who = authorLabel(t.user_id);
               const sign = t.type === "income" ? "+" : "−";
               return (
                 <li
@@ -140,9 +141,9 @@ export function TransactionsList({
                   </div>
                   <span
                     className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-background text-[10px] font-semibold text-muted"
-                    title={isOwn ? currentUserEmail : "Alt membru"}
+                    title={who}
                   >
-                    {isOwn ? ownInitial : "•"}
+                    {(who[0] ?? "?").toUpperCase()}
                   </span>
                   <span
                     className={`shrink-0 tabular-nums font-semibold ${

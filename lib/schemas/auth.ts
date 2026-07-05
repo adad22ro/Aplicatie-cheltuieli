@@ -8,8 +8,13 @@ export const credentialsSchema = z.object({
 
 export type Credentials = z.infer<typeof credentialsSchema>;
 
-/** Înregistrare: credențiale + cod de invitație obligatoriu (gating). */
+/** Înregistrare: credențiale + nume afișat + cod de invitație obligatoriu (gating). */
 export const registerSchema = credentialsSchema.extend({
+  name: z
+    .string()
+    .trim()
+    .min(1, "Numele este obligatoriu")
+    .max(40, "Numele e prea lung (max 40)"),
   code: z
     .string()
     .trim()

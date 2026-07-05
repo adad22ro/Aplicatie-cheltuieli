@@ -7,6 +7,7 @@ import {
 } from "@/lib/auth/current-user";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { listInvites } from "@/lib/data/invites";
+import { authorMap } from "@/lib/data/profiles";
 import { InviteManager } from "@/components/settings/InviteManager";
 
 /** Gospodărie: nume, membri, invitații (UI.md §3.6 + §4.1). Invitații doar pentru owner. */
@@ -28,7 +29,10 @@ export default async function HouseholdPage() {
     .select("user_id, role, joined_at")
     .order("joined_at", { ascending: true });
 
-  const invites = isOwner ? await listInvites() : [];
+  const [invites, names] = await Promise.all([
+    isOwner ? listInvites() : Promise.resolve([]),
+    authorMap(),
+  ]);
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 py-8">
@@ -58,7 +62,7 @@ export default async function HouseholdPage() {
                 className="flex items-center justify-between rounded-xl border border-border bg-surface p-3"
               >
                 <span className="font-medium">
-                  {isMe ? user?.email ?? "Tu" : "Membru"}
+                  {names[m.user_id] ?? (isMe ? user?.email ?? "Tu" : "Membru")}
                   {isMe ? " (tu)" : ""}
                 </span>
                 <span className="text-xs font-medium text-muted">
@@ -68,9 +72,6 @@ export default async function HouseholdPage() {
             );
           })}
         </ul>
-        <p className="text-xs text-muted">
-          Numele membrilor apar după ce adăugăm profilurile (în curând).
-        </p>
       </section>
 
       {isOwner ? (

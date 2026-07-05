@@ -8,6 +8,7 @@ export type TransactionFilters = {
   type?: "income" | "expense";
   categoryId?: string;
   paymentMethodId?: string;
+  userId?: string;
 };
 
 export type TransactionListItem = {
@@ -48,6 +49,7 @@ export async function listTransactions(
   if (filters.paymentMethodId) {
     query = query.eq("payment_method_id", filters.paymentMethodId);
   }
+  if (filters.userId) query = query.eq("user_id", filters.userId);
 
   const { data } = await query
     .order("date", { ascending: false })

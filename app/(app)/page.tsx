@@ -7,6 +7,7 @@ import { signOutAction } from "@/lib/actions/auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getMonthlySummary } from "@/lib/data/dashboard";
 import { listTransactions } from "@/lib/data/transactions";
+import { authorMap } from "@/lib/data/profiles";
 import { TransactionsList } from "@/components/transactions/TransactionsList";
 import {
   normalizeMonth,
@@ -49,9 +50,10 @@ export default async function DashboardPage({
     : membership.households;
 
   const month = normalizeMonth(monthParam);
-  const [summary, recent] = await Promise.all([
+  const [summary, recent, authors] = await Promise.all([
     getMonthlySummary(month),
     listTransactions({ month }, 20),
+    authorMap(),
   ]);
 
   const atCurrent = isCurrentOrFuture(month);
@@ -199,7 +201,7 @@ export default async function DashboardPage({
         <TransactionsList
           items={recent}
           currentUserId={user?.id ?? ""}
-          currentUserEmail={user?.email ?? ""}
+          authors={authors}
         />
       </section>
 

@@ -46,12 +46,13 @@ export async function registerAction(
   const parsed = registerSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
+    name: formData.get("name"),
     code: formData.get("code"),
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Date invalide" };
   }
-  const { email, password, code } = parsed.data;
+  const { email, password, name, code } = parsed.data;
 
   const admin = createAdminClient();
 
@@ -84,7 +85,10 @@ export async function registerAction(
   }
   const userId = created.user.id;
 
-  // 3) Auto-join în gospodăria țintă (dacă e setată pe cod).
+  // 3) Creează profilul cu numele afișat.
+  await admin.from("profiles").insert({ user_id: userId, display_name: name });
+
+  // 4) Auto-join în gospodăria țintă (dacă e setată pe cod).
   if (codeRow.household_id) {
     await admin.from("household_members").insert({
       household_id: codeRow.household_id,
@@ -93,13 +97,13 @@ export async function registerAction(
     });
   }
 
-  // 4) Marchează codul folosit.
+  // 5) Marchează codul folosit.
   await admin
     .from("signup_codes")
     .update({ used_by: userId, used_at: new Date().toISOString() })
     .eq("id", codeRow.id);
 
-  // 5) Autentifică userul (setează cookie-urile de sesiune).
+  // 6) Autentifică userul (setează cookie-urile de sesiune).
   const supabase = await createServerSupabaseClient();
   const { error: eSignIn } = await supabase.auth.signInWithPassword({ email, password });
   if (eSignIn) {

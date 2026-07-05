@@ -9,6 +9,7 @@ export default async function SettingsPage() {
   if (!householdId) redirect("/onboarding");
 
   const items = [
+    { href: "/settings/profile", title: "Profil", desc: "Numele tău afișat pe tranzacții" },
     { href: "/settings/categories", title: "Categorii", desc: "Venituri și cheltuieli, cu icon și culoare" },
     { href: "/settings/payment-methods", title: "Metode de plată", desc: "Cash, card, Revolut etc." },
     { href: "/settings/household", title: "Gospodărie", desc: "Membri și invitații" },

@@ -35,6 +35,22 @@ export function RegisterForm({ initialCode }: { initialCode?: string }) {
       </div>
 
       <div className="flex flex-col gap-1.5">
+        <label htmlFor="name" className="text-sm font-medium">
+          Numele tău
+        </label>
+        <input
+          id="name"
+          name="name"
+          type="text"
+          required
+          maxLength={40}
+          autoComplete="name"
+          placeholder="ex: Maria"
+          className="rounded-lg border border-border bg-surface px-3 py-2.5 outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
         <label htmlFor="email" className="text-sm font-medium">
           Email
         </label>

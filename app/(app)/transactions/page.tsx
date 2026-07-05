@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getActiveHouseholdId, getCurrentUser } from "@/lib/auth/current-user";
 import { listCategories, listPaymentMethods } from "@/lib/data/settings";
 import { listTransactions, type TransactionFilters } from "@/lib/data/transactions";
+import { listMemberProfiles, authorMap } from "@/lib/data/profiles";
 import { TransactionsList } from "@/components/transactions/TransactionsList";
 import { monthLabel, currentMonth, prevMonth } from "@/lib/utils/month";
 
@@ -27,6 +28,7 @@ export default async function TransactionsPage({
     type?: string;
     category?: string;
     method?: string;
+    person?: string;
   }>;
 }) {
   const [sp, householdId, user] = await Promise.all([
@@ -42,13 +44,16 @@ export default async function TransactionsPage({
     type: sp.type === "income" || sp.type === "expense" ? sp.type : undefined,
     categoryId: sp.category || undefined,
     paymentMethodId: sp.method || undefined,
+    userId: sp.person || undefined,
   };
-  const hasFilters = Boolean(sp.month || sp.type || sp.category || sp.method);
+  const hasFilters = Boolean(sp.month || sp.type || sp.category || sp.method || sp.person);
 
-  const [items, categories, methods] = await Promise.all([
+  const [items, categories, methods, members, authors] = await Promise.all([
     listTransactions(filters),
     listCategories(),
     listPaymentMethods(),
+    listMemberProfiles(),
+    authorMap(),
   ]);
 
   const selectCls =
@@ -99,6 +104,16 @@ export default async function TransactionsPage({
               </option>
             ))}
           </select>
+          {members.length > 1 ? (
+            <select name="person" defaultValue={sp.person ?? ""} aria-label="Persoană" className={`${selectCls} col-span-2`}>
+              <option value="">Toți membrii</option>
+              {members.map((m) => (
+                <option key={m.user_id} value={m.user_id}>
+                  {m.name ?? "Membru"}
+                </option>
+              ))}
+            </select>
+          ) : null}
         </div>
         <div className="flex gap-2">
           <button
@@ -118,11 +133,7 @@ export default async function TransactionsPage({
         </div>
       </form>
 
-      <TransactionsList
-        items={items}
-        currentUserId={user.id}
-        currentUserEmail={user.email ?? ""}
-      />
+      <TransactionsList items={items} currentUserId={user.id} authors={authors} />
 
       <Link
         href="/transactions/new"
