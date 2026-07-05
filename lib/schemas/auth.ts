@@ -8,8 +8,20 @@ export const credentialsSchema = z.object({
 
 export type Credentials = z.infer<typeof credentialsSchema>;
 
+/**
+ * Parolă puternică pentru conturi NOI (nu se aplică la login, ca să nu blocheze conturile
+ * existente cu parole mai scurte): min 8 caractere, cu literă și cifră.
+ */
+const strongPassword = z
+  .string()
+  .min(8, "Parola trebuie să aibă minim 8 caractere")
+  .max(72, "Parola e prea lungă (max 72)")
+  .regex(/[a-zA-Z]/, "Parola trebuie să conțină cel puțin o literă")
+  .regex(/[0-9]/, "Parola trebuie să conțină cel puțin o cifră");
+
 /** Înregistrare: credențiale + nume afișat + cod de invitație obligatoriu (gating). */
 export const registerSchema = credentialsSchema.extend({
+  password: strongPassword,
   name: z
     .string()
     .trim()

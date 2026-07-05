@@ -63,6 +63,36 @@ export type Database = {
         }
         Relationships: []
       }
+      security_events: {
+        Row: {
+          created_at: string
+          detail: Json | null
+          email: string | null
+          event_type: string
+          id: string
+          ip: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          detail?: Json | null
+          email?: string | null
+          event_type: string
+          id?: string
+          ip?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          detail?: Json | null
+          email?: string | null
+          event_type?: string
+          id?: string
+          ip?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       allocation_templates: {
         Row: {
           created_at: string
@@ -898,6 +928,10 @@ export type Database = {
       is_household_member: { Args: { hid: string }; Returns: boolean }
       is_household_owner: { Args: { hid: string }; Returns: boolean }
       redeem_invite: { Args: { p_code: string }; Returns: string }
+      rls_status: {
+        Args: never
+        Returns: { table_name: string; rls_enabled: boolean; policy_count: number }[]
+      }
       shares_household: { Args: { other: string }; Returns: boolean }
     }
     Enums: {

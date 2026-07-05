@@ -3,6 +3,7 @@ import "server-only";
 import { redirect } from "next/navigation";
 
 import { getCurrentUser } from "@/lib/auth/current-user";
+import { logSecurityEvent, getClientIp } from "@/lib/security/events";
 
 /**
  * True dacă emailul dat e cel al administratorului (comparație case-insensitive).
@@ -22,6 +23,16 @@ export function isAdminEmail(email: string | null | undefined): boolean {
 export async function requireAdmin() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  if (!isAdminEmail(user.email)) redirect("/");
+  if (!isAdminEmail(user.email)) {
+    // Semnal de intruziune: user autentificat, non-admin, care atinge zona de admin.
+    const ip = await getClientIp();
+    await logSecurityEvent({
+      type: "admin_access_denied",
+      email: user.email ?? null,
+      userId: user.id,
+      ip,
+    });
+    redirect("/");
+  }
   return user;
 }

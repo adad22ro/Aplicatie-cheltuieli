@@ -5,6 +5,11 @@ import { redirect } from "next/navigation";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { credentialsSchema, registerSchema } from "@/lib/schemas/auth";
+import {
+  logSecurityEvent,
+  checkAuthRateLimit,
+  getClientIp,
+} from "@/lib/security/events";
 
 /** Starea întoarsă de action-uri către formular (mesaj de eroare sau nimic la succes). */
 export type AuthActionState = { error: string } | undefined;
@@ -24,13 +29,24 @@ export async function signInAction(
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Date invalide" };
   }
+  const { email } = parsed.data;
+  const ip = await getClientIp();
+
+  // Rate-limiting: prea multe eșecuri recente (per email sau IP) → blocare temporară.
+  const rl = await checkAuthRateLimit(email, ip);
+  if (rl.blocked) {
+    await logSecurityEvent({ type: "rate_limited", email, ip, detail: { action: "login" } });
+    return { error: "Prea multe încercări. Reîncearcă peste câteva minute." };
+  }
 
   const supabase = await createServerSupabaseClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) {
+    await logSecurityEvent({ type: "login_failed", email, ip });
     return { error: "Email sau parolă greșite" };
   }
 
+  await logSecurityEvent({ type: "login_success", email, ip });
   redirect("/");
 }
 
@@ -53,20 +69,33 @@ export async function registerAction(
     return { error: parsed.error.issues[0]?.message ?? "Date invalide" };
   }
   const { email, password, name, code } = parsed.data;
+  const ip = await getClientIp();
+
+  // Rate-limiting (per email sau IP) contra ghicirii de coduri prin brute-force.
+  const rl = await checkAuthRateLimit(email, ip);
+  if (rl.blocked) {
+    await logSecurityEvent({ type: "rate_limited", email, ip, detail: { action: "register" } });
+    return { error: "Prea multe încercări. Reîncearcă peste câteva minute." };
+  }
 
   const admin = createAdminClient();
+  const nowIso = new Date().toISOString();
 
-  // 1) Validează codul.
-  const { data: codeRow } = await admin
+  // 1) Redeem ATOMIC: marchează codul folosit doar dacă e valid, neexpirat și nefolosit.
+  //    Un singur UPDATE condiționat → două cereri concurente nu pot folosi același cod
+  //    (a doua vede used_at deja setat și nu întoarce niciun rând).
+  const { data: claimed } = await admin
     .from("signup_codes")
-    .select("id, household_id, role, used_at, expires_at")
+    .update({ used_at: nowIso })
     .eq("code", code)
+    .is("used_at", null)
+    .or(`expires_at.is.null,expires_at.gt.${nowIso}`)
+    .select("id, household_id, role")
     .maybeSingle();
 
-  if (!codeRow) return { error: "Cod de invitație invalid" };
-  if (codeRow.used_at) return { error: "Codul a fost deja folosit" };
-  if (codeRow.expires_at && new Date(codeRow.expires_at) <= new Date()) {
-    return { error: "Codul a expirat" };
+  if (!claimed) {
+    await logSecurityEvent({ type: "register_failed", email, ip, detail: { reason: "invalid_code" } });
+    return { error: "Cod de invitație invalid, expirat sau deja folosit" };
   }
 
   // 2) Creează contul (confirmat, fără email — signup public e închis).
@@ -76,6 +105,9 @@ export async function registerAction(
     email_confirm: true,
   });
   if (eCreate || !created?.user) {
+    // Eliberează codul (revenim la nefolosit) ca să nu se piardă la o eroare de creare.
+    await admin.from("signup_codes").update({ used_at: null }).eq("id", claimed.id);
+    await logSecurityEvent({ type: "register_failed", email, ip, detail: { reason: "create_failed" } });
     const msg = eCreate?.message ?? "";
     return {
       error: /already|registered|exists/i.test(msg)
@@ -89,19 +121,17 @@ export async function registerAction(
   await admin.from("profiles").insert({ user_id: userId, display_name: name });
 
   // 4) Auto-join în gospodăria țintă (dacă e setată pe cod).
-  if (codeRow.household_id) {
+  if (claimed.household_id) {
     await admin.from("household_members").insert({
-      household_id: codeRow.household_id,
+      household_id: claimed.household_id,
       user_id: userId,
-      role: codeRow.role,
+      role: claimed.role,
     });
   }
 
-  // 5) Marchează codul folosit.
-  await admin
-    .from("signup_codes")
-    .update({ used_by: userId, used_at: new Date().toISOString() })
-    .eq("id", codeRow.id);
+  // 5) Finalizează codul: leagă-l de userul creat.
+  await admin.from("signup_codes").update({ used_by: userId }).eq("id", claimed.id);
+  await logSecurityEvent({ type: "register_success", email, ip, userId });
 
   // 6) Autentifică userul (setează cookie-urile de sesiune).
   const supabase = await createServerSupabaseClient();
@@ -112,7 +142,7 @@ export async function registerAction(
   }
 
   // Cu gospodărie țintă → direct la dashboard; altfel → onboarding (își creează una).
-  redirect(codeRow.household_id ? "/" : "/onboarding");
+  redirect(claimed.household_id ? "/" : "/onboarding");
 }
 
 /** Delogare + redirect la login. */
