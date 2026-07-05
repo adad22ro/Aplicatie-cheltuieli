@@ -68,6 +68,11 @@ Concept unificat: pagină `/plan` cu selector de lună. Luna curentă = aloci ve
   - ✅ **DECIS**: venit recurent = doar sursă de precompletare a planului (fără tranzacție auto). Migrare `20260706110000_recurring_expense_only.sql` filtrează `type='expense'` în `generate_due_recurring`.
     - ⬜ **DE APLICAT de user**: `npm run db:push` (migrarea 20260706110000 e scrisă dar NEAPLICATĂ).
 - ✅ Test funcțional DB + RLS: 15/15 OK (seed din recurență, totaluri Venit/Alocat/Nealocat, enum source='plan', toggle plătit→tranzacție legată, izolare RLS cross-tenant, cascade delete). Useri/date de test șterși după.
+- ✅ **Extinderi plan (2026-07-06)** — 4 grupuri, toate live:
+  - **A (polish)**: prioritizare alocări cu ↑/↓ (sort_order), bară de progres, „rest de plătit", alerte (deficit/„tot venitul alocat"/procent).
+  - **B (rollover & 2 venituri)**: report din luna anterioară → „disponibil"=venit+report; `plan_incomes.user_id` (migrare `20260706120000`) = contribuitor, breakdown pe persoană. Test 6/6.
+  - **C (șabloane)**: `allocation_templates`+`template_lines`+enum `allocation_mode` (migrare `20260706130000`). Linii sumă-fixă/procent-din-disponibil. Pagină `/plan/templates` + bară „Aplică șablon" pe `/plan`. Test 5/5.
+  - **D (admin & onboarding)**: `/admin/households` (redenumire + membri/tranzacții, audit), export CSV `/admin/export` (BOM Excel). Onboarding simplificat: ecran curat doar creare; alăturare doar prin link `?invite=`. Fără migrare.
 
 - **Ajustările userului** la ce s-a construit (le va comunica).
 - **Grafică / design** (o va face ulterior — direcție vizuală, polish UI).
