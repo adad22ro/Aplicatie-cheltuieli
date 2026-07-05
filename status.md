@@ -61,7 +61,7 @@ Ultima actualizare: 2026-07-05
 - **Resetare parolă self-service** (2026-07-06) — `/forgot-password` (`requestPasswordResetAction`: rate-limit + log `password_reset`, răspuns generic; email built-in Supabase → `redirectTo /auth/reset`) + `/auth/reset` (exchangeCodeForSession + updateUser, parolă min 8/literă/cifră). Link „Ți-ai uitat parola?" pe login. ⚠️ email built-in Supabase e limitat (~2/oră) până la Resend. Redirect URL `/auth/reset` trebuie în Supabase URL config.
 - **debug.mjs** extins cu secțiune securitate (security_events 24h + ultimele, admin_audit, rls_status, integritate). Rulează `npm run debug` pentru raport „ce nu e ok". Fix fals-pozitiv RLS: deny-all (0 politici + RLS activ) nu mai e semnalat ca eroare.
 - **Test funcțional (2026-07-06)**: script temporar 8/8 OK (coloana `week` + constrângere week 1-6/null, redeem ATOMIC cod = exact 1 câștigător la concurență, `rls_status()` fără tabele dezactivate, numărare rate-limit). Date de test curățate. Script șters după.
-- Google OAuth: userul a făcut pașii de config (Google Cloud + Supabase) — de testat cu cont real în browser.
+- Google OAuth: **CONFIGURAT ȘI FUNCȚIONAL** (testat live cu cont real, 2026-07-06). Google Cloud OAuth client + provider Supabase enable. Login doar pt. conturi existente (disable_signup).
 
 ## Stare curentă (handoff)
 - **Faza 1 + Faza 2 COMPLETE**, plus sistem de admin + PWA + profiluri. Toate live pe Vercel (branch `main`, auto-deploy la push).
