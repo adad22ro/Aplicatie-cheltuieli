@@ -44,6 +44,16 @@ Ultima actualizare: 2026-07-05
 - ✅ Invitații în gospodărie (Faza 2, pasul 8) — RPC `redeem_invite` SECURITY DEFINER (migrare `20260705120000`), generare cod (owner) + expirare, `/settings/household` (membri + invitații, copiază cod/link, revocare), onboarding cu alăturare prin cod (`?invite=`). Test funcțional: redeem OK, refolosit/invalid/expirat respinse, RLS blochează non-owner.
 - ✅ Dashboard lunar: sold cu carry-over + selector lună + filtrări (pasul 6) — **capăt Faza 1**. `app/(app)/page.tsx` (carduri venituri/cheltuieli/sold, report cumulat din luni anterioare, nav pe luni, tranzacții recente), filtre pe `/transactions` (lună/tip/categorie/metodă, form GET). `lib/data/dashboard.ts`, `lib/utils/month.ts`. Test funcțional 10/10 (carry-over pe 3 luni + filtre).
 
+## Securitate — val 1 (2026-07-06, live)
+- **Headers/CSP** în `next.config.ts`: CSP (connect-src self+Supabase), HSTS, X-Frame-Options DENY, nosniff, Referrer/Permissions-Policy.
+- **Parole**: min 8 + literă + cifră DOAR la register (`strongPassword` în `lib/schemas/auth.ts`); login rămâne min 6 (nu blochează conturi vechi).
+- **Fix race cod invitație**: redeem ATOMIC în `registerAction` (UPDATE condiționat `used_at is null` + expirare, release la eroare de creare cont).
+- **Rate-limiting**: `lib/security/events.ts` — 5 eșecuri/15min per email SAU IP, fail-open. `checkAuthRateLimit` + `logSecurityEvent` + `getClientIp` (x-forwarded-for).
+- **Jurnal `security_events`** (migrare `20260706160000_security.sql`, RLS deny → doar service_role): login_failed/success, register_*, admin_access_denied (logat în `requireAdmin`), rate_limited. + funcție `rls_status()` SECURITY DEFINER.
+- **Admin nou**: pagină `/admin/security` (feed + contoare 24h); `/admin/debug` extins cu verificator acoperire RLS + integritate date + config env. Nav actualizat. Date în `lib/data/security.ts`.
+- ⚠️ verificat typecheck+build, nu vizual/runtime.
+- **RĂMAS val 2**: sesiuni + forțează logout (verifică endpoint GoTrue întâi), Google OAuth (decizie gating + credențiale Google Cloud), supraveghere+alertă email (monitor extern uptime + cron intern cu Resend). SMTP custom (Resend) tot lipsește.
+
 ## Stare curentă (handoff)
 - **Faza 1 + Faza 2 COMPLETE**, plus sistem de admin + PWA + profiluri. Toate live pe Vercel (branch `main`, auto-deploy la push).
 - **Auth model**: signup public DEZACTIVAT (`disable_signup: true`). Conturi doar prin `registerAction` (service_role, `admin.createUser({email_confirm:true})`) după cod valid din `signup_codes`. Codul poate ținti o gospodărie (auto-join). Confirmarea email NU mai contează pentru signup (createUser confirmă direct) → SMTP custom nu mai e necesar pentru fluxul actual.
