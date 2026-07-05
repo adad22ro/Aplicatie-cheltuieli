@@ -156,6 +156,13 @@ export default async function DashboardPage({
           <span>💳 Rate</span>
           <span aria-hidden className="text-muted">→</span>
         </Link>
+        <Link
+          href="/budgets"
+          className="flex items-center justify-between rounded-xl border border-border bg-surface p-3 text-sm font-medium shadow-sm transition-colors hover:bg-background"
+        >
+          <span>🎯 Bugete</span>
+          <span aria-hidden className="text-muted">→</span>
+        </Link>
       </div>
 
       {/* Tranzacții recente ale lunii */}
