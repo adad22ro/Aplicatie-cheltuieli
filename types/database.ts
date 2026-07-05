@@ -425,6 +425,7 @@ export type Database = {
           plan_id: string
           planned_amount: number
           recurring_id: string | null
+          savings_goal_id: string | null
           sort_order: number
         }
         Insert: {
@@ -439,6 +440,7 @@ export type Database = {
           plan_id: string
           planned_amount: number
           recurring_id?: string | null
+          savings_goal_id?: string | null
           sort_order?: number
         }
         Update: {
@@ -453,6 +455,7 @@ export type Database = {
           plan_id?: string
           planned_amount?: number
           recurring_id?: string | null
+          savings_goal_id?: string | null
           sort_order?: number
         }
         Relationships: [
@@ -489,6 +492,13 @@ export type Database = {
             columns: ["recurring_id"]
             isOneToOne: false
             referencedRelation: "recurring_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_allocations_savings_goal_id_fkey"
+            columns: ["savings_goal_id"]
+            isOneToOne: false
+            referencedRelation: "savings_goals"
             referencedColumns: ["id"]
           },
         ]

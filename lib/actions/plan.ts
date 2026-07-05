@@ -20,6 +20,24 @@ function revalidate() {
   revalidatePath("/");
 }
 
+/** Ajustează contribuția unui obiectiv de economisire cu `delta` (poate fi negativ). Clamp la 0. */
+async function adjustGoal(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  goalId: string,
+  delta: number,
+): Promise<void> {
+  const { data: goal } = await supabase
+    .from("savings_goals")
+    .select("current_amount")
+    .eq("id", goalId)
+    .is("deleted_at", null)
+    .maybeSingle();
+  if (!goal) return;
+  const current = typeof goal.current_amount === "string" ? Number(goal.current_amount) : goal.current_amount;
+  const next = Math.max(0, Math.round((current + delta) * 100) / 100);
+  await supabase.from("savings_goals").update({ current_amount: next }).eq("id", goalId);
+}
+
 /** Data tranzacției generate dintr-o alocare: azi dacă e luna curentă, altfel ziua 1 a lunii. */
 function planTxDate(month: string): string {
   if (month === currentMonth()) {
@@ -112,13 +130,14 @@ export async function addAllocationAction(
   const parsed = addAllocationSchema.safeParse({
     month: formData.get("month"),
     category_id: formData.get("category_id"),
+    savings_goal_id: formData.get("savings_goal_id"),
     label: formData.get("label"),
     planned_amount: formData.get("planned_amount"),
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Date invalide" };
   }
-  const { month, category_id, label, planned_amount } = parsed.data;
+  const { month, category_id, savings_goal_id, label, planned_amount } = parsed.data;
 
   const planId = await ensurePlan(householdId, month);
   if (!planId) return { error: "Nu am putut pregăti planul." };
@@ -127,7 +146,8 @@ export async function addAllocationAction(
   const { error } = await supabase.from("plan_allocations").insert({
     plan_id: planId,
     household_id: householdId,
-    category_id,
+    category_id: savings_goal_id ? null : category_id,
+    savings_goal_id: savings_goal_id ?? null,
     label,
     planned_amount,
   });
@@ -202,21 +222,23 @@ export async function togglePaidAction(formData: FormData): Promise<void> {
   const { data: alloc } = await supabase
     .from("plan_allocations")
     .select(
-      "id, planned_amount, category_id, label, is_paid, paid_transaction_id, plan:monthly_plans(month)",
+      "id, planned_amount, category_id, savings_goal_id, label, is_paid, paid_transaction_id, plan:monthly_plans(month)",
     )
     .eq("id", id)
     .is("deleted_at", null)
     .maybeSingle();
   if (!alloc) return;
+  const amt = typeof alloc.planned_amount === "string" ? Number(alloc.planned_amount) : alloc.planned_amount;
 
   if (alloc.is_paid) {
-    // Debifare: șterge tranzacția generată (dacă există)
+    // Debifare: șterge tranzacția generată (dacă există) sau scade contribuția la economii.
     if (alloc.paid_transaction_id) {
       await supabase
         .from("transactions")
         .update({ deleted_at: new Date().toISOString() })
         .eq("id", alloc.paid_transaction_id);
     }
+    if (alloc.savings_goal_id) await adjustGoal(supabase, alloc.savings_goal_id, -amt);
     await supabase
       .from("plan_allocations")
       .update({ is_paid: false, paid_transaction_id: null })
@@ -225,7 +247,15 @@ export async function togglePaidAction(formData: FormData): Promise<void> {
     return;
   }
 
-  // Bifare: creează tranzacția reală. Fără categorie nu putem (category_id NOT NULL).
+  // Bifare, alocare către economii → crește obiectivul (fără tranzacție de cheltuială).
+  if (alloc.savings_goal_id) {
+    await adjustGoal(supabase, alloc.savings_goal_id, amt);
+    await supabase.from("plan_allocations").update({ is_paid: true }).eq("id", id);
+    revalidate();
+    return;
+  }
+
+  // Bifare fără categorie și fără obiectiv → doar marchează (nu putem crea tranzacție).
   if (!alloc.category_id) {
     await supabase.from("plan_allocations").update({ is_paid: true }).eq("id", id);
     revalidate();
@@ -268,7 +298,7 @@ export async function deleteAllocationAction(id: string): Promise<void> {
   const supabase = await createServerSupabaseClient();
   const { data: alloc } = await supabase
     .from("plan_allocations")
-    .select("paid_transaction_id")
+    .select("paid_transaction_id, is_paid, savings_goal_id, planned_amount")
     .eq("id", parsed.data.id)
     .maybeSingle();
 
@@ -277,6 +307,14 @@ export async function deleteAllocationAction(id: string): Promise<void> {
       .from("transactions")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", alloc.paid_transaction_id);
+  }
+  // Dacă era o contribuție la economii deja bifată, o scădem la loc din obiectiv.
+  if (alloc?.is_paid && alloc.savings_goal_id) {
+    const amt =
+      typeof alloc.planned_amount === "string"
+        ? Number(alloc.planned_amount)
+        : alloc.planned_amount;
+    await adjustGoal(supabase, alloc.savings_goal_id, -amt);
   }
   await supabase
     .from("plan_allocations")

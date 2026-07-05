@@ -15,6 +15,7 @@ import {
 } from "@/lib/actions/plan";
 import type { PlanIncome, PlanAllocation, Contribution } from "@/lib/data/plan";
 import type { Category } from "@/lib/data/settings";
+import type { SavingsGoal } from "@/lib/data/savings";
 
 const ron = new Intl.NumberFormat("ro-RO", {
   style: "currency",
@@ -34,6 +35,7 @@ export function PlanEditor({
   categories,
   rollover,
   contributions,
+  savingsGoals,
 }: {
   month: string;
   incomes: PlanIncome[];
@@ -41,6 +43,7 @@ export function PlanEditor({
   categories: Category[];
   rollover: number;
   contributions: Contribution[];
+  savingsGoals: SavingsGoal[];
 }) {
   const incomeCats = useMemo(() => categories.filter((c) => c.type === "income"), [categories]);
   const expenseCats = useMemo(() => categories.filter((c) => c.type === "expense"), [categories]);
@@ -206,7 +209,7 @@ export function PlanEditor({
             ))
           )}
         </div>
-        <AddAllocationForm month={month} expenseCats={expenseCats} />
+        <AddAllocationForm month={month} expenseCats={expenseCats} savingsGoals={savingsGoals} />
       </section>
     </div>
   );
@@ -265,7 +268,11 @@ function AllocationRow({
   onAmount: (v: number) => void;
 }) {
   const [pending, start] = useTransition();
-  const name = alloc.category?.name ?? alloc.label ?? "Cheltuială";
+  const isSavings = Boolean(alloc.savings_goal_id);
+  const name = isSavings
+    ? (alloc.savings_goal?.name ?? "Economii")
+    : (alloc.category?.name ?? alloc.label ?? "Cheltuială");
+  const icon = isSavings ? "🐷 " : alloc.category?.icon ? `${alloc.category.icon} ` : "";
   return (
     <div
       className={`flex items-center gap-2 rounded-xl border p-2.5 ${
@@ -311,7 +318,7 @@ function AllocationRow({
       </form>
 
       <span className="flex-1 truncate text-sm font-medium">
-        {alloc.category?.icon ? `${alloc.category.icon} ` : ""}
+        {icon}
         {name}
         {alloc.recurring_id ? <span className="ml-1 text-muted">🔁</span> : null}
       </span>
@@ -444,15 +451,18 @@ function AddIncomeForm({ month, incomeCats }: { month: string; incomeCats: Categ
 function AddAllocationForm({
   month,
   expenseCats,
+  savingsGoals,
 }: {
   month: string;
   expenseCats: Category[];
+  savingsGoals: SavingsGoal[];
 }) {
   const [state, formAction, pending] = useActionState<PlanActionState, FormData>(
     addAllocationAction,
     undefined,
   );
   const [open, setOpen] = useState(false);
+  const [kind, setKind] = useState<"expense" | "savings">("expense");
 
   if (!open) {
     return (
@@ -466,28 +476,69 @@ function AddAllocationForm({
     );
   }
 
+  const savingsAvailable = savingsGoals.length > 0;
+
   return (
     <form
       action={formAction}
       className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-3"
     >
       <input type="hidden" name="month" value={month} />
-      <select
-        name="category_id"
-        required
-        defaultValue=""
-        className="rounded-lg border border-border bg-background px-2 py-2 text-sm"
-      >
-        <option value="" disabled>
-          Categorie cheltuială…
-        </option>
-        {expenseCats.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.icon ? `${c.icon} ` : ""}
-            {c.name}
+
+      {/* Tip alocare: cheltuială sau economii */}
+      {savingsAvailable ? (
+        <div className="grid grid-cols-2 gap-1 rounded-lg border border-border p-1 text-sm">
+          <button
+            type="button"
+            onClick={() => setKind("expense")}
+            className={`rounded py-1 font-medium ${kind === "expense" ? "bg-primary text-white" : "text-muted"}`}
+          >
+            Cheltuială
+          </button>
+          <button
+            type="button"
+            onClick={() => setKind("savings")}
+            className={`rounded py-1 font-medium ${kind === "savings" ? "bg-primary text-white" : "text-muted"}`}
+          >
+            🐷 Economii
+          </button>
+        </div>
+      ) : null}
+
+      {kind === "savings" ? (
+        <select
+          name="savings_goal_id"
+          required
+          defaultValue=""
+          className="rounded-lg border border-border bg-background px-2 py-2 text-sm"
+        >
+          <option value="" disabled>
+            Obiectiv de economisire…
           </option>
-        ))}
-      </select>
+          {savingsGoals.map((g) => (
+            <option key={g.id} value={g.id}>
+              {g.name}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <select
+          name="category_id"
+          required
+          defaultValue=""
+          className="rounded-lg border border-border bg-background px-2 py-2 text-sm"
+        >
+          <option value="" disabled>
+            Categorie cheltuială…
+          </option>
+          {expenseCats.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.icon ? `${c.icon} ` : ""}
+              {c.name}
+            </option>
+          ))}
+        </select>
+      )}
       <input
         name="label"
         placeholder="Detaliu (opțional)"

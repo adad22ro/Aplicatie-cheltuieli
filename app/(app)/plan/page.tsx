@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getCurrentMembership } from "@/lib/auth/current-user";
 import { getPlanView } from "@/lib/data/plan";
 import { listCategories } from "@/lib/data/settings";
+import { listSavings } from "@/lib/data/savings";
 import { listTemplates } from "@/lib/data/templates";
 import { ensurePlanAction } from "@/lib/actions/plan";
 import { applyTemplateAction } from "@/lib/actions/templates";
@@ -28,10 +29,11 @@ export default async function PlanPage({
   if (!membership) redirect("/onboarding");
 
   const month = normalizeMonth(monthParam);
-  const [plan, categories, templates] = await Promise.all([
+  const [plan, categories, templates, savingsGoals] = await Promise.all([
     getPlanView(month),
     listCategories(),
     listTemplates(),
+    listSavings(),
   ]);
 
   // Semnătură pt. remontarea editorului când se adaugă/șterg rânduri (nu la editarea sumei).
@@ -139,6 +141,7 @@ export default async function PlanPage({
           categories={categories}
           rollover={plan.totals.rollover}
           contributions={plan.contributions}
+          savingsGoals={savingsGoals}
         />
       )}
     </main>

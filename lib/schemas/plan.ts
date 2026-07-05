@@ -36,10 +36,16 @@ export const addIncomeSchema = z
     path: ["category_id"],
   });
 
-/** Adaugă o cheltuială ad-hoc în plan („+ Adaugă altceva"). Categorie obligatorie. */
-export const addAllocationSchema = z.object({
-  month,
-  category_id: z.string().uuid("Alege o categorie"),
-  label: shortText.optional().transform((v) => (v && v.length > 0 ? v : null)),
-  planned_amount: amount,
-});
+/** Adaugă o alocare ad-hoc: fie o cheltuială (categorie), fie o economie (obiectiv). */
+export const addAllocationSchema = z
+  .object({
+    month,
+    category_id: optionalUuid,
+    savings_goal_id: optionalUuid,
+    label: shortText.optional().transform((v) => (v && v.length > 0 ? v : null)),
+    planned_amount: amount,
+  })
+  .refine((d) => d.category_id || d.savings_goal_id, {
+    message: "Alege o categorie sau un obiectiv de economisire",
+    path: ["category_id"],
+  });
