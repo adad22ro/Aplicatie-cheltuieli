@@ -190,6 +190,25 @@ export async function setAllocationAmountAction(
   revalidate();
 }
 
+/** Atribuie o alocare unei săptămâni a lunii (1..6) sau o scoate din săptămâni (null). */
+export async function setAllocationWeekAction(
+  id: string,
+  week: number | null,
+): Promise<void> {
+  const parsed = idSchema.safeParse({ id });
+  if (!parsed.success) return;
+  const value =
+    week !== null && Number.isInteger(week) && week >= 1 && week <= 6 ? week : null;
+
+  const supabase = await createServerSupabaseClient();
+  await supabase
+    .from("plan_allocations")
+    .update({ week: value })
+    .eq("id", parsed.data.id);
+
+  revalidate();
+}
+
 /** Actualizează suma unui venit din plan (auto-save la blur). */
 export async function setIncomeAmountAction(id: string, amount: number): Promise<void> {
   const parsed = idSchema.safeParse({ id });

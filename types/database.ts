@@ -427,6 +427,7 @@ export type Database = {
           recurring_id: string | null
           savings_goal_id: string | null
           sort_order: number
+          week: number | null
         }
         Insert: {
           category_id?: string | null
@@ -442,6 +443,7 @@ export type Database = {
           recurring_id?: string | null
           savings_goal_id?: string | null
           sort_order?: number
+          week?: number | null
         }
         Update: {
           category_id?: string | null
@@ -457,6 +459,7 @@ export type Database = {
           recurring_id?: string | null
           savings_goal_id?: string | null
           sort_order?: number
+          week?: number | null
         }
         Relationships: [
           {

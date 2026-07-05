@@ -23,6 +23,7 @@ export type PlanAllocation = {
   category: { name: string; icon: string | null; color: string | null } | null;
   savings_goal_id: string | null;
   savings_goal: { name: string } | null;
+  week: number | null; // săptămâna lunii (1-based) sau null = „oricând"
 };
 
 export type Contribution = { user_id: string | null; name: string; amount: number };
@@ -117,7 +118,7 @@ export async function getPlanView(month: string): Promise<PlanView> {
     supabase
       .from("plan_allocations")
       .select(
-        "id, label, planned_amount, is_paid, recurring_id, category_id, category:categories(name, icon, color), savings_goal_id, savings_goal:savings_goals(name)",
+        "id, label, planned_amount, is_paid, recurring_id, category_id, category:categories(name, icon, color), savings_goal_id, savings_goal:savings_goals(name), week",
       )
       .eq("plan_id", plan.id)
       .is("deleted_at", null)
@@ -145,6 +146,7 @@ export async function getPlanView(month: string): Promise<PlanView> {
     category: one(a.category),
     savings_goal_id: a.savings_goal_id,
     savings_goal: one(a.savings_goal),
+    week: a.week,
   }));
 
   // Contribuții pe persoană (venituri grupate pe user_id; null = „Comun").

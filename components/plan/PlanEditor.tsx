@@ -7,6 +7,7 @@ import {
   addAllocationAction,
   setAllocationAmountAction,
   setAllocationOrderAction,
+  setAllocationWeekAction,
   setIncomeAmountAction,
   deleteAllocationAction,
   deleteIncomeAction,
@@ -16,6 +17,7 @@ import {
 import type { PlanIncome, PlanAllocation, Contribution } from "@/lib/data/plan";
 import type { Category } from "@/lib/data/settings";
 import type { SavingsGoal } from "@/lib/data/savings";
+import { weekBlocksInMonth, weekRange } from "@/lib/utils/month";
 
 const ron = new Intl.NumberFormat("ro-RO", {
   style: "currency",
@@ -65,7 +67,22 @@ export function PlanEditor({
   );
   const orderedAllocs = order.map((id) => byId[id]).filter(Boolean) as PlanAllocation[];
 
+  // Săptămâna locală per alocare (pentru grupare live la schimbare, fără remount).
+  const [weekOf, setWeekOf] = useState<Record<string, number | null>>(
+    () => Object.fromEntries(allocations.map((a) => [a.id, a.week])),
+  );
+  const [, startWeek] = useTransition();
+  const [view, setView] = useState<"list" | "weeks">("list");
+  const weekCount = weekBlocksInMonth(month);
+
+  const setWeek = (id: string, week: number | null) => {
+    setWeekOf((m) => ({ ...m, [id]: week }));
+    startWeek(() => setAllocationWeekAction(id, week));
+  };
+
   const amountOf = (a: PlanAllocation) => allocAmounts[a.id] ?? a.planned_amount;
+  const weekValueOf = (a: PlanAllocation) =>
+    a.id in weekOf ? weekOf[a.id]! : a.week;
 
   const totalIncome = incomes.reduce((s, i) => s + (incomeAmounts[i.id] ?? i.amount), 0);
   const available = totalIncome + rollover; // bani de repartizat (venit + report)
@@ -77,6 +94,8 @@ export function PlanEditor({
     .reduce((s, a) => s + amountOf(a), 0);
   const pctAllocated =
     available > 0 ? Math.round((totalAllocated / available) * 100) : 0;
+  // Buget pe săptămână: disponibilul împărțit egal la numărul de săptămâni ale lunii.
+  const disponibilPerWeek = weekCount > 0 && available > 0 ? available / weekCount : 0;
 
   const move = (index: number, dir: -1 | 1) => {
     const next = [...order];
@@ -192,23 +211,65 @@ export function PlanEditor({
 
       {/* Cheltuieli planificate */}
       <section className="flex flex-col gap-3">
-        <h2 className="font-semibold">Cheltuieli planificate</h2>
-        <div className="flex flex-col gap-2">
-          {orderedAllocs.length === 0 ? (
-            <p className="text-sm text-muted">Nicio cheltuială planificată.</p>
-          ) : (
-            orderedAllocs.map((a, index) => (
-              <AllocationRow
-                key={a.id}
-                alloc={a}
-                index={index}
-                count={orderedAllocs.length}
-                onMove={move}
-                onAmount={(v) => setAllocAmounts((m) => ({ ...m, [a.id]: v }))}
-              />
-            ))
-          )}
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold">Cheltuieli planificate</h2>
+          {/* Toggle listă / pe săptămâni */}
+          <div className="grid grid-cols-2 gap-1 rounded-lg border border-border bg-surface p-0.5 text-xs">
+            <button
+              type="button"
+              onClick={() => setView("list")}
+              className={`rounded px-2.5 py-1 font-medium ${
+                view === "list" ? "bg-primary text-white" : "text-muted"
+              }`}
+            >
+              Listă
+            </button>
+            <button
+              type="button"
+              onClick={() => setView("weeks")}
+              className={`rounded px-2.5 py-1 font-medium ${
+                view === "weeks" ? "bg-primary text-white" : "text-muted"
+              }`}
+            >
+              Săptămâni
+            </button>
+          </div>
         </div>
+
+        {view === "list" ? (
+          <div className="flex flex-col gap-2">
+            {orderedAllocs.length === 0 ? (
+              <p className="text-sm text-muted">Nicio cheltuială planificată.</p>
+            ) : (
+              orderedAllocs.map((a, index) => (
+                <AllocationRow
+                  key={a.id}
+                  alloc={a}
+                  index={index}
+                  count={orderedAllocs.length}
+                  weekCount={weekCount}
+                  weekValue={weekValueOf(a)}
+                  showReorder
+                  onMove={move}
+                  onWeek={(w) => setWeek(a.id, w)}
+                  onAmount={(v) => setAllocAmounts((m) => ({ ...m, [a.id]: v }))}
+                />
+              ))
+            )}
+          </div>
+        ) : (
+          <WeeksView
+            month={month}
+            weekCount={weekCount}
+            disponibilPerWeek={disponibilPerWeek}
+            allocations={orderedAllocs}
+            weekValueOf={weekValueOf}
+            amountOf={amountOf}
+            onWeek={setWeek}
+            onAmount={(id, v) => setAllocAmounts((m) => ({ ...m, [id]: v }))}
+          />
+        )}
+
         <AddAllocationForm month={month} expenseCats={expenseCats} savingsGoals={savingsGoals} />
       </section>
     </div>
@@ -258,13 +319,21 @@ function AllocationRow({
   alloc,
   index,
   count,
+  weekCount,
+  weekValue,
+  showReorder,
   onMove,
+  onWeek,
   onAmount,
 }: {
   alloc: PlanAllocation;
   index: number;
   count: number;
+  weekCount: number;
+  weekValue: number | null;
+  showReorder: boolean;
   onMove: (index: number, dir: -1 | 1) => void;
+  onWeek: (week: number | null) => void;
   onAmount: (v: number) => void;
 }) {
   const [pending, start] = useTransition();
@@ -279,27 +348,29 @@ function AllocationRow({
         alloc.is_paid ? "border-income/40 bg-income/5" : "border-border bg-surface"
       }`}
     >
-      {/* Reordonare (prioritizare) */}
-      <div className="flex flex-col">
-        <button
-          type="button"
-          aria-label="Mută mai sus"
-          disabled={index === 0}
-          onClick={() => onMove(index, -1)}
-          className="px-1 text-xs leading-none text-muted hover:text-foreground disabled:opacity-30"
-        >
-          ▲
-        </button>
-        <button
-          type="button"
-          aria-label="Mută mai jos"
-          disabled={index === count - 1}
-          onClick={() => onMove(index, 1)}
-          className="px-1 text-xs leading-none text-muted hover:text-foreground disabled:opacity-30"
-        >
-          ▼
-        </button>
-      </div>
+      {/* Reordonare (prioritizare) — doar în vizualizarea listă */}
+      {showReorder ? (
+        <div className="flex flex-col">
+          <button
+            type="button"
+            aria-label="Mută mai sus"
+            disabled={index === 0}
+            onClick={() => onMove(index, -1)}
+            className="px-1 text-xs leading-none text-muted hover:text-foreground disabled:opacity-30"
+          >
+            ▲
+          </button>
+          <button
+            type="button"
+            aria-label="Mută mai jos"
+            disabled={index === count - 1}
+            onClick={() => onMove(index, 1)}
+            className="px-1 text-xs leading-none text-muted hover:text-foreground disabled:opacity-30"
+          >
+            ▼
+          </button>
+        </div>
+      ) : null}
 
       {/* Toggle „plătit" */}
       <form action={togglePaidAction}>
@@ -323,6 +394,21 @@ function AllocationRow({
         {alloc.recurring_id ? <span className="ml-1 text-muted">🔁</span> : null}
       </span>
 
+      {/* Selector de săptămână */}
+      <select
+        aria-label={`Săptămâna pentru ${name}`}
+        value={weekValue ?? ""}
+        onChange={(e) => onWeek(e.target.value === "" ? null : Number(e.target.value))}
+        className="rounded-lg border border-border bg-background px-1.5 py-1.5 text-xs text-muted outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      >
+        <option value="">oricând</option>
+        {Array.from({ length: weekCount }, (_, i) => i + 1).map((w) => (
+          <option key={w} value={w}>
+            S{w}
+          </option>
+        ))}
+      </select>
+
       <input
         type="text"
         inputMode="decimal"
@@ -345,6 +431,112 @@ function AllocationRow({
       >
         ✕
       </button>
+    </div>
+  );
+}
+
+/** Vizualizarea planului grupat pe săptămâni, cu buget disponibil pe săptămână. */
+function WeeksView({
+  month,
+  weekCount,
+  disponibilPerWeek,
+  allocations,
+  weekValueOf,
+  amountOf,
+  onWeek,
+  onAmount,
+}: {
+  month: string;
+  weekCount: number;
+  disponibilPerWeek: number;
+  allocations: PlanAllocation[];
+  weekValueOf: (a: PlanAllocation) => number | null;
+  amountOf: (a: PlanAllocation) => number;
+  onWeek: (id: string, week: number | null) => void;
+  onAmount: (id: string, v: number) => void;
+}) {
+  const weeks = Array.from({ length: weekCount }, (_, i) => i + 1);
+  const anytime = allocations.filter((a) => weekValueOf(a) === null);
+
+  return (
+    <div className="flex flex-col gap-4">
+      {weeks.map((w) => {
+        const items = allocations.filter((a) => weekValueOf(a) === w);
+        const alloc = items.reduce((s, a) => s + amountOf(a), 0);
+        const over = disponibilPerWeek > 0 && alloc > disponibilPerWeek;
+        const pct =
+          disponibilPerWeek > 0 ? Math.round((alloc / disponibilPerWeek) * 100) : 0;
+        return (
+          <div key={w} className="flex flex-col gap-2">
+            <div className="flex items-baseline justify-between">
+              <h3 className="text-sm font-semibold">
+                Săptămâna {w}{" "}
+                <span className="font-normal text-muted">({weekRange(month, w)})</span>
+              </h3>
+              <span className="text-xs tabular-nums text-muted">
+                <span className={over ? "font-semibold text-expense" : "font-semibold text-foreground"}>
+                  {ron.format(alloc)}
+                </span>
+                {disponibilPerWeek > 0 ? <> / {ron.format(disponibilPerWeek)}</> : null}
+              </span>
+            </div>
+            {disponibilPerWeek > 0 ? (
+              <div className="h-1.5 overflow-hidden rounded-full bg-background">
+                <div
+                  className={`h-full rounded-full ${over ? "bg-expense" : "bg-primary"}`}
+                  style={{ width: `${Math.min(pct, 100)}%` }}
+                />
+              </div>
+            ) : null}
+            {over ? (
+              <p className="text-xs font-medium text-expense">
+                Depășire {ron.format(alloc - disponibilPerWeek)} față de partea săptămânii
+              </p>
+            ) : null}
+            {items.length === 0 ? (
+              <p className="text-xs text-muted">Nimic planificat.</p>
+            ) : (
+              items.map((a) => (
+                <AllocationRow
+                  key={a.id}
+                  alloc={a}
+                  index={0}
+                  count={1}
+                  weekCount={weekCount}
+                  weekValue={weekValueOf(a)}
+                  showReorder={false}
+                  onMove={() => {}}
+                  onWeek={(wk) => onWeek(a.id, wk)}
+                  onAmount={(v) => onAmount(a.id, v)}
+                />
+              ))
+            )}
+          </div>
+        );
+      })}
+
+      {/* Alocări fără săptămână anume */}
+      <div className="flex flex-col gap-2 border-t border-border pt-3">
+        <h3 className="text-sm font-semibold text-muted">Oricând (fără săptămână)</h3>
+        {anytime.length === 0 ? (
+          <p className="text-xs text-muted">Toate alocările au o săptămână.</p>
+        ) : (
+          anytime.map((a) => (
+            <AllocationRow
+              key={a.id}
+              alloc={a}
+              index={0}
+              count={1}
+              weekCount={weekCount}
+              weekValue={null}
+              showReorder={false}
+              onMove={() => {}}
+              onWeek={(wk) => onWeek(a.id, wk)}
+              onAmount={(v) => onAmount(a.id, v)}
+            />
+          ))
+        )}
+      </div>
     </div>
   );
 }

@@ -70,6 +70,8 @@ export async function ensurePlan(
         category_id: r.category_id,
         planned_amount: r.amount,
         sort_order: i,
+        // Presetează săptămâna din ziua recurenței (bloc de 7 zile), plafonat la 5.
+        week: Math.min(Math.floor((r.day_of_month - 1) / 7) + 1, 5),
       })),
     );
   }

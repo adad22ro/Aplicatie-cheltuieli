@@ -78,9 +78,8 @@ Concept unificat: pagină `/plan` cu selector de lună. Luna curentă = aloci ve
   - **E**: căutare liberă tranzacții (notă ilike + sumă) pe `/transactions`; adăugare rapidă „la fel ca data trecută" (chips din combinații recente → prefill) pe `/transactions/new`. Test 4/4.
   - **F**: top 3 categorii/săptămână în vizualizarea săptămânală; comparație lună-la-lună pe `/reports` (`getCategoryComparison`, delta + %).
   - **G**: alocare din plan către un obiectiv de economisire (`plan_allocations.savings_goal_id`, migrare `20260706140000`). Bifat „plătit" → crește obiectivul (fără tranzacție); debifat/șters → scade. ⚠️ testat doar build/tsc, nu runtime cu script.
-- ⬜ **RĂMASE (sesiune nouă)** din lista de funcții utile cerute (1,2,3,4,6,7,8; sărite 5,9,10,11):
-  - **Grup I — #2 digest în-app pe dashboard**: card „ți-au intrat X, ai Y recurente de plătit, sold Z". (push real = ulterior)
-  - **Grup H — #8 plan pe săptămâni**: împarte planul lunar (nu doar tracking-ul) pe săptămâni. Cel mai complex.
+- ✅ **Grup I — #2 digest în-app pe dashboard (2026-07-06)**: card pe luna curentă „Ți-au intrat X · mai ai Y de plătit (N recurențe/rate rămase scadente) · sold Z". `getMonthDigest(month, summary)` în `lib/data/dashboard.ts` (refolosește sumarul + 2 query-uri: recurring active expense cu day_of_month>azi + installment plans neterminate). Build OK. (push real = ulterior)
+- ✅ **Grup H — #8 plan pe săptămâni (2026-07-06)**: coloană `plan_allocations.week` (smallint 1..6, null=„oricând"), migrare `20260706150000_plan_allocation_week.sql`. `/plan`: toggle Listă/Săptămâni; selector S1..Sn pe fiecare alocare; vizualizarea pe săptămâni grupează + arată buget disponibil/săptămână (available împărțit egal) cu alertă de depășire. `ensurePlan` presetează săptămâna din ziua recurenței. Helperi `weekBlocksInMonth`/`weekRange` în `lib/utils/month.ts`, acțiune `setAllocationWeekAction`. Typecheck+build OK. ⚠️ testat doar build/tsc; migrarea trebuie aplicată (db:push) înainte de push cod.
 
 - **Ajustările userului** la ce s-a construit (le va comunica).
 - **Grafică / design** (o va face ulterior — direcție vizuală, polish UI).
