@@ -2,12 +2,15 @@ import "server-only";
 
 import { redirect } from "next/navigation";
 
-import { env } from "@/lib/env";
 import { getCurrentUser } from "@/lib/auth/current-user";
 
-/** True dacă emailul dat e cel al administratorului (comparație case-insensitive). */
+/**
+ * True dacă emailul dat e cel al administratorului (comparație case-insensitive).
+ * `ADMIN_EMAIL` se citește lenevos: dacă lipsește, nimeni nu e admin (deny sigur).
+ */
 export function isAdminEmail(email: string | null | undefined): boolean {
-  return !!email && email.toLowerCase() === env.adminEmail.toLowerCase();
+  const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
+  return !!adminEmail && !!email && email.toLowerCase() === adminEmail;
 }
 
 /**

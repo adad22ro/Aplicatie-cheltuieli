@@ -14,7 +14,13 @@ import { env } from "@/lib/env";
  * autorizarea (cod valid sau utilizator admin).
  */
 export function createAdminClient() {
-  return createClient(env.supabase.url, env.supabase.serviceRoleKey, {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceRoleKey) {
+    throw new Error(
+      "SUPABASE_SERVICE_ROLE_KEY lipsește — necesară pentru înregistrare și panoul de admin. Adaug-o în .env.local și în Vercel.",
+    );
+  }
+  return createClient(env.supabase.url, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
