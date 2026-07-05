@@ -52,7 +52,12 @@ Ultima actualizare: 2026-07-05
 - **Jurnal `security_events`** (migrare `20260706160000_security.sql`, RLS deny → doar service_role): login_failed/success, register_*, admin_access_denied (logat în `requireAdmin`), rate_limited. + funcție `rls_status()` SECURITY DEFINER.
 - **Admin nou**: pagină `/admin/security` (feed + contoare 24h); `/admin/debug` extins cu verificator acoperire RLS + integritate date + config env. Nav actualizat. Date în `lib/data/security.ts`.
 - ⚠️ verificat typecheck+build, nu vizual/runtime.
-- **RĂMAS val 2**: sesiuni + forțează logout (verifică endpoint GoTrue întâi), Google OAuth (decizie gating + credențiale Google Cloud), supraveghere+alertă email (monitor extern uptime + cron intern cu Resend). SMTP custom (Resend) tot lipsește.
+## Securitate — val 2 (2026-07-06, live)
+- **Ghid de utilizare** `/help` (conținut static, secțiuni pliabile) + link „Ghid" în header dashboard.
+- **Suspendă/Reactivează cont** în `/admin/users` — `setUserBanAction` (ban_duration '876000h'/'none' via updateUserById), status SUSPENDAT, audit. GoTrue NU are logout-by-id/listare sesiuni → ban e echivalentul practic. `banned_until` adăugat în `AdminUser`.
+- **Google OAuth „doar conturi existente"** — `GoogleSignInButton` pe `/login` + rută `/auth/callback` (`exchangeCodeForSession`, loghează în security_events). Funcționează doar pt. emailuri cu cont fiindcă `disable_signup: true`. `/login?error=oauth` la eșec.
+  - ⬜ **DE CONFIGURAT de user** (fără el butonul dă eroare): (1) Google Cloud → OAuth Client (Web), Authorized redirect URI = `<SUPABASE_URL>/auth/v1/callback`; (2) Supabase → Authentication → Providers → Google: pune Client ID + Secret, enable. Site URL + Redirect URLs în Supabase să includă domeniul Vercel + `/auth/callback`.
+- **Supraveghere** — `/api/health` (verifică DB, 200/503), rute publice în proxy. Pentru alertă: monitor extern (Better Stack/UptimeRobot) pe `https://<domeniu>/api/health`. Alertă email prin cron intern = ulterior (cere Resend/SMTP, tot lipsește).
 
 ## Stare curentă (handoff)
 - **Faza 1 + Faza 2 COMPLETE**, plus sistem de admin + PWA + profiluri. Toate live pe Vercel (branch `main`, auto-deploy la push).
