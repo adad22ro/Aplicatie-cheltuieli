@@ -63,7 +63,14 @@ Ultima actualizare: 2026-07-05
 - **Test funcțional (2026-07-06)**: script temporar 8/8 OK (coloana `week` + constrângere week 1-6/null, redeem ATOMIC cod = exact 1 câștigător la concurență, `rls_status()` fără tabele dezactivate, numărare rate-limit). Date de test curățate. Script șters după.
 - Google OAuth: **CONFIGURAT ȘI FUNCȚIONAL** (testat live cu cont real, 2026-07-06). Google Cloud OAuth client + provider Supabase enable. Login doar pt. conturi existente (disable_signup).
 
-## Stare curentă (handoff)
+## Stare curentă (handoff) — actualizat 2026-07-06
+- **APP FUNCȚIONAL COMPLET pentru uz privat.** Tot ce e mai jos e LIVE pe Vercel (`main`, auto-deploy). Ultim commit: `ff699f6`.
+- **Livrat:** Faza 1+2, plan lunar (+ extinderi A-D, săptămâni, economii), vizualizare săptămânală, funcții utile E/F/G/H/I, 13 grafice în `/reports`, ghid de utilizare `/help`, admin+PWA+profiluri, securitate val 1+2.
+- **Auth COMPLET:** email+parolă · **Google OAuth** (funcțional, doar conturi existente) · resetare parolă self-service (`/forgot-password` + `/auth/reset`). Rate-limiting + `security_events` + parole puternice la register.
+- **Securitate live:** headers/CSP (`next.config.ts`), redeem cod ATOMIC, rate-limit, jurnal `security_events`, `/admin/security` (feed+contoare), verificator RLS + integritate + config în `/admin/debug`, suspendare cont în `/admin/users` (`ban_duration`).
+- **Supraveghere:** `/api/health` (200/503) — de pus un monitor extern.
+- **DE FĂCUT (opțional, lăsat deoparte de user):** Resend/SMTP (deblochează emailuri nelimitate resetare + alertă cron), monitor extern pe `/api/health`, grafică/design polish (userul o face). Idee neînceput: alocare plan pe săptămâni „pas 2" mai avansat.
+- **De testat de user pe live:** fluxul complet de resetare parolă (email built-in Supabase limitat ~2/oră; `/auth/reset` trebuie în Supabase Redirect URLs).
 - **Faza 1 + Faza 2 COMPLETE**, plus sistem de admin + PWA + profiluri. Toate live pe Vercel (branch `main`, auto-deploy la push).
 - **Auth model**: signup public DEZACTIVAT (`disable_signup: true`). Conturi doar prin `registerAction` (service_role, `admin.createUser({email_confirm:true})`) după cod valid din `signup_codes`. Codul poate ținti o gospodărie (auto-join). Confirmarea email NU mai contează pentru signup (createUser confirmă direct) → SMTP custom nu mai e necesar pentru fluxul actual.
 - **Admin** (`/admin`, guard `ADMIN_EMAIL=gabirusu2000@gmail.com`, service_role): statistici, generator+listă coduri, useri (reset parolă/ștergere), activitate, debug, audit. Buton ⚙️ pe dashboard doar pentru admin.
@@ -76,8 +83,9 @@ Ultima actualizare: 2026-07-05
 - Testare RLS/funcțională: scripturi Node ESM temporare în rădăcină (rezolvă node_modules), rulate apoi șterse; useri de test creați cu service_role `admin.createUser({email_confirm:true})`, șterși la final (⚠️ ordine FK: șterge signup_codes/date înainte de useri). `npm run debug` = raport stare.
 - Generare recurențe/rate: „lazy" la deschiderea dashboard-ului prin RPC-uri SECURITY DEFINER (fără cron).
 
-## Migrări aplicate (remote)
-`20260704150519` schema+RLS · `20260705120000` redeem_invite · `20260705140000` generate_due_recurring · `20260705160000` generate_due_installments · `20260705180000` signup_codes+admin_audit · `20260705200000` profiles+shares_household
+## Migrări aplicate (remote) — TOATE aplicate
+`20260704150519` schema+RLS · `20260705120000` redeem_invite · `20260705140000` generate_due_recurring · `20260705160000` generate_due_installments · `20260705180000` signup_codes+admin_audit · `20260705200000` profiles+shares_household · `20260706100000` monthly_plans · `20260706110000` recurring_expense_only · `20260706120000` plan_income_contributor · `20260706130000` allocation_templates · `20260706140000` plan_allocation_savings · `20260706150000` plan_allocation_week · `20260706160000` security (security_events + rls_status)
+- ⚠️ tipuri: pe lângă `db:types`, unele coloane noi au fost adăugate MANUAL în `types/database.ts` (`plan_allocations.week`, `security_events`, `rls_status`) — o regenerare `npm run db:types` le confirmă.
 
 ## ✅ „Plan lunar" (alocare venit + planificare lună viitoare) — implementat 2026-07-06
 Concept unificat: pagină `/plan` cu selector de lună. Luna curentă = aloci venitul intrat; luna viitoare = planifici.
@@ -107,5 +115,5 @@ Concept unificat: pagină `/plan` cu selector de lună. Luna curentă = aloci ve
 
 ## Git / versiune
 - Branch de lucru: `main` (direct, fără PR — solo, testare locală). Auto-deploy Vercel.
-- Ultim commit relevant: `241601c` profiluri.
-- Faza 1 + Faza 2 livrate. Pre-v1.0 (funcțional complet pentru uz privat 2 persoane).
+- Ultim commit: `ff699f6` (status: Google OAuth confirmat). Tot ce e în status.md e pushuit & live.
+- Funcțional complet pentru uz privat (2 persoane). Rămâne doar opțional: Resend/SMTP, monitor extern, design polish.
