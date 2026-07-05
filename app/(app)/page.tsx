@@ -80,6 +80,13 @@ export default async function DashboardPage({
             </Link>
           ) : null}
           <Link
+            href="/help"
+            aria-label="Ghid de utilizare"
+            className="rounded-xl border border-border px-3 py-2 text-sm font-medium hover:bg-background"
+          >
+            Ghid
+          </Link>
+          <Link
             href="/settings"
             className="rounded-xl border border-border px-3 py-2 text-sm font-medium hover:bg-background"
           >

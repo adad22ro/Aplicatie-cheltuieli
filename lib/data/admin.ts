@@ -30,6 +30,7 @@ export type AdminUser = {
   email: string | null;
   created_at: string;
   last_sign_in_at: string | null;
+  banned_until: string | null; // suspendat până la data asta (viitor = suspendat activ)
   households: { name: string; role: string }[];
 };
 
@@ -162,6 +163,7 @@ export async function listAllUsers(): Promise<AdminUser[]> {
     email: u.email ?? null,
     created_at: u.created_at,
     last_sign_in_at: u.last_sign_in_at ?? null,
+    banned_until: (u as { banned_until?: string }).banned_until ?? null,
     households: byUser.get(u.id) ?? [],
   }));
 }

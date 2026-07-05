@@ -63,36 +63,6 @@ export type Database = {
         }
         Relationships: []
       }
-      security_events: {
-        Row: {
-          created_at: string
-          detail: Json | null
-          email: string | null
-          event_type: string
-          id: string
-          ip: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          detail?: Json | null
-          email?: string | null
-          event_type: string
-          id?: string
-          ip?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          detail?: Json | null
-          email?: string | null
-          event_type?: string
-          id?: string
-          ip?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       allocation_templates: {
         Row: {
           created_at: string
@@ -739,6 +709,36 @@ export type Database = {
           },
         ]
       }
+      security_events: {
+        Row: {
+          created_at: string
+          detail: Json | null
+          email: string | null
+          event_type: string
+          id: string
+          ip: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          detail?: Json | null
+          email?: string | null
+          event_type: string
+          id?: string
+          ip?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          detail?: Json | null
+          email?: string | null
+          event_type?: string
+          id?: string
+          ip?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       signup_codes: {
         Row: {
           code: string
@@ -930,7 +930,11 @@ export type Database = {
       redeem_invite: { Args: { p_code: string }; Returns: string }
       rls_status: {
         Args: never
-        Returns: { table_name: string; rls_enabled: boolean; policy_count: number }[]
+        Returns: {
+          policy_count: number
+          rls_enabled: boolean
+          table_name: string
+        }[]
       }
       shares_household: { Args: { other: string }; Returns: boolean }
     }

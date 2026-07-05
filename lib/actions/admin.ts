@@ -138,6 +138,26 @@ export async function resetPasswordAction(
   return { ok: true };
 }
 
+/**
+ * Admin suspendă (ban) sau reactivează un cont. Suspendarea blochează login-ul nou și
+ * reîmprospătarea token-ului → userul e deconectat efectiv cât expiră access-token-ul (~1h).
+ * Nu se poate suspenda pe sine.
+ */
+export async function setUserBanAction(formData: FormData): Promise<void> {
+  const adminUser = await requireAdmin();
+  const userId = formData.get("userId");
+  const ban = formData.get("ban") === "true";
+  if (typeof userId !== "string" || userId === adminUser.id) return;
+
+  const admin = createAdminClient();
+  // '876000h' ≈ 100 ani (suspendare pe termen nedefinit); 'none' = reactivare.
+  await admin.auth.admin.updateUserById(userId, {
+    ban_duration: ban ? "876000h" : "none",
+  });
+  await audit(admin, adminUser.id, ban ? "ban_user" : "unban_user", { userId });
+  revalidatePath("/admin/users");
+}
+
 /** Admin șterge un user (nu se poate șterge pe el însuși). */
 export async function deleteUserAction(formData: FormData): Promise<void> {
   const adminUser = await requireAdmin();

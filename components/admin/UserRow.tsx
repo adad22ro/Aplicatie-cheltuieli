@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 import {
   resetPasswordAction,
   deleteUserAction,
+  setUserBanAction,
   type AdminActionState,
 } from "@/lib/actions/admin";
 import type { AdminUser } from "@/lib/data/admin";
@@ -16,6 +17,9 @@ export function UserRow({ user, isSelf }: { user: AdminUser; isSelf: boolean }) 
     undefined,
   );
 
+  const suspended =
+    !!user.banned_until && new Date(user.banned_until) > new Date();
+
   return (
     <li className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-3">
       <div className="flex items-start justify-between gap-2">
@@ -23,6 +27,11 @@ export function UserRow({ user, isSelf }: { user: AdminUser; isSelf: boolean }) 
           <p className="truncate font-medium">
             {user.email ?? user.id}
             {isSelf ? " (tu)" : ""}
+            {suspended ? (
+              <span className="ml-2 rounded bg-expense/10 px-1.5 py-0.5 text-[10px] font-semibold text-expense">
+                SUSPENDAT
+              </span>
+            ) : null}
           </p>
           <p className="text-xs text-muted">
             {user.households.length > 0
@@ -44,6 +53,18 @@ export function UserRow({ user, isSelf }: { user: AdminUser; isSelf: boolean }) 
           >
             Parolă
           </button>
+          {!isSelf ? (
+            <form action={setUserBanAction}>
+              <input type="hidden" name="userId" value={user.id} />
+              <input type="hidden" name="ban" value={suspended ? "false" : "true"} />
+              <button
+                type="submit"
+                className="rounded-lg border border-border px-2 py-1 text-xs font-medium hover:bg-background"
+              >
+                {suspended ? "Reactivează" : "Suspendă"}
+              </button>
+            </form>
+          ) : null}
           {!isSelf ? (
             <form action={deleteUserAction}>
               <input type="hidden" name="userId" value={user.id} />
