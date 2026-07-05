@@ -4,7 +4,9 @@ import { redirect } from "next/navigation";
 import { getCurrentMembership } from "@/lib/auth/current-user";
 import { getPlanView } from "@/lib/data/plan";
 import { listCategories } from "@/lib/data/settings";
+import { listTemplates } from "@/lib/data/templates";
 import { ensurePlanAction } from "@/lib/actions/plan";
+import { applyTemplateAction } from "@/lib/actions/templates";
 import { PlanEditor } from "@/components/plan/PlanEditor";
 import {
   normalizeMonth,
@@ -26,7 +28,11 @@ export default async function PlanPage({
   if (!membership) redirect("/onboarding");
 
   const month = normalizeMonth(monthParam);
-  const [plan, categories] = await Promise.all([getPlanView(month), listCategories()]);
+  const [plan, categories, templates] = await Promise.all([
+    getPlanView(month),
+    listCategories(),
+    listTemplates(),
+  ]);
 
   // Semnătură pt. remontarea editorului când se adaugă/șterg rânduri (nu la editarea sumei).
   const signature = [
@@ -66,6 +72,45 @@ export default async function PlanPage({
           className="rounded-lg px-3 py-1.5 text-sm font-medium hover:bg-background"
         >
           →
+        </Link>
+      </div>
+
+      {/* Aplică șablon de alocare */}
+      <div className="flex items-center gap-2 rounded-xl border border-border bg-surface p-2">
+        {templates.length > 0 ? (
+          <form action={applyTemplateAction} className="flex flex-1 items-center gap-2">
+            <input type="hidden" name="month" value={month} />
+            <select
+              name="template_id"
+              required
+              defaultValue=""
+              aria-label="Alege șablon"
+              className="flex-1 rounded-lg border border-border bg-background px-2 py-1.5 text-sm"
+            >
+              <option value="" disabled>
+                Aplică un șablon…
+              </option>
+              {templates.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+            <button
+              type="submit"
+              className="rounded-lg bg-primary px-3 py-1.5 text-sm font-semibold text-white hover:bg-primary-hover"
+            >
+              Aplică
+            </button>
+          </form>
+        ) : (
+          <span className="flex-1 text-sm text-muted">Niciun șablon salvat.</span>
+        )}
+        <Link
+          href="/plan/templates"
+          className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium hover:bg-background"
+        >
+          Șabloane
         </Link>
       </div>
 

@@ -63,6 +63,38 @@ export type Database = {
         }
         Relationships: []
       }
+      allocation_templates: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          household_id: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          household_id: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          household_id?: string
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "allocation_templates_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       budgets: {
         Row: {
           amount: number
@@ -711,6 +743,67 @@ export type Database = {
           },
         ]
       }
+      template_lines: {
+        Row: {
+          category_id: string | null
+          created_at: string
+          deleted_at: string | null
+          household_id: string
+          id: string
+          label: string | null
+          mode: Database["public"]["Enums"]["allocation_mode"]
+          sort_order: number
+          template_id: string
+          value: number
+        }
+        Insert: {
+          category_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          household_id: string
+          id?: string
+          label?: string | null
+          mode?: Database["public"]["Enums"]["allocation_mode"]
+          sort_order?: number
+          template_id: string
+          value: number
+        }
+        Update: {
+          category_id?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          household_id?: string
+          id?: string
+          label?: string | null
+          mode?: Database["public"]["Enums"]["allocation_mode"]
+          sort_order?: number
+          template_id?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_lines_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_lines_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_lines_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "allocation_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
           amount: number
@@ -795,6 +888,7 @@ export type Database = {
       shares_household: { Args: { other: string }; Returns: boolean }
     }
     Enums: {
+      allocation_mode: "fixed" | "percent"
       entry_type: "income" | "expense"
       household_role: "owner" | "member"
       recurring_frequency: "monthly"
@@ -929,6 +1023,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      allocation_mode: ["fixed", "percent"],
       entry_type: ["income", "expense"],
       household_role: ["owner", "member"],
       recurring_frequency: ["monthly"],
