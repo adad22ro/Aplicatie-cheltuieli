@@ -65,8 +65,7 @@ Concept unificat: pagină `/plan` cu selector de lună. Luna curentă = aloci ve
 - **Migrare aplicată**: `20260706100000_monthly_plans.sql` — `monthly_plans`, `plan_incomes`, `plan_allocations` (RLS is_household_member + soft delete) + enum `transaction_source += 'plan'`.
 - **Fișiere**: `lib/schemas/plan.ts`, `lib/data/plan.ts`, `lib/plan/ensure-plan.ts` (ensurePlan seedează din recurențe active + linkIncomeToPlan), `lib/actions/plan.ts`, `app/(app)/plan/page.tsx`, `components/plan/PlanEditor.tsx`. Card pe dashboard + `createTransactionAction` la venit → linkează în plan și redirect la `/plan`.
 - **Surse de venit recurente**: bifa „recurent" pe un venit din plan creează o recurență de tip venit (gestionată din `/recurring`).
-  - ✅ **DECIS**: venit recurent = doar sursă de precompletare a planului (fără tranzacție auto). Migrare `20260706110000_recurring_expense_only.sql` filtrează `type='expense'` în `generate_due_recurring`.
-    - ⬜ **DE APLICAT de user**: `npm run db:push` (migrarea 20260706110000 e scrisă dar NEAPLICATĂ).
+  - ✅ **DECIS**: venit recurent = doar sursă de precompletare a planului (fără tranzacție auto). Migrare `20260706110000_recurring_expense_only.sql` filtrează `type='expense'` în `generate_due_recurring`. **Aplicată** (db:push + db:types rulate 2026-07-06).
 - ✅ Test funcțional DB + RLS: 15/15 OK (seed din recurență, totaluri Venit/Alocat/Nealocat, enum source='plan', toggle plătit→tranzacție legată, izolare RLS cross-tenant, cascade delete). Useri/date de test șterși după.
 - ✅ **Extinderi plan (2026-07-06)** — 4 grupuri, toate live:
   - **A (polish)**: prioritizare alocări cu ↑/↓ (sort_order), bară de progres, „rest de plătit", alerte (deficit/„tot venitul alocat"/procent).

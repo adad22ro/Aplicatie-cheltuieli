@@ -5,7 +5,7 @@ import { getCurrentMembership, getCurrentUser } from "@/lib/auth/current-user";
 import { isAdminEmail } from "@/lib/auth/admin";
 import { signOutAction } from "@/lib/actions/auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { getMonthlySummary } from "@/lib/data/dashboard";
+import { getMonthlySummary, getMonthDigest } from "@/lib/data/dashboard";
 import { listTransactions } from "@/lib/data/transactions";
 import { getWeeklyBreakdown } from "@/lib/data/weekly";
 import { authorMap } from "@/lib/data/profiles";
@@ -59,6 +59,7 @@ export default async function DashboardPage({
     authorMap(),
     weekly ? getWeeklyBreakdown(month) : Promise.resolve([]),
   ]);
+  const digest = await getMonthDigest(month, summary);
 
   const atCurrent = isCurrentOrFuture(month);
 
@@ -174,6 +175,41 @@ export default async function DashboardPage({
           </p>
         </div>
       </div>
+
+      {/* Digest luna curentă — pe scurt: ce a intrat, ce mai ai de plătit, sold */}
+      {digest.isCurrentMonth ? (
+        <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+          <p className="text-sm leading-relaxed">
+            Ți-au intrat{" "}
+            <span className="font-semibold tabular-nums text-income">
+              {ron.format(digest.income)}
+            </span>{" "}
+            luna asta.{" "}
+            {digest.upcomingCount > 0 ? (
+              <>
+                Mai ai{" "}
+                <span className="font-semibold tabular-nums text-expense">
+                  {ron.format(digest.upcomingAmount)}
+                </span>{" "}
+                de plătit ({digest.upcomingCount}{" "}
+                {digest.upcomingCount === 1 ? "recurență/rată" : "recurențe/rate"}) până la
+                finalul lunii.
+              </>
+            ) : (
+              <>Nu mai ai recurențe sau rate scadente luna asta. ✅</>
+            )}{" "}
+            Sold curent:{" "}
+            <span
+              className={`font-semibold tabular-nums ${
+                digest.balance < 0 ? "text-expense" : "text-foreground"
+              }`}
+            >
+              {ron.format(digest.balance)}
+            </span>
+            .
+          </p>
+        </div>
+      ) : null}
 
       {/* Plan lunar — alocare venit + planificare */}
       <Link
