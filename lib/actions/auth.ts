@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { credentialsSchema, registerSchema } from "@/lib/schemas/auth";
+import { credentialsSchema, registerSchema, resetRequestSchema } from "@/lib/schemas/auth";
+import { headers } from "next/headers";
 import {
   logSecurityEvent,
   checkAuthRateLimit,
@@ -143,6 +144,45 @@ export async function registerAction(
 
   // Cu gospodărie țintă → direct la dashboard; altfel → onboarding (își creează una).
   redirect(claimed.household_id ? "/" : "/onboarding");
+}
+
+export type ResetActionState = { error: string } | { ok: true } | undefined;
+
+/**
+ * Cerere de resetare parolă. Trimite emailul de recuperare (link către /auth/reset).
+ * Răspuns GENERIC indiferent dacă emailul există (nu divulgăm ce conturi există).
+ * Rate-limited ca restul fluxului de auth.
+ */
+export async function requestPasswordResetAction(
+  _prev: ResetActionState,
+  formData: FormData,
+): Promise<ResetActionState> {
+  const parsed = resetRequestSchema.safeParse({ email: formData.get("email") });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Email invalid" };
+  }
+  const { email } = parsed.data;
+  const ip = await getClientIp();
+
+  const rl = await checkAuthRateLimit(email, ip);
+  if (rl.blocked) {
+    await logSecurityEvent({ type: "rate_limited", email, ip, detail: { action: "reset" } });
+    return { error: "Prea multe încercări. Reîncearcă peste câteva minute." };
+  }
+
+  // Construiește originul public din antete (ex: https://domeniu.vercel.app).
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "";
+  const proto = h.get("x-forwarded-proto") ?? "https";
+  const origin = host ? `${proto}://${host}` : "";
+
+  const supabase = await createServerSupabaseClient();
+  await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/auth/reset`,
+  });
+  await logSecurityEvent({ type: "password_reset", email, ip, detail: { stage: "requested" } });
+
+  return { ok: true };
 }
 
 /** Delogare + redirect la login. */

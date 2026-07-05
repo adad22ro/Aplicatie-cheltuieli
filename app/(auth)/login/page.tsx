@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { AuthForm } from "@/components/AuthForm";
 import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import { signInAction } from "@/lib/actions/auth";
@@ -30,6 +32,12 @@ export default async function LoginPage({
           altHref="/register"
           altLinkLabel="Creează unul"
         />
+
+        <p className="mt-3 text-center text-sm">
+          <Link href="/forgot-password" className="text-muted hover:text-primary">
+            Ți-ai uitat parola?
+          </Link>
+        </p>
 
         <div className="my-4 flex items-center gap-3 text-xs text-muted">
           <span className="h-px flex-1 bg-border" />

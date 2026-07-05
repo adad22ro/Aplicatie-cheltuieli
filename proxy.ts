@@ -5,7 +5,14 @@ import { updateSession } from "@/lib/supabase/proxy";
 // Rute publice (accesibile fără sesiune). Restul cer autentificare.
 // - /auth/callback: finalizează OAuth (setează sesiunea) — nu poate cere deja sesiune.
 // - /api/health: sondat de monitoare externe fără cont.
-const PUBLIC_ROUTES = ["/login", "/register", "/auth/callback", "/api/health"];
+const PUBLIC_ROUTES = [
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/auth/callback",
+  "/auth/reset",
+  "/api/health",
+];
 
 /**
  * Proxy (middleware Next 16): reîmprospătează sesiunea și protejează rutele.
