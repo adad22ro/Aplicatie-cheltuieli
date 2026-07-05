@@ -7,8 +7,10 @@ import { signOutAction } from "@/lib/actions/auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getMonthlySummary } from "@/lib/data/dashboard";
 import { listTransactions } from "@/lib/data/transactions";
+import { getWeeklyBreakdown } from "@/lib/data/weekly";
 import { authorMap } from "@/lib/data/profiles";
 import { TransactionsList } from "@/components/transactions/TransactionsList";
+import { WeeklyView } from "@/components/WeeklyView";
 import {
   normalizeMonth,
   prevMonth,
@@ -27,13 +29,14 @@ const ron = new Intl.NumberFormat("ro-RO", {
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ month?: string }>;
+  searchParams: Promise<{ month?: string; view?: string }>;
 }) {
-  const [{ month: monthParam }, user, membership] = await Promise.all([
+  const [{ month: monthParam, view: viewParam }, user, membership] = await Promise.all([
     searchParams,
     getCurrentUser(),
     getCurrentMembership(),
   ]);
+  const weekly = viewParam === "weekly";
 
   if (!membership) redirect("/onboarding");
 
@@ -50,10 +53,11 @@ export default async function DashboardPage({
     : membership.households;
 
   const month = normalizeMonth(monthParam);
-  const [summary, recent, authors] = await Promise.all([
+  const [summary, recent, authors, weeks] = await Promise.all([
     getMonthlySummary(month),
-    listTransactions({ month }, 20),
+    weekly ? Promise.resolve([]) : listTransactions({ month }, 20),
     authorMap(),
+    weekly ? getWeeklyBreakdown(month) : Promise.resolve([]),
   ]);
 
   const atCurrent = isCurrentOrFuture(month);
@@ -94,7 +98,7 @@ export default async function DashboardPage({
       {/* Selector de lună */}
       <div className="flex items-center justify-between rounded-xl border border-border bg-surface p-2">
         <Link
-          href={`/?month=${prevMonth(month)}`}
+          href={`/?month=${prevMonth(month)}${weekly ? "&view=weekly" : ""}`}
           aria-label="Luna anterioară"
           className="rounded-lg px-3 py-1.5 text-sm font-medium hover:bg-background"
         >
@@ -107,13 +111,33 @@ export default async function DashboardPage({
           </span>
         ) : (
           <Link
-            href={`/?month=${nextMonth(month)}`}
+            href={`/?month=${nextMonth(month)}${weekly ? "&view=weekly" : ""}`}
             aria-label="Luna următoare"
             className="rounded-lg px-3 py-1.5 text-sm font-medium hover:bg-background"
           >
             →
           </Link>
         )}
+      </div>
+
+      {/* Toggle lunar / săptămânal */}
+      <div className="grid grid-cols-2 gap-1 rounded-xl border border-border bg-surface p-1 text-sm">
+        <Link
+          href={`/?month=${month}`}
+          className={`rounded-lg py-1.5 text-center font-medium ${
+            weekly ? "text-muted hover:bg-background" : "bg-primary text-white"
+          }`}
+        >
+          Lunar
+        </Link>
+        <Link
+          href={`/?month=${month}&view=weekly`}
+          className={`rounded-lg py-1.5 text-center font-medium ${
+            weekly ? "bg-primary text-white" : "text-muted hover:bg-background"
+          }`}
+        >
+          Săptămânal
+        </Link>
       </div>
 
       {/* Carduri sumar */}
@@ -202,19 +226,27 @@ export default async function DashboardPage({
         </Link>
       </div>
 
-      {/* Tranzacții recente ale lunii */}
+      {/* Tranzacții — vizualizare lunară sau săptămânală */}
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold">Tranzacții</h2>
+          <h2 className="font-semibold">{weekly ? "Pe săptămâni" : "Tranzacții"}</h2>
           <Link href="/transactions" className="text-sm font-medium text-primary">
             Vezi toate →
           </Link>
         </div>
-        <TransactionsList
-          items={recent}
-          currentUserId={user?.id ?? ""}
-          authors={authors}
-        />
+        {weekly ? (
+          <WeeklyView
+            weeks={weeks}
+            currentUserId={user?.id ?? ""}
+            authors={authors}
+          />
+        ) : (
+          <TransactionsList
+            items={recent}
+            currentUserId={user?.id ?? ""}
+            authors={authors}
+          />
+        )}
       </section>
 
       <Link
