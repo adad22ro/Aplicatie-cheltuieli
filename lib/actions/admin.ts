@@ -93,6 +93,31 @@ export async function revokeSignupCodeAction(formData: FormData): Promise<void> 
   revalidatePath("/admin/codes");
 }
 
+/** Admin redenumește o gospodărie. */
+export async function renameHouseholdAction(
+  _prev: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const adminUser = await requireAdmin();
+  const id = formData.get("id");
+  const name = formData.get("name");
+  if (typeof id !== "string" || typeof name !== "string" || name.trim().length === 0) {
+    return { error: "Nume invalid" };
+  }
+  if (name.trim().length > 60) return { error: "Nume prea lung (max 60)" };
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("households")
+    .update({ name: name.trim() })
+    .eq("id", id);
+  if (error) return { error: "Nu am putut redenumi gospodăria." };
+
+  await audit(admin, adminUser.id, "rename_household", { id, name: name.trim() });
+  revalidatePath("/admin/households");
+  return { ok: true };
+}
+
 /** Admin resetează parola unui user. */
 export async function resetPasswordAction(
   _prev: AdminActionState,

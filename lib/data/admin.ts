@@ -95,6 +95,40 @@ export async function listSignupCodes(): Promise<SignupCodeRow[]> {
   });
 }
 
+export type AdminHousehold = {
+  id: string;
+  name: string;
+  created_at: string;
+  members: number;
+  transactions: number;
+};
+
+/** Gospodăriile cu nr. de membri și tranzacții (pentru pagina de gestiune admin). */
+export async function listHouseholdsDetailed(): Promise<AdminHousehold[]> {
+  const admin = createAdminClient();
+  const [households, members, txs] = await Promise.all([
+    admin.from("households").select("id, name, created_at").is("deleted_at", null).order("name"),
+    admin.from("household_members").select("household_id"),
+    admin.from("transactions").select("household_id").is("deleted_at", null),
+  ]);
+
+  const countBy = (rows: { household_id: string }[] | null) => {
+    const m = new Map<string, number>();
+    for (const r of rows ?? []) m.set(r.household_id, (m.get(r.household_id) ?? 0) + 1);
+    return m;
+  };
+  const mCount = countBy(members.data as { household_id: string }[] | null);
+  const tCount = countBy(txs.data as { household_id: string }[] | null);
+
+  return (households.data ?? []).map((h) => ({
+    id: h.id,
+    name: h.name,
+    created_at: h.created_at,
+    members: mCount.get(h.id) ?? 0,
+    transactions: tCount.get(h.id) ?? 0,
+  }));
+}
+
 /** Gospodăriile active (id + nume) pentru selectorul din generatorul de coduri. */
 export async function listHouseholdsForSelect(): Promise<{ id: string; name: string }[]> {
   const admin = createAdminClient();

@@ -5,9 +5,9 @@ import { OnboardingForm } from "@/components/OnboardingForm";
 import { JoinForm } from "@/components/JoinForm";
 
 /**
- * Onboarding: userul fără gospodărie fie își creează una, fie se alătură uneia existente
- * printr-un cod de invitație. Dacă are deja gospodărie → dashboard. Un link de invitație
- * (`?invite=COD`) precompletează codul și deschide direct pe tab-ul de alăturare.
+ * Onboarding: userul fără gospodărie își creează una. Cine sosește printr-un link de
+ * invitație (`?invite=COD`) vede în schimb formularul de alăturare (cu creare ca opțiune
+ * secundară). Fără link, ecranul e curat — doar crearea. Dacă are deja gospodărie → dashboard.
  */
 export default async function OnboardingPage({
   searchParams,
@@ -29,7 +29,7 @@ export default async function OnboardingPage({
         <p className="mb-6 text-sm text-muted">
           {hasInvite
             ? "Ai fost invitat într-o gospodărie. Confirmă codul ca să te alături."
-            : "Creează-ți gospodăria sau alătură-te uneia existente cu un cod de invitație."}
+            : "Creează-ți gospodăria ca să începi."}
         </p>
 
         {hasInvite ? (
@@ -45,17 +45,7 @@ export default async function OnboardingPage({
             </details>
           </div>
         ) : (
-          <div className="flex flex-col gap-6">
-            <OnboardingForm />
-            <details className="text-sm">
-              <summary className="cursor-pointer text-muted">
-                Ai un cod de invitație?
-              </summary>
-              <div className="mt-4">
-                <JoinForm />
-              </div>
-            </details>
-          </div>
+          <OnboardingForm />
         )}
       </div>
     </main>
