@@ -76,6 +76,7 @@ export async function createTransactionAction(
       label: parsed.data.note ?? cat?.name ?? "Venit",
       amount: parsed.data.amount,
       transactionId: created.id,
+      userId: user.id,
     });
     revalidatePath("/plan");
     redirect(`/plan?month=${month}`);

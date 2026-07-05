@@ -44,7 +44,10 @@ export async function addIncomeAction(
   _prev: PlanActionState,
   formData: FormData,
 ): Promise<PlanActionState> {
-  const householdId = await getActiveHouseholdId();
+  const [user, householdId] = await Promise.all([
+    getCurrentUser(),
+    getActiveHouseholdId(),
+  ]);
   if (!householdId) redirect("/onboarding");
 
   const parsed = addIncomeSchema.safeParse({
@@ -90,6 +93,7 @@ export async function addIncomeAction(
     label,
     amount,
     recurring_id: recurringId,
+    user_id: user?.id ?? null,
   });
   if (error) return { error: "Nu am putut salva venitul." };
 

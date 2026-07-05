@@ -92,6 +92,8 @@ export default async function PlanPage({
           incomes={plan.incomes}
           allocations={plan.allocations}
           categories={categories}
+          rollover={plan.totals.rollover}
+          contributions={plan.contributions}
         />
       )}
     </main>

@@ -84,7 +84,7 @@ export async function ensurePlan(
 export async function linkIncomeToPlan(
   householdId: string,
   month: string,
-  income: { label: string; amount: number; transactionId: string },
+  income: { label: string; amount: number; transactionId: string; userId: string },
 ): Promise<void> {
   const planId = await ensurePlan(householdId, month);
   if (!planId) return;
@@ -103,6 +103,7 @@ export async function linkIncomeToPlan(
     label: income.label,
     amount: income.amount,
     transaction_id: income.transactionId,
+    user_id: income.userId,
     is_confirmed: true,
   });
 }

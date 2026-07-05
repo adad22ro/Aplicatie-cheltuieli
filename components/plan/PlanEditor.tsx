@@ -13,7 +13,7 @@ import {
   togglePaidAction,
   type PlanActionState,
 } from "@/lib/actions/plan";
-import type { PlanIncome, PlanAllocation } from "@/lib/data/plan";
+import type { PlanIncome, PlanAllocation, Contribution } from "@/lib/data/plan";
 import type { Category } from "@/lib/data/settings";
 
 const ron = new Intl.NumberFormat("ro-RO", {
@@ -32,11 +32,15 @@ export function PlanEditor({
   incomes,
   allocations,
   categories,
+  rollover,
+  contributions,
 }: {
   month: string;
   incomes: PlanIncome[];
   allocations: PlanAllocation[];
   categories: Category[];
+  rollover: number;
+  contributions: Contribution[];
 }) {
   const incomeCats = useMemo(() => categories.filter((c) => c.type === "income"), [categories]);
   const expenseCats = useMemo(() => categories.filter((c) => c.type === "expense"), [categories]);
@@ -61,14 +65,15 @@ export function PlanEditor({
   const amountOf = (a: PlanAllocation) => allocAmounts[a.id] ?? a.planned_amount;
 
   const totalIncome = incomes.reduce((s, i) => s + (incomeAmounts[i.id] ?? i.amount), 0);
+  const available = totalIncome + rollover; // bani de repartizat (venit + report)
   const totalAllocated = allocations.reduce((s, a) => s + amountOf(a), 0);
-  const unallocated = totalIncome - totalAllocated;
+  const unallocated = available - totalAllocated;
   // Rest de plătit = alocările încă nebifate „plătit".
   const remainingToPay = allocations
     .filter((a) => !a.is_paid)
     .reduce((s, a) => s + amountOf(a), 0);
   const pctAllocated =
-    totalIncome > 0 ? Math.round((totalAllocated / totalIncome) * 100) : 0;
+    available > 0 ? Math.round((totalAllocated / available) * 100) : 0;
 
   const move = (index: number, dir: -1 | 1) => {
     const next = [...order];
@@ -104,8 +109,20 @@ export function PlanEditor({
           </div>
         </div>
 
+        {/* Report din luna anterioară */}
+        {rollover !== 0 ? (
+          <p className="mt-2 text-center text-xs text-muted">
+            Report din luna trecută:{" "}
+            <span className={`font-semibold ${rollover < 0 ? "text-expense" : "text-income"}`}>
+              {rollover >= 0 ? "+" : ""}
+              {ron.format(rollover)}
+            </span>{" "}
+            · disponibil {ron.format(available)}
+          </p>
+        ) : null}
+
         {/* Bară de progres alocare */}
-        {totalIncome > 0 ? (
+        {available > 0 ? (
           <div className="mt-3 h-2 overflow-hidden rounded-full bg-background">
             <div
               className={`h-full rounded-full ${
@@ -135,6 +152,20 @@ export function PlanEditor({
             )
           ) : null}
         </div>
+
+        {/* Contribuții pe persoană (cont comun cu 2 venituri) */}
+        {contributions.length > 1 ? (
+          <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-2">
+            {contributions.map((c) => (
+              <span
+                key={c.user_id ?? "comun"}
+                className="rounded-full bg-background px-2.5 py-1 text-xs"
+              >
+                {c.name}: <span className="font-semibold tabular-nums">{ron.format(c.amount)}</span>
+              </span>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       {/* Venituri */}

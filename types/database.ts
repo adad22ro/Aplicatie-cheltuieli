@@ -474,6 +474,7 @@ export type Database = {
           recurring_id: string | null
           sort_order: number
           transaction_id: string | null
+          user_id: string | null
         }
         Insert: {
           amount: number
@@ -487,6 +488,7 @@ export type Database = {
           recurring_id?: string | null
           sort_order?: number
           transaction_id?: string | null
+          user_id?: string | null
         }
         Update: {
           amount?: number
@@ -500,6 +502,7 @@ export type Database = {
           recurring_id?: string | null
           sort_order?: number
           transaction_id?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
