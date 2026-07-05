@@ -73,6 +73,8 @@ Concept unificat: pagină `/plan` cu selector de lună. Luna curentă = aloci ve
   - **B (rollover & 2 venituri)**: report din luna anterioară → „disponibil"=venit+report; `plan_incomes.user_id` (migrare `20260706120000`) = contribuitor, breakdown pe persoană. Test 6/6.
   - **C (șabloane)**: `allocation_templates`+`template_lines`+enum `allocation_mode` (migrare `20260706130000`). Linii sumă-fixă/procent-din-disponibil. Pagină `/plan/templates` + bară „Aplică șablon" pe `/plan`. Test 5/5.
   - **D (admin & onboarding)**: `/admin/households` (redenumire + membri/tranzacții, audit), export CSV `/admin/export` (BOM Excel). Onboarding simplificat: ecran curat doar creare; alăturare doar prin link `?invite=`. Fără migrare.
+- ✅ **Vizualizare săptămânală (2026-07-06)** — toggle lunar/săptămânal pe dashboard (`?view=weekly`). Luna spartă în blocuri fixe de 7 zile (1–7, 8–14, …); fiecare săptămână: venituri/cheltuieli/sold + tranzacții desfășurabile (`<details>`, refolosește `TransactionsList`). `lib/data/weekly.ts` (grupare pură pe date, fără migrare) + `components/WeeklyView.tsx`.
+  - Idee viitoare discutată: alocare a planului pe săptămâni (pas 2, mai complex) — neînceput.
 
 - **Ajustările userului** la ce s-a construit (le va comunica).
 - **Grafică / design** (o va face ulterior — direcție vizuală, polish UI).
