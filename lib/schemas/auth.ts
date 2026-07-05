@@ -8,6 +8,16 @@ export const credentialsSchema = z.object({
 
 export type Credentials = z.infer<typeof credentialsSchema>;
 
+/** Înregistrare: credențiale + cod de invitație obligatoriu (gating). */
+export const registerSchema = credentialsSchema.extend({
+  code: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .min(6, "Cod de invitație invalid")
+    .max(20, "Cod de invitație invalid"),
+});
+
 /** Nume gospodărie la onboarding. */
 export const householdNameSchema = z.object({
   name: z

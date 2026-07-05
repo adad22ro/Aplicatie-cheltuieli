@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { getCurrentMembership, getCurrentUser } from "@/lib/auth/current-user";
+import { isAdminEmail } from "@/lib/auth/admin";
 import { signOutAction } from "@/lib/actions/auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getMonthlySummary } from "@/lib/data/dashboard";
@@ -63,6 +64,14 @@ export default async function DashboardPage({
           <h1 className="text-2xl font-bold">{household?.name ?? "—"}</h1>
         </div>
         <div className="flex items-center gap-2">
+          {isAdminEmail(user?.email) ? (
+            <Link
+              href="/admin"
+              className="rounded-xl border border-border px-3 py-2 text-sm font-medium hover:bg-background"
+            >
+              ⚙️
+            </Link>
+          ) : null}
           <Link
             href="/settings"
             className="rounded-xl border border-border px-3 py-2 text-sm font-medium hover:bg-background"

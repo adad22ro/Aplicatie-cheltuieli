@@ -39,6 +39,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit: {
+        Row: {
+          action: string
+          admin_id: string | null
+          created_at: string
+          detail: Json | null
+          id: string
+        }
+        Insert: {
+          action: string
+          admin_id?: string | null
+          created_at?: string
+          detail?: Json | null
+          id?: string
+        }
+        Update: {
+          action?: string
+          admin_id?: string | null
+          created_at?: string
+          detail?: Json | null
+          id?: string
+        }
+        Relationships: []
+      }
       budgets: {
         Row: {
           amount: number
@@ -419,6 +443,53 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "savings_goals_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signup_codes: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          household_id: string | null
+          id: string
+          label: string | null
+          role: Database["public"]["Enums"]["household_role"]
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          household_id?: string | null
+          id?: string
+          label?: string | null
+          role?: Database["public"]["Enums"]["household_role"]
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          household_id?: string | null
+          id?: string
+          label?: string | null
+          role?: Database["public"]["Enums"]["household_role"]
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signup_codes_household_id_fkey"
             columns: ["household_id"]
             isOneToOne: false
             referencedRelation: "households"

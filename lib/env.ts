@@ -18,6 +18,14 @@ const envSchema = z.object({
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z
     .string()
     .min(1, "NEXT_PUBLIC_SUPABASE_ANON_KEY lipsește"),
+  // Server-only (NU ajung în browser). Necesare pentru înregistrarea controlată de
+  // admin și pentru panoul de admin.
+  SUPABASE_SERVICE_ROLE_KEY: z
+    .string()
+    .min(1, "SUPABASE_SERVICE_ROLE_KEY lipsește (cheia secretă service_role)"),
+  ADMIN_EMAIL: z
+    .string()
+    .email("ADMIN_EMAIL trebuie să fie un email valid (contul de administrator)"),
 });
 
 /**
@@ -28,6 +36,8 @@ function loadEnv() {
   const parsed = envSchema.safeParse({
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    ADMIN_EMAIL: process.env.ADMIN_EMAIL,
   });
 
   if (!parsed.success) {
@@ -49,5 +59,7 @@ export const env = {
   supabase: {
     url: raw.NEXT_PUBLIC_SUPABASE_URL,
     anonKey: raw.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    serviceRoleKey: raw.SUPABASE_SERVICE_ROLE_KEY,
   },
+  adminEmail: raw.ADMIN_EMAIL,
 } as const;
