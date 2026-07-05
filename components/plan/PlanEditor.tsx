@@ -6,6 +6,7 @@ import {
   addIncomeAction,
   addAllocationAction,
   setAllocationAmountAction,
+  setAllocationOrderAction,
   setIncomeAmountAction,
   deleteAllocationAction,
   deleteIncomeAction,
@@ -48,12 +49,35 @@ export function PlanEditor({
     () => Object.fromEntries(incomes.map((i) => [i.id, i.amount])),
   );
 
-  const totalIncome = incomes.reduce((s, i) => s + (incomeAmounts[i.id] ?? i.amount), 0);
-  const totalAllocated = allocations.reduce(
-    (s, a) => s + (allocAmounts[a.id] ?? a.planned_amount),
-    0,
+  // Ordinea locală a alocărilor (pentru prioritizare cu ↑/↓).
+  const [order, setOrder] = useState<string[]>(() => allocations.map((a) => a.id));
+  const [, startReorder] = useTransition();
+  const byId = useMemo(
+    () => Object.fromEntries(allocations.map((a) => [a.id, a])),
+    [allocations],
   );
+  const orderedAllocs = order.map((id) => byId[id]).filter(Boolean) as PlanAllocation[];
+
+  const amountOf = (a: PlanAllocation) => allocAmounts[a.id] ?? a.planned_amount;
+
+  const totalIncome = incomes.reduce((s, i) => s + (incomeAmounts[i.id] ?? i.amount), 0);
+  const totalAllocated = allocations.reduce((s, a) => s + amountOf(a), 0);
   const unallocated = totalIncome - totalAllocated;
+  // Rest de plătit = alocările încă nebifate „plătit".
+  const remainingToPay = allocations
+    .filter((a) => !a.is_paid)
+    .reduce((s, a) => s + amountOf(a), 0);
+  const pctAllocated =
+    totalIncome > 0 ? Math.round((totalAllocated / totalIncome) * 100) : 0;
+
+  const move = (index: number, dir: -1 | 1) => {
+    const next = [...order];
+    const j = index + dir;
+    if (j < 0 || j >= next.length) return;
+    [next[index], next[j]] = [next[j]!, next[index]!];
+    setOrder(next);
+    startReorder(() => setAllocationOrderAction(next));
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -79,11 +103,38 @@ export function PlanEditor({
             </p>
           </div>
         </div>
-        {unallocated < 0 ? (
-          <p className="mt-2 text-center text-xs text-expense">
-            Ai alocat mai mult decât venitul disponibil.
-          </p>
+
+        {/* Bară de progres alocare */}
+        {totalIncome > 0 ? (
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-background">
+            <div
+              className={`h-full rounded-full ${
+                unallocated < 0 ? "bg-expense" : "bg-primary"
+              }`}
+              style={{ width: `${Math.min(pctAllocated, 100)}%` }}
+            />
+          </div>
         ) : null}
+
+        {/* Alerte / rest de acoperit */}
+        <div className="mt-2 flex items-center justify-between text-xs">
+          <span className="text-muted">
+            Rest de plătit: <span className="font-semibold text-foreground">{ron.format(remainingToPay)}</span>
+          </span>
+          {totalIncome > 0 ? (
+            unallocated < 0 ? (
+              <span className="font-medium text-expense">
+                Lipsă {ron.format(-unallocated)} pentru tot planul
+              </span>
+            ) : unallocated === 0 ? (
+              <span className="font-medium text-income">Tot venitul e alocat 🎉</span>
+            ) : (
+              <span className="text-muted">
+                Alocat {pctAllocated}% · mai ai {ron.format(unallocated)}
+              </span>
+            )
+          ) : null}
+        </div>
       </div>
 
       {/* Venituri */}
@@ -109,13 +160,16 @@ export function PlanEditor({
       <section className="flex flex-col gap-3">
         <h2 className="font-semibold">Cheltuieli planificate</h2>
         <div className="flex flex-col gap-2">
-          {allocations.length === 0 ? (
+          {orderedAllocs.length === 0 ? (
             <p className="text-sm text-muted">Nicio cheltuială planificată.</p>
           ) : (
-            allocations.map((a) => (
+            orderedAllocs.map((a, index) => (
               <AllocationRow
                 key={a.id}
                 alloc={a}
+                index={index}
+                count={orderedAllocs.length}
+                onMove={move}
                 onAmount={(v) => setAllocAmounts((m) => ({ ...m, [a.id]: v }))}
               />
             ))
@@ -168,9 +222,15 @@ function IncomeRow({
 
 function AllocationRow({
   alloc,
+  index,
+  count,
+  onMove,
   onAmount,
 }: {
   alloc: PlanAllocation;
+  index: number;
+  count: number;
+  onMove: (index: number, dir: -1 | 1) => void;
   onAmount: (v: number) => void;
 }) {
   const [pending, start] = useTransition();
@@ -181,6 +241,28 @@ function AllocationRow({
         alloc.is_paid ? "border-income/40 bg-income/5" : "border-border bg-surface"
       }`}
     >
+      {/* Reordonare (prioritizare) */}
+      <div className="flex flex-col">
+        <button
+          type="button"
+          aria-label="Mută mai sus"
+          disabled={index === 0}
+          onClick={() => onMove(index, -1)}
+          className="px-1 text-xs leading-none text-muted hover:text-foreground disabled:opacity-30"
+        >
+          ▲
+        </button>
+        <button
+          type="button"
+          aria-label="Mută mai jos"
+          disabled={index === count - 1}
+          onClick={() => onMove(index, 1)}
+          className="px-1 text-xs leading-none text-muted hover:text-foreground disabled:opacity-30"
+        >
+          ▼
+        </button>
+      </div>
+
       {/* Toggle „plătit" */}
       <form action={togglePaidAction}>
         <input type="hidden" name="id" value={alloc.id} />

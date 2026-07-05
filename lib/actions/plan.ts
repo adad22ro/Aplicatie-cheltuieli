@@ -133,6 +133,21 @@ export async function addAllocationAction(
   return undefined;
 }
 
+/** Rescrie ordinea alocărilor (sort_order = poziția în listă). */
+export async function setAllocationOrderAction(ids: string[]): Promise<void> {
+  if (!Array.isArray(ids) || ids.length === 0) return;
+  const parsed = ids.filter((id) => idSchema.safeParse({ id }).success);
+
+  const supabase = await createServerSupabaseClient();
+  await Promise.all(
+    parsed.map((id, i) =>
+      supabase.from("plan_allocations").update({ sort_order: i }).eq("id", id),
+    ),
+  );
+
+  revalidate();
+}
+
 /** Actualizează suma alocată a unui rând (auto-save la blur din editor). */
 export async function setAllocationAmountAction(
   id: string,
