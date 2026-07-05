@@ -35,9 +35,13 @@ export default async function DashboardPage({
 
   if (!membership) redirect("/onboarding");
 
-  // Generează „lazy" tranzacțiile recurente scadente (idempotent) la deschiderea app-ului.
+  // Generează „lazy" tranzacțiile scadente (idempotent) la deschiderea app-ului:
+  // recurențe + rate din planuri de rate.
   const supabase = await createServerSupabaseClient();
-  await supabase.rpc("generate_due_recurring");
+  await Promise.all([
+    supabase.rpc("generate_due_recurring"),
+    supabase.rpc("generate_due_installments"),
+  ]);
 
   const household = Array.isArray(membership.households)
     ? membership.households[0]
@@ -137,13 +141,22 @@ export default async function DashboardPage({
       </div>
 
       {/* Navigare rapidă */}
-      <Link
-        href="/recurring"
-        className="flex items-center justify-between rounded-xl border border-border bg-surface p-3 text-sm font-medium shadow-sm transition-colors hover:bg-background"
-      >
-        <span>🔁 Recurențe</span>
-        <span aria-hidden className="text-muted">→</span>
-      </Link>
+      <div className="grid grid-cols-2 gap-2">
+        <Link
+          href="/recurring"
+          className="flex items-center justify-between rounded-xl border border-border bg-surface p-3 text-sm font-medium shadow-sm transition-colors hover:bg-background"
+        >
+          <span>🔁 Recurențe</span>
+          <span aria-hidden className="text-muted">→</span>
+        </Link>
+        <Link
+          href="/installments"
+          className="flex items-center justify-between rounded-xl border border-border bg-surface p-3 text-sm font-medium shadow-sm transition-colors hover:bg-background"
+        >
+          <span>💳 Rate</span>
+          <span aria-hidden className="text-muted">→</span>
+        </Link>
+      </div>
 
       {/* Tranzacții recente ale lunii */}
       <section className="flex flex-col gap-3">
