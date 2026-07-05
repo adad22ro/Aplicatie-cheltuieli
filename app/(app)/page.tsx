@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { getCurrentMembership, getCurrentUser } from "@/lib/auth/current-user";
 import { signOutAction } from "@/lib/actions/auth";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getMonthlySummary } from "@/lib/data/dashboard";
 import { listTransactions } from "@/lib/data/transactions";
 import { TransactionsList } from "@/components/transactions/TransactionsList";
@@ -33,6 +34,10 @@ export default async function DashboardPage({
   ]);
 
   if (!membership) redirect("/onboarding");
+
+  // Generează „lazy" tranzacțiile recurente scadente (idempotent) la deschiderea app-ului.
+  const supabase = await createServerSupabaseClient();
+  await supabase.rpc("generate_due_recurring");
 
   const household = Array.isArray(membership.households)
     ? membership.households[0]
@@ -130,6 +135,15 @@ export default async function DashboardPage({
           </p>
         </div>
       </div>
+
+      {/* Navigare rapidă */}
+      <Link
+        href="/recurring"
+        className="flex items-center justify-between rounded-xl border border-border bg-surface p-3 text-sm font-medium shadow-sm transition-colors hover:bg-background"
+      >
+        <span>🔁 Recurențe</span>
+        <span aria-hidden className="text-muted">→</span>
+      </Link>
 
       {/* Tranzacții recente ale lunii */}
       <section className="flex flex-col gap-3">

@@ -502,6 +502,7 @@ export type Database = {
     }
     Functions: {
       create_household: { Args: { p_name: string }; Returns: string }
+      generate_due_recurring: { Args: never; Returns: number }
       is_household_member: { Args: { hid: string }; Returns: boolean }
       is_household_owner: { Args: { hid: string }; Returns: boolean }
       redeem_invite: { Args: { p_code: string }; Returns: string }
