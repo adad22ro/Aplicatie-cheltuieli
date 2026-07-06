@@ -10,6 +10,7 @@ import { getWeeklyBreakdown } from "@/lib/data/weekly";
 import { authorMap } from "@/lib/data/profiles";
 import { TransactionsList } from "@/components/transactions/TransactionsList";
 import { WeeklyView } from "@/components/WeeklyView";
+import { InstallButton } from "@/components/InstallButton";
 import {
   normalizeMonth,
   prevMonth,
@@ -113,6 +114,9 @@ export default async function DashboardPage({
           </Link>
         )}
       </div>
+
+      {/* Buton instalare PWA (se ascunde dacă e deja instalată) */}
+      <InstallButton />
 
       {/* Toggle lunar / săptămânal */}
       <div className="grid grid-cols-2 gap-1 rounded-xl border border-border bg-surface p-1 text-sm">
