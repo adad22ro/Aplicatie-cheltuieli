@@ -133,11 +133,10 @@ export function TransactionForm({
         </button>
       </div>
 
-      {/* Categorie (filtrată după tip) */}
+      {/* Categorie (filtrată după tip) — grilă de chip-uri colorate (varianta 1a) */}
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="category_id" className="text-sm font-medium">
-          Categorie
-        </label>
+        <span className="text-sm font-medium">Categorie</span>
+        <input type="hidden" name="category_id" value={effectiveCategoryId} />
         {noCategories ? (
           <p className="rounded-lg border border-dashed border-border p-3 text-sm text-muted">
             Nicio categorie de {type === "income" ? "venit" : "cheltuială"}.{" "}
@@ -147,24 +146,40 @@ export function TransactionForm({
             .
           </p>
         ) : (
-          <select
-            id="category_id"
-            name="category_id"
-            required
-            value={effectiveCategoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            className="rounded-xl border border-border bg-surface px-3 py-2.5 outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          <div
+            role="radiogroup"
+            aria-label="Categorie"
+            className="grid grid-cols-4 gap-2"
           >
-            <option value="" disabled>
-              Alege categoria…
-            </option>
-            {visibleCategories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.icon ? `${c.icon} ` : ""}
-                {c.name}
-              </option>
-            ))}
-          </select>
+            {visibleCategories.map((c) => {
+              const selected = c.id === effectiveCategoryId;
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => setCategoryId(c.id)}
+                  className={`flex flex-col items-center gap-1.5 rounded-2xl border p-2 transition-transform active:scale-95 ${
+                    selected
+                      ? "border-primary bg-primary/5 ring-2 ring-primary"
+                      : "border-border hover:bg-background"
+                  }`}
+                >
+                  <span
+                    className="grid h-9 w-9 place-items-center rounded-xl text-base"
+                    style={{ backgroundColor: c.color ?? "var(--color-background)" }}
+                    aria-hidden
+                  >
+                    {c.icon ?? "•"}
+                  </span>
+                  <span className="line-clamp-1 text-center text-[11px] font-semibold leading-tight">
+                    {c.name}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         )}
       </div>
 

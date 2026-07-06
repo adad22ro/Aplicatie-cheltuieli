@@ -66,6 +66,29 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* Carduri „tinted" (varianta 1a): fundal colorat discret + border în aceeași culoare,
+   derivate din tokenii semantici cu color-mix → automat corecte în light/dark. */
+.tint-income {
+  background: color-mix(in srgb, var(--income) 12%, var(--surface));
+  border-color: color-mix(in srgb, var(--income) 30%, var(--surface));
+}
+.tint-expense {
+  background: color-mix(in srgb, var(--expense) 12%, var(--surface));
+  border-color: color-mix(in srgb, var(--expense) 30%, var(--surface));
+}
+.tint-primary {
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+  border-color: color-mix(in srgb, var(--primary) 28%, var(--surface));
+}
+.tint-accent {
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--surface));
+}
+.tint-warning {
+  background: color-mix(in srgb, var(--warning) 14%, var(--surface));
+  border-color: color-mix(in srgb, var(--warning) 32%, var(--surface));
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;

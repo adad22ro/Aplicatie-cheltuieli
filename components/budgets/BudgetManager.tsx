@@ -22,12 +22,26 @@ function BudgetRow({ item }: { item: BudgetItem }) {
     undefined,
   );
 
+  const near = !item.over && item.pct >= 80;
+  // Culoare bară: depășit → roșu, aproape (>80%) → ambră, altfel culoarea categoriei.
+  const fillColor = item.over
+    ? "var(--color-expense)"
+    : near
+      ? "var(--color-warning)"
+      : (item.category?.color ?? "var(--color-primary)");
+
   return (
     <li className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-3">
       <div className="flex items-center justify-between gap-2">
-        <span className="min-w-0 truncate font-medium">
-          {item.category?.icon ? `${item.category.icon} ` : ""}
-          {item.category?.name ?? "—"}
+        <span className="flex min-w-0 items-center gap-2 font-medium">
+          <span
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-xl text-sm"
+            style={{ backgroundColor: item.category?.color ?? "var(--color-background)" }}
+            aria-hidden
+          >
+            {item.category?.icon ?? "•"}
+          </span>
+          <span className="truncate">{item.category?.name ?? "—"}</span>
         </span>
         <span className={`text-sm tabular-nums ${item.over ? "text-expense font-semibold" : "text-muted"}`}>
           {ron.format(item.spent)} / {ron.format(item.amount)}
@@ -36,8 +50,8 @@ function BudgetRow({ item }: { item: BudgetItem }) {
 
       <div className="h-2 overflow-hidden rounded-full bg-background">
         <div
-          className={`h-full rounded-full transition-all ${item.over ? "bg-expense" : "bg-primary"}`}
-          style={{ width: `${item.pct}%` }}
+          className="h-full rounded-full transition-all"
+          style={{ width: `${item.pct}%`, backgroundColor: fillColor }}
         />
       </div>
 

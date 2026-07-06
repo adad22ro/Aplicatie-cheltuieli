@@ -150,15 +150,15 @@ export default async function DashboardPage({
 
       {/* Carduri sumar */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
-          <p className="text-xs font-medium text-muted">Venituri</p>
-          <p className="mt-1 text-lg font-bold tabular-nums text-income">
+        <div className="tint-income rounded-2xl border p-4">
+          <p className="text-xs font-semibold text-income/80">Venituri</p>
+          <p className="mt-1 text-xl font-bold tabular-nums text-income">
             {ron.format(summary.income)}
           </p>
         </div>
-        <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
-          <p className="text-xs font-medium text-muted">Cheltuieli</p>
-          <p className="mt-1 text-lg font-bold tabular-nums text-expense">
+        <div className="tint-expense rounded-2xl border p-4">
+          <p className="text-xs font-semibold text-expense/80">Cheltuieli</p>
+          <p className="mt-1 text-xl font-bold tabular-nums text-expense">
             {ron.format(summary.expense)}
           </p>
         </div>
@@ -230,43 +230,27 @@ export default async function DashboardPage({
         <span aria-hidden className="text-primary">→</span>
       </Link>
 
-      {/* Navigare rapidă */}
+      {/* Navigare rapidă — carduri cu tonuri colorate alternate (varianta 1a) */}
       <div className="grid grid-cols-2 gap-2">
-        <Link
-          href="/recurring"
-          className="flex items-center justify-between rounded-xl border border-border bg-surface p-3 text-sm font-medium shadow-sm transition-colors hover:bg-background"
-        >
-          <span>🔁 Recurențe</span>
-          <span aria-hidden className="text-muted">→</span>
-        </Link>
-        <Link
-          href="/installments"
-          className="flex items-center justify-between rounded-xl border border-border bg-surface p-3 text-sm font-medium shadow-sm transition-colors hover:bg-background"
-        >
-          <span>💳 Rate</span>
-          <span aria-hidden className="text-muted">→</span>
-        </Link>
-        <Link
-          href="/budgets"
-          className="flex items-center justify-between rounded-xl border border-border bg-surface p-3 text-sm font-medium shadow-sm transition-colors hover:bg-background"
-        >
-          <span>🎯 Bugete</span>
-          <span aria-hidden className="text-muted">→</span>
-        </Link>
-        <Link
-          href="/reports"
-          className="flex items-center justify-between rounded-xl border border-border bg-surface p-3 text-sm font-medium shadow-sm transition-colors hover:bg-background"
-        >
-          <span>📊 Grafice</span>
-          <span aria-hidden className="text-muted">→</span>
-        </Link>
-        <Link
-          href="/savings"
-          className="flex items-center justify-between rounded-xl border border-border bg-surface p-3 text-sm font-medium shadow-sm transition-colors hover:bg-background"
-        >
-          <span>🐷 Obiective</span>
-          <span aria-hidden className="text-muted">→</span>
-        </Link>
+        {[
+          { href: "/recurring", icon: "🔁", label: "Recurențe", tint: "tint-primary" },
+          { href: "/installments", icon: "💳", label: "Rate", tint: "tint-accent" },
+          { href: "/budgets", icon: "🎯", label: "Bugete", tint: "tint-warning" },
+          { href: "/reports", icon: "📊", label: "Grafice", tint: "tint-income" },
+          { href: "/savings", icon: "🐷", label: "Obiective", tint: "tint-expense" },
+        ].map(({ href, icon, label, tint }) => (
+          <Link
+            key={href}
+            href={href}
+            className={`${tint} flex items-center gap-2 rounded-xl border p-3 text-sm font-semibold transition-transform active:scale-[0.98]`}
+          >
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-surface/70 text-lg">
+              {icon}
+            </span>
+            <span className="flex-1">{label}</span>
+            <span aria-hidden className="text-muted">→</span>
+          </Link>
+        ))}
       </div>
 
       {/* Tranzacții — vizualizare lunară sau săptămânală */}
