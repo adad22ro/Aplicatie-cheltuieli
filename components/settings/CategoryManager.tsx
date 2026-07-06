@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 
 import {
   createCategoryAction,
@@ -10,6 +10,7 @@ import {
 } from "@/lib/actions/categories";
 import { CATEGORY_COLORS } from "@/lib/schemas/settings";
 import type { Category } from "@/lib/data/settings";
+import { EmojiPicker } from "@/components/settings/EmojiPicker";
 
 const TYPE_LABEL: Record<Category["type"], string> = {
   income: "Venit",
@@ -31,22 +32,26 @@ function CategoryForm({
     action,
     undefined,
   );
-  const formRef = useRef<HTMLFormElement>(null);
+  const [icon, setIcon] = useState(initial?.icon ?? "");
+  const [color, setColor] = useState(initial?.color ?? "");
 
+  // La succes anunțăm părintele: la editare închide formularul, la creare
+  // părintele remontează formularul (via `key`) ca să-l reseteze complet.
   useEffect(() => {
-    if (state && "ok" in state && state.ok) {
-      if (mode === "create") formRef.current?.reset();
-      onDone?.();
-    }
-  }, [state, mode, onDone]);
+    if (state && "ok" in state && state.ok) onDone?.();
+  }, [state, onDone]);
 
   return (
-    <form ref={formRef} action={formAction} className="flex flex-col gap-3">
+    <form action={formAction} className="flex flex-col gap-3">
       {mode === "edit" && initial ? (
         <input type="hidden" name="id" value={initial.id} />
       ) : null}
 
+      <input type="hidden" name="icon" value={icon} />
+      <input type="hidden" name="color" value={color} />
+
       <div className="flex gap-2">
+        <EmojiPicker value={icon} onChange={setIcon} />
         <input
           name="name"
           type="text"
@@ -56,15 +61,6 @@ function CategoryForm({
           placeholder="Nume categorie"
           aria-label="Nume categorie"
           className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 py-2 outline-none focus-visible:ring-2 focus-visible:ring-primary"
-        />
-        <input
-          name="icon"
-          type="text"
-          maxLength={4}
-          defaultValue={initial?.icon ?? ""}
-          placeholder="🛒"
-          aria-label="Icon (emoji, opțional)"
-          className="w-14 rounded-lg border border-border bg-surface px-2 py-2 text-center outline-none focus-visible:ring-2 focus-visible:ring-primary"
         />
       </div>
 
@@ -78,36 +74,60 @@ function CategoryForm({
         <option value="income">Venit</option>
       </select>
 
-      <fieldset className="flex flex-wrap items-center gap-2">
-        <legend className="sr-only">Culoare</legend>
-        <label title="Fără culoare" className="cursor-pointer">
-          <input
-            type="radio"
-            name="color"
-            value=""
-            defaultChecked={!initial?.color}
-            className="peer sr-only"
-          />
-          <span className="flex h-6 w-6 items-center justify-center rounded-full border border-border text-xs text-muted peer-checked:ring-2 peer-checked:ring-primary peer-checked:ring-offset-1 peer-checked:ring-offset-surface">
-            ∅
-          </span>
-        </label>
-        {CATEGORY_COLORS.map((c) => (
-          <label key={c} title={c} className="cursor-pointer">
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-medium">Culoare</span>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Selector rotund custom — orice culoare */}
+          <label
+            title="Alege orice culoare"
+            className="relative h-9 w-9 cursor-pointer overflow-hidden rounded-full border border-border"
+            style={{
+              background: color
+                ? undefined
+                : "conic-gradient(#ff6b4a,#f59e0b,#22c55e,#14b8a6,#3b82f6,#a855f7,#ec4899,#ff6b4a)",
+              backgroundColor: color || undefined,
+            }}
+          >
             <input
-              type="radio"
-              name="color"
-              value={c}
-              defaultChecked={initial?.color === c}
-              className="peer sr-only"
-            />
-            <span
-              style={{ backgroundColor: c }}
-              className="block h-6 w-6 rounded-full peer-checked:ring-2 peer-checked:ring-primary peer-checked:ring-offset-1 peer-checked:ring-offset-surface"
+              type="color"
+              value={color || "#7c3aed"}
+              onChange={(e) => setColor(e.target.value)}
+              aria-label="Culoare personalizată"
+              className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
             />
           </label>
-        ))}
-      </fieldset>
+
+          {/* „Fără culoare" */}
+          <button
+            type="button"
+            onClick={() => setColor("")}
+            title="Fără culoare"
+            aria-pressed={!color}
+            className={`flex h-9 w-9 items-center justify-center rounded-full border border-border text-xs text-muted ${
+              !color ? "ring-2 ring-primary ring-offset-1 ring-offset-surface" : ""
+            }`}
+          >
+            ∅
+          </button>
+
+          {/* Presetări rapide */}
+          {CATEGORY_COLORS.map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => setColor(c)}
+              title={c}
+              aria-pressed={color.toLowerCase() === c.toLowerCase()}
+              style={{ backgroundColor: c }}
+              className={`h-9 w-9 rounded-full ${
+                color.toLowerCase() === c.toLowerCase()
+                  ? "ring-2 ring-primary ring-offset-1 ring-offset-surface"
+                  : ""
+              }`}
+            />
+          ))}
+        </div>
+      </div>
 
       {state && "error" in state ? (
         <p role="alert" className="text-sm text-expense">
@@ -183,11 +203,17 @@ function CategoryRow({ category }: { category: Category }) {
 }
 
 export function CategoryManager({ categories }: { categories: Category[] }) {
+  // La fiecare creare reușită bumpăm cheia → formularul se remontează curat.
+  const [createKey, setCreateKey] = useState(0);
   return (
     <div className="flex flex-col gap-5">
       <section className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
         <h2 className="mb-3 text-sm font-semibold text-muted">Categorie nouă</h2>
-        <CategoryForm mode="create" />
+        <CategoryForm
+          key={createKey}
+          mode="create"
+          onDone={() => setCreateKey((k) => k + 1)}
+        />
       </section>
 
       {categories.length === 0 ? (

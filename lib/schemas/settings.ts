@@ -31,7 +31,7 @@ const categoryFields = {
   icon: z
     .string()
     .trim()
-    .max(4, "Iconul e prea lung")
+    .max(8, "Iconul e prea lung")
     .optional()
     .transform((v) => (v && v.length > 0 ? v : null)),
   // Culoare opțională; dacă e prezentă trebuie să fie un hex valid (#RGB/#RRGGBB).

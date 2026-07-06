@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { getActiveHouseholdId } from "@/lib/auth/current-user";
+import { signOutAction } from "@/lib/actions/auth";
 
 /** Hub de setări cu sub-pagini (UI.md §3.6). Faza 1: categorii + metode de plată. */
 export default async function SettingsPage() {
@@ -45,6 +46,15 @@ export default async function SettingsPage() {
           </li>
         ))}
       </ul>
+
+      <form action={signOutAction} className="mt-2">
+        <button
+          type="submit"
+          className="w-full rounded-2xl border border-border bg-surface p-4 text-sm font-semibold text-expense shadow-sm transition-colors hover:bg-background"
+        >
+          Ieși din cont
+        </button>
+      </form>
     </main>
   );
 }

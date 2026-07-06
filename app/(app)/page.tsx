@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 
 import { getCurrentMembership, getCurrentUser } from "@/lib/auth/current-user";
 import { isAdminEmail } from "@/lib/auth/admin";
-import { signOutAction } from "@/lib/actions/auth";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getMonthlySummary, getMonthDigest } from "@/lib/data/dashboard";
 import { listTransactions } from "@/lib/data/transactions";
@@ -74,6 +73,7 @@ export default async function DashboardPage({
           {isAdminEmail(user?.email) ? (
             <Link
               href="/admin"
+              aria-label="Administrare"
               className="rounded-xl border border-border px-3 py-2 text-sm font-medium hover:bg-background"
             >
               ⚙️
@@ -86,20 +86,6 @@ export default async function DashboardPage({
           >
             Ghid
           </Link>
-          <Link
-            href="/settings"
-            className="rounded-xl border border-border px-3 py-2 text-sm font-medium hover:bg-background"
-          >
-            Setări
-          </Link>
-          <form action={signOutAction}>
-            <button
-              type="submit"
-              className="rounded-xl border border-border px-3 py-2 text-sm font-medium hover:bg-background"
-            >
-              Ieși
-            </button>
-          </form>
         </div>
       </header>
 
@@ -218,37 +204,22 @@ export default async function DashboardPage({
         </div>
       ) : null}
 
-      {/* Plan lunar — alocare venit + planificare */}
-      <Link
-        href="/plan"
-        className="flex items-center justify-between rounded-2xl border border-primary/30 bg-primary/5 p-4 shadow-sm transition-colors hover:bg-primary/10"
-      >
-        <span className="flex items-center gap-2 font-semibold">
-          🗓️ Plan lunar
-          <span className="text-xs font-normal text-muted">alocă venitul & planifică</span>
-        </span>
-        <span aria-hidden className="text-primary">→</span>
-      </Link>
-
-      {/* Navigare rapidă — carduri cu tonuri colorate alternate (varianta 1a) */}
-      <div className="grid grid-cols-2 gap-2">
+      {/* Scurtături — rând compact de pastile scrollabile (varianta 1a) */}
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {[
-          { href: "/recurring", icon: "🔁", label: "Recurențe", tint: "tint-primary" },
-          { href: "/installments", icon: "💳", label: "Rate", tint: "tint-accent" },
-          { href: "/budgets", icon: "🎯", label: "Bugete", tint: "tint-warning" },
+          { href: "/plan", icon: "🗓️", label: "Plan", tint: "tint-primary" },
+          { href: "/recurring", icon: "🔁", label: "Recurențe", tint: "tint-accent" },
+          { href: "/installments", icon: "💳", label: "Rate", tint: "tint-warning" },
           { href: "/reports", icon: "📊", label: "Grafice", tint: "tint-income" },
           { href: "/savings", icon: "🐷", label: "Obiective", tint: "tint-expense" },
         ].map(({ href, icon, label, tint }) => (
           <Link
             key={href}
             href={href}
-            className={`${tint} flex items-center gap-2 rounded-xl border p-3 text-sm font-semibold transition-transform active:scale-[0.98]`}
+            className={`${tint} flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold transition-transform active:scale-95`}
           >
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-surface/70 text-lg">
-              {icon}
-            </span>
-            <span className="flex-1">{label}</span>
-            <span aria-hidden className="text-muted">→</span>
+            <span aria-hidden>{icon}</span>
+            <span>{label}</span>
           </Link>
         ))}
       </div>
@@ -275,13 +246,6 @@ export default async function DashboardPage({
           />
         )}
       </section>
-
-      <Link
-        href="/transactions/new"
-        className="fixed bottom-6 right-1/2 z-40 translate-x-[min(13rem,50vw-1.5rem)] rounded-full bg-primary px-5 py-3 font-semibold text-white shadow-lg transition-colors hover:bg-primary-hover"
-      >
-        + Adaugă
-      </Link>
     </main>
   );
 }
