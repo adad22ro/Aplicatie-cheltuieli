@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 /** Bibliotecă de emoji grupată, cu cuvinte-cheie pentru căutare (în română). */
 const GROUPS: { title: string; items: { e: string; k: string }[] }[] = [
@@ -143,6 +143,16 @@ export function EmojiPicker({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const ref = useRef<HTMLDivElement>(null);
+
+  // Închide panoul la atingere/click în afara lui.
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [open]);
 
   const filtered = useMemo(() => {
     const q = norm(query.trim());

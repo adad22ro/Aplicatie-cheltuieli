@@ -95,10 +95,14 @@ export function TransactionsList({
   if (visible.length === 0) {
     return (
       <div className="rounded-2xl border border-dashed border-border p-8 text-center">
-        <p className="text-sm text-muted">Nicio tranzacție încă.</p>
+        <p className="text-3xl" aria-hidden>👛</p>
+        <p className="mt-2 font-semibold">Încă nimic pe aici</p>
+        <p className="mt-1 text-sm text-muted">
+          Notează prima ta cheltuială sau venit — durează câteva secunde.
+        </p>
         <Link
           href="/transactions/new"
-          className="mt-3 inline-block rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover"
+          className="mt-4 inline-block rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover"
         >
           Adaugă prima
         </Link>

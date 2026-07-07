@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { getActiveHouseholdId } from "@/lib/auth/current-user";
 import { signOutAction } from "@/lib/actions/auth";
+import { ThemeToggle } from "@/components/settings/ThemeToggle";
 
 /** Hub de setări cu sub-pagini (UI.md §3.6). Faza 1: categorii + metode de plată. */
 export default async function SettingsPage() {
@@ -27,6 +28,11 @@ export default async function SettingsPage() {
         </Link>
         <h1 className="text-2xl font-bold">Setări</h1>
       </header>
+
+      <section className="flex flex-col gap-2 rounded-2xl border border-border bg-surface p-4 shadow-sm">
+        <p className="font-semibold">Temă</p>
+        <ThemeToggle />
+      </section>
 
       <ul className="flex flex-col gap-2">
         {items.map((item) => (

@@ -173,9 +173,13 @@ export function BudgetManager({
     <div className="flex flex-col gap-5">
       <AddBudget categories={available} />
       {budgets.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-border p-5 text-center text-sm text-muted">
-          Niciun buget încă. Setează limite lunare pe categorii ca să urmărești cheltuielile.
-        </p>
+        <div className="rounded-2xl border border-dashed border-border p-6 text-center">
+          <p className="text-3xl" aria-hidden>🎯</p>
+          <p className="mt-2 font-semibold">Niciun buget încă</p>
+          <p className="mt-1 text-sm text-muted">
+            Pune o limită lunară pe o categorie (de ex. Mâncare) și vezi cât ți-a mai rămas.
+          </p>
+        </div>
       ) : (
         <ul className="flex flex-col gap-2">
           {budgets.map((b) => (
