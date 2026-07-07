@@ -46,8 +46,12 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Rulează pe toate rutele mai puțin asset-uri statice și imagini.
+  // Rulează pe toate rutele mai puțin asset-uri statice, imagini și fișierele
+  // PWA (manifest / service worker / pagina offline). Acestea din urmă trebuie
+  // să fie accesibile FĂRĂ autentificare — browserul cere manifest-ul fără
+  // cookie-uri, iar un redirect la /login l-ar face pe Chrome să declare
+  // aplicația neinstalabilă (buton lipsă + „Add to Home Screen" = doar bookmark).
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|offline.html|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };
