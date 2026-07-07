@@ -1,17 +1,22 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 /**
  * Userul autentificat curent (sau null). Validează sesiunea cu serverul Supabase.
+ *
+ * `cache()` dedupe apelul în cadrul aceluiași request: chiar dacă mai multe componente
+ * cer userul, se face un singur apel `auth.getUser()` (de rețea) per randare.
  */
-export async function getCurrentUser() {
+export const getCurrentUser = cache(async () => {
   const supabase = await createServerSupabaseClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   return user;
-}
+});
 
 /**
  * Apartenența la gospodărie a userului curent (prima găsită) + numele gospodăriei.
@@ -21,7 +26,7 @@ export async function getCurrentUser() {
  * Nota: un user poate fi în mai multe gospodării (PLAN §12); selectorul de gospodărie
  * activă vine ulterior. Deocamdată luăm prima.
  */
-export async function getCurrentMembership() {
+export const getCurrentMembership = cache(async () => {
   const supabase = await createServerSupabaseClient();
   const { data } = await supabase
     .from("household_members")
@@ -31,7 +36,7 @@ export async function getCurrentMembership() {
     .maybeSingle();
 
   return data;
-}
+});
 
 /**
  * ID-ul gospodăriei active a userului curent (prima apartenență), sau null dacă nu e

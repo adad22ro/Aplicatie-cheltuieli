@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 
 import { getCurrentMembership, getCurrentUser } from "@/lib/auth/current-user";
 import { isAdminEmail } from "@/lib/auth/admin";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getMonthlySummary, getMonthDigest } from "@/lib/data/dashboard";
 import { listTransactions } from "@/lib/data/transactions";
 import { getWeeklyBreakdown } from "@/lib/data/weekly";
@@ -11,6 +10,7 @@ import { authorMap } from "@/lib/data/profiles";
 import { TransactionsList } from "@/components/transactions/TransactionsList";
 import { WeeklyView } from "@/components/WeeklyView";
 import { InstallButton } from "@/components/InstallButton";
+import { GenerateDueOnLoad } from "@/components/GenerateDueOnLoad";
 import {
   normalizeMonth,
   prevMonth,
@@ -40,14 +40,6 @@ export default async function DashboardPage({
 
   if (!membership) redirect("/onboarding");
 
-  // Generează „lazy" tranzacțiile scadente (idempotent) la deschiderea app-ului:
-  // recurențe + rate din planuri de rate.
-  const supabase = await createServerSupabaseClient();
-  await Promise.all([
-    supabase.rpc("generate_due_recurring"),
-    supabase.rpc("generate_due_installments"),
-  ]);
-
   const household = Array.isArray(membership.households)
     ? membership.households[0]
     : membership.households;
@@ -65,6 +57,8 @@ export default async function DashboardPage({
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 py-8">
+      <GenerateDueOnLoad />
+
       <header className="flex items-start justify-between">
         <div>
           <p className="text-sm text-muted">Gospodărie</p>
