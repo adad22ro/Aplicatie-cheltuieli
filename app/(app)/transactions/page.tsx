@@ -146,13 +146,6 @@ export default async function TransactionsPage({
       </form>
 
       <TransactionsList items={items} currentUserId={user.id} authors={authors} />
-
-      <Link
-        href="/transactions/new"
-        className="fixed bottom-6 right-1/2 z-40 translate-x-[min(13rem,50vw-1.5rem)] rounded-full bg-primary px-5 py-3 font-semibold text-white shadow-lg transition-colors hover:bg-primary-hover"
-      >
-        + Adaugă
-      </Link>
     </main>
   );
 }

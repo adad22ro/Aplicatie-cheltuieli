@@ -33,7 +33,7 @@ export default async function InstallmentsPage() {
 
       <Link
         href="/installments/new"
-        className="fixed bottom-6 right-1/2 z-40 translate-x-[min(13rem,50vw-1.5rem)] rounded-full bg-primary px-5 py-3 font-semibold text-white shadow-lg transition-colors hover:bg-primary-hover"
+        className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-1/2 z-40 translate-x-[min(13rem,50vw-1.5rem)] rounded-full bg-primary px-5 py-3 font-semibold text-white shadow-lg transition-colors hover:bg-primary-hover"
       >
         + Adaugă
       </Link>
