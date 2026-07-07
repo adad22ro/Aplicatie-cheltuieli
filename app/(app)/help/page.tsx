@@ -4,7 +4,7 @@ export const metadata = {
   title: "Ghid de utilizare",
 };
 
-/** Manual de utilizare complet — explică fiecare funcție a aplicației. Conținut static. */
+/** Manual de utilizare prietenos, pe înțelesul oricui. Conținut static. */
 export default function HelpPage() {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 py-8">
@@ -15,32 +15,44 @@ export default function HelpPage() {
         >
           ← Înapoi
         </Link>
-        <h1 className="text-2xl font-bold">Ghid de utilizare</h1>
+        <h1 className="text-2xl font-bold">Ghid</h1>
       </header>
 
-      <p className="text-sm text-muted">
-        Tot ce știe aplicația să facă, pe scurt și pe înțelesul tuturor. Apasă pe o secțiune ca s-o
-        deschizi.
+      <p className="text-muted">
+        Bine ai venit! Aici ții socoteala banilor din casă — cât intră, cât iese și cât îți
+        rămâne — fără foi de calcul complicate. Mai jos îți explicăm pe scurt tot ce poți face.
+        Apasă pe o secțiune ca s-o deschizi.
       </p>
+
+      {/* Start rapid */}
+      <div className="tint-primary flex flex-col gap-2 rounded-2xl border p-4">
+        <p className="font-semibold">🚀 Cel mai important lucru</p>
+        <p className="text-sm text-muted">
+          Ca să notezi o cheltuială sau un venit, apasă butonul mare{" "}
+          <span className="font-semibold text-foreground">➕</span> din mijlocul barei de jos.
+          Scrii suma, alegi ce este (de ex. Mâncare) și gata. Restul aplicației te ajută doar
+          să vezi mai clar unde-ți pleacă banii.
+        </p>
+      </div>
 
       {/* Cuprins */}
       <nav className="rounded-2xl border border-border bg-surface p-4 text-sm">
-        <p className="mb-2 font-semibold">Cuprins</p>
+        <p className="mb-2 font-semibold">Ce găsești mai jos</p>
         <ul className="flex flex-col gap-1">
           {[
-            ["#concepte", "Concepte de bază"],
-            ["#dashboard", "Pagina principală (dashboard)"],
-            ["#tranzactii", "Tranzacții"],
-            ["#plan", "Plan lunar"],
-            ["#recurente", "Recurențe"],
-            ["#rate", "Rate / angajamente"],
-            ["#bugete", "Bugete"],
-            ["#economii", "Obiective de economisire"],
-            ["#grafice", "Grafice"],
-            ["#setari", "Setări"],
-            ["#gospodarie", "Gospodărie & invitații"],
-            ["#instalare", "Instalare pe telefon (PWA)"],
-            ["#securitate", "Securitate & confidențialitate"],
+            ["#baza", "💡 Câteva cuvinte simple"],
+            ["#acasa", "🏠 Pagina de start"],
+            ["#adaug", "➕ Cum notez un venit sau o cheltuială"],
+            ["#plan", "🗓️ Îmi fac un plan pentru lună"],
+            ["#recurente", "🔁 Plăți care se repetă lună de lună"],
+            ["#rate", "💳 Cumpărături în rate"],
+            ["#bugete", "🎯 Limite pe categorii (bugete)"],
+            ["#economii", "🐷 Pun bani deoparte"],
+            ["#grafice", "📊 Văd totul în grafice"],
+            ["#setari", "⚙️ Personalizez aplicația"],
+            ["#familie", "👨‍👩‍👧 Familia mea în aplicație"],
+            ["#telefon", "📲 Pun aplicația pe telefon"],
+            ["#siguranta", "🔒 Sunt banii mei în siguranță?"],
           ].map(([href, label]) => (
             <li key={href}>
               <a href={href} className="text-primary hover:underline">
@@ -51,200 +63,189 @@ export default function HelpPage() {
         </ul>
       </nav>
 
-      <Section id="concepte" title="Concepte de bază">
-        <P>
-          Aplicația ține evidența banilor unei <B>gospodării</B> (una sau mai multe persoane care
-          împart aceleași finanțe). Tot ce adaugi — venituri, cheltuieli, planuri — aparține
-          gospodăriei, iar membrii ei văd aceleași date.
-        </P>
+      <Section id="baza" title="💡 Câteva cuvinte simple">
+        <P>Ca să ne înțelegem ușor, iată ce înseamnă câțiva termeni pe care îi vei vedea:</P>
         <Ul>
-          <Li><B>Venit</B> = bani care intră (salariu, bonus, cadou).</Li>
-          <Li><B>Cheltuială</B> = bani care ies.</Li>
+          <Li><B>Venit</B> — bani care intră: salariu, un bonus, un cadou.</Li>
+          <Li><B>Cheltuială</B> — bani care ies: cumpărături, facturi, o cafea.</Li>
           <Li>
-            <B>Sold</B> = câți bani ai la un moment dat. Se reportează („carry-over"): soldul unei
-            luni pornește de la ce a rămas din lunile anterioare.
+            <B>Sold</B> — câți bani ai la un moment dat. Ce-ți rămâne la sfârșitul unei luni
+            trece automat în luna următoare, ca într-un portofel.
           </Li>
-          <Li><B>Categorie</B> = eticheta unei tranzacții (Mâncare, Chirie, Salariu…).</Li>
-          <Li><B>Metodă de plată</B> = numerar, card etc.</Li>
-        </Ul>
-      </Section>
-
-      <Section id="dashboard" title="Pagina principală (dashboard)">
-        <P>Prima pagină îți arată situația lunii curente. De sus în jos:</P>
-        <Ul>
-          <Li><B>Selector de lună</B> — săgețile ← → te mută între luni.</Li>
+          <Li><B>Categorie</B> — eticheta unei cheltuieli: Mâncare, Chirie, Transport…</Li>
           <Li>
-            <B>Lunar / Săptămânal</B> — comută modul de afișare. „Săptămânal" sparge luna în
-            blocuri de 7 zile, fiecare cu venituri/cheltuieli/sold și top categorii.
-          </Li>
-          <Li>
-            <B>Carduri sumar</B> — Venituri, Cheltuieli și Sold la finalul lunii (cu reportul din
-            lunile anterioare + fluxul lunii).
-          </Li>
-          <Li>
-            <B>Digest</B> — pe scurt: cât ți-a intrat luna asta, cât mai ai de plătit din recurențe
-            și rate până la finalul lunii și soldul curent.
-          </Li>
-          <Li><B>Plan lunar</B>, <B>Recurențe</B>, <B>Rate</B>, <B>Bugete</B>, <B>Grafice</B>, <B>Obiective</B> — scurtături.</Li>
-          <Li><B>+ Adaugă</B> — butonul rotund care deschide formularul rapid de tranzacție.</Li>
-        </Ul>
-      </Section>
-
-      <Section id="tranzactii" title="Tranzacții">
-        <P>Inima aplicației. Din <B>/transactions</B> vezi lista grupată pe zile, cu sume colorate
-          (verde venit, roșu cheltuială) și autorul fiecăreia.</P>
-        <Ul>
-          <Li>
-            <B>Adăugare rapidă</B> — apeși „+ Adaugă": cursorul e direct pe sumă, cu tastatură
-            numerică; comuți venit/cheltuială (filtrează categoriile), data e azi implicit.
-          </Li>
-          <Li>
-            <B>„La fel ca data trecută"</B> — chips cu combinațiile tale recente (categorie + sumă)
-            care precompletează formularul dintr-o atingere.
-          </Li>
-          <Li><B>Editare</B> — atingi o tranzacție pentru a-i schimba suma, categoria, data, nota.</Li>
-          <Li><B>Ștergere cu Undo</B> — ștergerea e reversibilă imediat (buton „Anulează").</Li>
-          <Li><B>Duplică</B> — creezi rapid o copie a unei tranzacții.</Li>
-          <Li>
-            <B>Filtre & căutare</B> — pe lună, tip, categorie, metodă; plus căutare liberă după notă
-            sau sumă.
+            <B>Gospodărie</B> — voi, cei care împărțiți aceiași bani (o familie, o casă). Toți
+            vedeți aceleași cheltuieli.
           </Li>
         </Ul>
       </Section>
 
-      <Section id="plan" title="Plan lunar">
+      <Section id="acasa" title="🏠 Pagina de start">
         <P>
-          La <B>/plan</B> îți <B>planifici</B> luna: împarți banii disponibili pe cheltuieli, înainte
-          să-i cheltui. Alege luna din selector (poți planifica și luna viitoare).
+          Când deschizi aplicația, prima pagină îți arată cum stai luna aceasta, dintr-o privire:
         </P>
         <Ul>
           <Li>
-            <B>Venituri</B> — adaugi sursele de venit ale lunii. Dacă bifezi „recurent", devine și o
-            recurență (gestionabilă din Recurențe).
+            <B>Săgețile de lună</B> (← →) te plimbă între luni, ca să vezi și trecutul.
           </Li>
           <Li>
-            <B>Cheltuieli planificate (alocări)</B> — cât aloci fiecărei categorii. Bara de sus arată
-            Venit → Alocat → Nealocat, cu alerte (deficit / „tot venitul e alocat").
+            <B>Venituri și Cheltuieli</B> — două căsuțe colorate: verde pentru banii care au
+            intrat, roșu pentru cei care au ieșit.
           </Li>
           <Li>
-            <B>„Plătit"</B> — când chiar plătești ceva, bifezi alocarea: abia atunci devine o
-            cheltuială reală. Debifezi și dispare. Așa planul nu se amestecă cu realitatea până nu
-            confirmi.
-          </Li>
-          <Li><B>Prioritizare</B> — muți alocările cu ↑/↓ (ce plătești întâi).</Li>
-          <Li>
-            <B>Report (rollover)</B> — ce a rămas din luna trecută se adaugă la „disponibil" luna
-            asta.
+            <B>Soldul lunii</B> — cât îți rămâne la sfârșit, ținând cont și de ce a mai rămas din
+            lunile trecute.
           </Li>
           <Li>
-            <B>Două venituri / persoană</B> — fiecare venit poate fi atribuit unei persoane;
-            aplicația arată cine cât a adus.
+            <B>Pe scurt</B> — o frază care-ți spune cât ți-a intrat și cât mai ai de plătit până
+            la finalul lunii.
           </Li>
           <Li>
-            <B>Șabloane</B> — la <B>/plan/templates</B> salvezi un tipar de alocări (sume fixe sau
-            procent din disponibil) și-l aplici într-o atingere pe orice lună.
+            <B>Scurtăturile colorate</B> (Plan, Recurențe, Rate, Grafice, Obiective) te duc la
+            fiecare parte a aplicației.
+          </Li>
+        </Ul>
+        <P>
+          Jos ai mereu bara cu <B>Acasă</B>, <B>Tranzacții</B>, butonul <B>➕</B>, <B>Bugete</B> și{" "}
+          <B>Setări</B> — de acolo ajungi rapid oriunde.
+        </P>
+      </Section>
+
+      <Section id="adaug" title="➕ Cum notez un venit sau o cheltuială">
+        <P>Cel mai des lucru pe care-l vei face. Durează câteva secunde:</P>
+        <Ul>
+          <Li>Apasă butonul <B>➕</B> din mijlocul barei de jos.</Li>
+          <Li>Scrie <B>suma</B> (tastatura pornește direct pe cifre).</Li>
+          <Li>Alege dacă e <B>cheltuială</B> sau <B>venit</B>.</Li>
+          <Li>Atinge <B>categoria</B> potrivită (cerculețele colorate).</Li>
+          <Li>Data e azi, dar o poți schimba. Poți adăuga și o notă („cadou mama”).</Li>
+        </Ul>
+        <P>Bune de știut:</P>
+        <Ul>
+          <Li>
+            <B>Ai greșit?</B> Atingi tranzacția în listă și o modifici, sau o ștergi (apare
+            imediat un buton „Anulează” dacă te răzgândești).
           </Li>
           <Li>
-            <B>Pe săptămâni</B> — comuți „Listă / Săptămâni": fiecare alocare primește o săptămână
-            (S1…S5 sau „oricând"), iar planul se împarte pe săptămâni cu buget disponibil pe fiecare
-            și alertă de depășire.
+            <B>Se repetă des aceeași cheltuială?</B> Aplicația îți propune combinațiile tale
+            recente ca s-o adaugi dintr-o atingere.
           </Li>
           <Li>
-            <B>Alocare către economii</B> — o alocare poate ținti un obiectiv de economisire; când o
-            bifezi „plătit", crește obiectivul (fără să creeze o cheltuială).
+            În pagina <B>Tranzacții</B> vezi tot ce ai notat, grupat pe zile, și poți căuta sau
+            filtra (după lună, categorie, persoană).
           </Li>
         </Ul>
       </Section>
 
-      <Section id="recurente" title="Recurențe">
+      <Section id="plan" title="🗓️ Îmi fac un plan pentru lună">
         <P>
-          La <B>/recurring</B> definești cheltuieli care se repetă lunar (abonamente, chirie),
-          cu ziua din lună. Aplicația le generează automat („lazy", la deschiderea dashboard-ului),
-          fără să le dubleze. Poți opri/reactiva fiecare recurență.
+          Planul te ajută să <B>împarți banii dinainte</B>, ca să știi cât dai pe fiecare lucru
+          înainte să-i cheltui — nu după.
         </P>
-        <P>
-          Veniturile recurente servesc doar la precompletarea planului — nu creează automat
-          tranzacții (ca să nu se dubleze cu venitul real pe care-l adaugi când chiar intră banii).
-        </P>
-      </Section>
-
-      <Section id="rate" title="Rate / angajamente">
-        <P>
-          La <B>/installments</B> introduci o cumpărare în rate (sumă totală + număr de rate → rata
-          se calculează). Vezi progresul, cât ai plătit și restul. Ratele scadente se generează
-          automat; la ultima rată planul se închide singur.
-        </P>
-      </Section>
-
-      <Section id="bugete" title="Bugete">
-        <P>
-          La <B>/budgets</B> pui o limită lunară pe o categorie. Vezi progresul (cât ai cheltuit din
-          limită) și primești alertă la depășire. Comparația buget vs. real e și în Grafice.
-        </P>
-      </Section>
-
-      <Section id="economii" title="Obiective de economisire">
-        <P>
-          La <B>/savings</B> creezi obiective (ex: „Vacanță 5000 lei"). Adaugi sau retragi
-          contribuții, vezi progresul în procente și când l-ai atins. Poți alimenta un obiectiv și
-          direct din planul lunar.
-        </P>
-      </Section>
-
-      <Section id="grafice" title="Grafice">
-        <P>La <B>/reports</B>, cu selector de lună, ai o imagine completă:</P>
         <Ul>
-          <Li><B>Proiecție final de lună</B> — în ritmul actual, cât vei cheltui până la sfârșit.</Li>
-          <Li><B>Cheltuieli pe categorie</B> — donut cu procente.</Li>
-          <Li><B>Cumulativ vs luna trecută</B> — ești peste sau sub ritmul de luna trecută.</Li>
-          <Li><B>Venituri vs cheltuieli</B> — evoluție pe 6 luni.</Li>
-          <Li><B>Sold cumulat</B> — traiectoria averii pe 6 luni.</Li>
-          <Li><B>Rată de economisire</B> — cât % din venit rămâne, lună de lună.</Li>
-          <Li><B>Fixe vs variabile</B> — cât e „fix" (recurențe + rate) vs discreționar.</Li>
-          <Li><B>Buget planificat vs real</B>, <B>cheltuieli pe zi</B>, <B>pe zile ale săptămânii</B>.</Li>
-          <Li><B>Top cheltuieli</B> ale lunii și <B>progres economii</B>.</Li>
-        </Ul>
-      </Section>
-
-      <Section id="setari" title="Setări">
-        <P>La <B>/settings</B> personalizezi aplicația:</P>
-        <Ul>
-          <Li><B>Categorii</B> — venit/cheltuială, cu emoji și culoare din paletă.</Li>
-          <Li><B>Metode de plată</B> — numerar, card etc.</Li>
-          <Li><B>Profil</B> — numele tău afișat (apare ca autor pe tranzacții).</Li>
-        </Ul>
-      </Section>
-
-      <Section id="gospodarie" title="Gospodărie & invitații">
-        <P>
-          La <B>/settings/household</B> (dacă ești owner) vezi membrii și poți genera un cod/link de
-          invitație (cu expirare). Cine îl folosește se alătură automat gospodăriei. Datele sunt
-          strict izolate: o gospodărie nu vede niciodată datele alteia.
-        </P>
-      </Section>
-
-      <Section id="instalare" title="Instalare pe telefon (PWA)">
-        <P>
-          Aplicația se instalează ca o aplicație nativă: din meniul browserului alegi „Adaugă pe
-          ecranul principal" (Add to Home Screen). Primești iconiță proprie și funcționează și cu
-          semnal slab.
-        </P>
-      </Section>
-
-      <Section id="securitate" title="Securitate & confidențialitate">
-        <Ul>
-          <Li>Conturile se creează doar cu un <B>cod de invitație</B> — nu există înregistrare publică.</Li>
-          <Li>Datele fiecărei gospodării sunt izolate la nivel de bază de date (RLS).</Li>
+          <Li>Treci <B>veniturile</B> pe care le aștepți luna asta.</Li>
           <Li>
-            Parolele conturilor noi cer minim 8 caractere, cu literă și cifră. La prea multe
-            încercări greșite de login, contul e limitat temporar.
+            Împarți banii pe categorii: cât vrei să dai pe mâncare, cât pe facturi, cât pe
+            distracție. Sus vezi cât ai împărțit și cât ți-a mai rămas nealocat.
           </Li>
-          <Li>Conexiunea e doar prin HTTPS, cu antete de securitate (anti-clickjacking, CSP).</Li>
+          <Li>
+            Când chiar plătești ceva, <B>bifezi</B> — abia atunci devine o cheltuială reală. Așa
+            planul rămâne curat până confirmi tu.
+          </Li>
+          <Li>Poți muta lucrurile mai sus sau mai jos, după ce plătești întâi.</Li>
+          <Li>
+            Dacă-ți iese un plan bun, îl <B>salvezi ca șablon</B> și-l refolosești luna viitoare
+            dintr-o atingere.
+          </Li>
+        </Ul>
+      </Section>
+
+      <Section id="recurente" title="🔁 Plăți care se repetă lună de lună">
+        <P>
+          Pentru lucruri fixe — chirie, abonamente, internet. Le treci o singură dată, spui în ce
+          zi a lunii vin, iar aplicația ți le notează automat de fiecare dată, fără să le dublezi.
+          Poți opri sau reporni oricare, oricând.
+        </P>
+      </Section>
+
+      <Section id="rate" title="💳 Cumpărături în rate">
+        <P>
+          Ai luat ceva în rate? Treci suma totală și în câte rate o plătești, iar aplicația
+          calculează rata lunară. Vezi mereu cât ai plătit și cât mai ai. Când termini, se închide
+          singură.
+        </P>
+      </Section>
+
+      <Section id="bugete" title="🎯 Limite pe categorii (bugete)">
+        <P>
+          Vrei să nu depășești un anumit ban pe mâncare sau distracție? Pui o limită lunară pe
+          categoria aceea. O bară colorată îți arată cât ai consumat, se face galbenă când te
+          apropii și roșie dacă ai depășit.
+        </P>
+      </Section>
+
+      <Section id="economii" title="🐷 Pun bani deoparte">
+        <P>
+          Îți faci obiective („Vacanță — 5000 lei”, „Fond de urgență”) și pui bani în ele când
+          poți. Vezi cât ai strâns și cât mai ai până la țintă. Poți alimenta un obiectiv și direct
+          din planul lunar.
+        </P>
+      </Section>
+
+      <Section id="grafice" title="📊 Văd totul în grafice">
+        <P>
+          Dacă îți plac imaginile mai mult decât cifrele, aici ai totul desenat: pe ce categorii
+          dai cei mai mulți bani, cum stai față de luna trecută, cât reușești să economisești și
+          încotro se îndreaptă banii tăi. E locul perfect pentru „unde mi s-au dus banii?”.
+        </P>
+      </Section>
+
+      <Section id="setari" title="⚙️ Personalizez aplicația">
+        <P>Faci aplicația să arate ca a ta:</P>
+        <Ul>
+          <Li>
+            <B>Categorii</B> — creezi-le pe ale tale, cu emoji și culoare (apeși cerculețul de
+            culoare și alegi ce vrei).
+          </Li>
+          <Li><B>Metode de plată</B> — numerar, card, Revolut… cum plătești tu.</Li>
+          <Li><B>Profil</B> — numele tău, care apare lângă tranzacțiile pe care le adaugi.</Li>
+          <Li>Tot din Setări te poți și <B>deconecta</B> din cont.</Li>
+        </Ul>
+      </Section>
+
+      <Section id="familie" title="👨‍👩‍👧 Familia mea în aplicație">
+        <P>
+          Poți folosi aplicația împreună cu partenerul/familia. Persoana care a creat gospodăria
+          poate invita pe alții printr-un cod sau link. Cine îl folosește intră în aceeași casă și
+          vedeți împreună aceleași cheltuieli — util când amândoi cumpărați lucruri pentru casă.
+        </P>
+      </Section>
+
+      <Section id="telefon" title="📲 Pun aplicația pe telefon">
+        <P>
+          Poți adăuga aplicația pe ecranul telefonului, ca să se deschidă cu o iconiță proprie, ca
+          orice altă aplicație. Pe pagina de start apare un buton care te ajută să faci asta;
+          pe iPhone folosești butonul de „Share” din Safari → „Adaugă la ecranul principal”.
+        </P>
+      </Section>
+
+      <Section id="siguranta" title="🔒 Sunt banii mei în siguranță?">
+        <Ul>
+          <Li>
+            Datele gospodăriei tale sunt <B>private</B> — nicio altă familie nu le poate vedea,
+            niciodată.
+          </Li>
+          <Li>Nu se poate intra fără cont, iar conturile se fac doar pe bază de invitație.</Li>
+          <Li>
+            Aplicația îți cere o parolă sigură și blochează temporar contul dacă cineva încearcă
+            să ghicească parola de prea multe ori.
+          </Li>
+          <Li>Legătura cu aplicația e mereu criptată.</Li>
         </Ul>
       </Section>
 
       <p className="text-center text-xs text-muted">
-        Ai o întrebare la care ghidul nu răspunde? Spune-i administratorului gospodăriei.
+        Ai o întrebare la care ghidul nu răspunde? Întreabă persoana care se ocupă de gospodărie.
       </p>
     </main>
   );
