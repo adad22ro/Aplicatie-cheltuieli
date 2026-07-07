@@ -21,6 +21,21 @@ export async function getMonthlySummary(month: string): Promise<MonthlySummary> 
   const start = monthStart(month);
   const end = nextMonthStart(month);
 
+  // Cale rapidă: agregare în DB (un singur rând). Vezi migrarea get_monthly_summary.
+  const { data: agg, error } = await supabase.rpc("get_monthly_summary", {
+    p_start: start,
+    p_end: end,
+  });
+  if (!error && agg && agg.length > 0) {
+    const row = agg[0]!;
+    const income = Number(row.income) || 0;
+    const expense = Number(row.expense) || 0;
+    const carryOver = Number(row.carry_over) || 0;
+    const net = income - expense;
+    return { income, expense, net, carryOver, balance: carryOver + net };
+  }
+
+  // Fallback (migrarea încă neaplicată): aducem coloanele mici și calculăm în JS.
   const { data } = await supabase
     .from("transactions")
     .select("amount, type, date")
@@ -53,6 +68,8 @@ export type MonthDigest = {
   balance: number; // soldul la finalul lunii (carry-over + flux)
   upcomingAmount: number; // suma recurențelor + ratelor rămase de plătit până la finalul lunii
   upcomingCount: number; // câte astfel de plăți urmează
+  weekAmount: number; // din acestea, cât e scadent în următoarele 7 zile
+  weekCount: number; // câte plăți sunt scadente în următoarele 7 zile
 };
 
 /**
@@ -76,6 +93,8 @@ export async function getMonthDigest(
       balance: summary.balance,
       upcomingAmount: 0,
       upcomingCount: 0,
+      weekAmount: 0,
+      weekCount: 0,
     };
   }
 
@@ -98,27 +117,36 @@ export async function getMonthDigest(
       .is("deleted_at", null),
   ]);
 
+  const weekEnd = today + 7; // scadent în următoarele 7 zile din luna curentă
+
   let upcomingAmount = 0;
   let upcomingCount = 0;
+  let weekAmount = 0;
+  let weekCount = 0;
+
+  const consider = (amt: number, dayOfMonth: number) => {
+    const due = Math.min(dayOfMonth, lastDay);
+    if (due <= today) return;
+    upcomingAmount += amt;
+    upcomingCount += 1;
+    if (due <= weekEnd) {
+      weekAmount += amt;
+      weekCount += 1;
+    }
+  };
 
   for (const r of recurring.data ?? []) {
-    const due = Math.min(r.day_of_month, lastDay);
-    if (due > today) {
-      upcomingAmount += typeof r.amount === "string" ? Number(r.amount) : r.amount;
-      upcomingCount += 1;
-    }
+    consider(typeof r.amount === "string" ? Number(r.amount) : r.amount, r.day_of_month);
   }
 
   for (const p of installments.data ?? []) {
     if (p.paid_installments >= p.total_installments) continue;
-    const due = Math.min(p.day_of_month, lastDay);
-    if (due > today) {
-      upcomingAmount +=
-        typeof p.installment_amount === "string"
-          ? Number(p.installment_amount)
-          : p.installment_amount;
-      upcomingCount += 1;
-    }
+    consider(
+      typeof p.installment_amount === "string"
+        ? Number(p.installment_amount)
+        : p.installment_amount,
+      p.day_of_month,
+    );
   }
 
   return {
@@ -127,5 +155,7 @@ export async function getMonthDigest(
     balance: summary.balance,
     upcomingAmount: Math.round(upcomingAmount * 100) / 100,
     upcomingCount,
+    weekAmount: Math.round(weekAmount * 100) / 100,
+    weekCount,
   };
 }

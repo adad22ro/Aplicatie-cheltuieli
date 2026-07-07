@@ -202,6 +202,21 @@ export default async function DashboardPage({
         </div>
       ) : null}
 
+      {/* Reamintire: plăți scadente în următoarele 7 zile */}
+      {digest.isCurrentMonth && digest.weekCount > 0 ? (
+        <div className="tint-warning flex items-center gap-3 rounded-2xl border p-4">
+          <span aria-hidden className="text-2xl">⏰</span>
+          <p className="text-sm">
+            Săptămâna asta mai ai de plătit{" "}
+            <span className="font-bold tabular-nums text-foreground">
+              {ron.format(digest.weekAmount)}
+            </span>{" "}
+            ({digest.weekCount} {digest.weekCount === 1 ? "plată" : "plăți"} din
+            recurențe/rate).
+          </p>
+        </div>
+      ) : null}
+
       {/* Scurtături — rând compact de pastile scrollabile (varianta 1a) */}
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {[

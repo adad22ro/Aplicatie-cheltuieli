@@ -1,11 +1,33 @@
 import { z } from "zod";
 
 /**
+ * Normalizează o sumă scrisă „ca omul": acceptă virgulă sau punct ca separator zecimal
+ * și separatori de mii. Exemple corecte: „24,50", „24.50", „1.234,50", „1,234.50", „1 234,50".
+ * Regula: dacă apar ambii separatori, ultimul e cel zecimal.
+ */
+export function parseAmount(v: unknown): unknown {
+  if (typeof v !== "string") return v;
+  let s = v.replace(/\s/g, "");
+  if (s === "") return v;
+  const hasComma = s.includes(",");
+  const hasDot = s.includes(".");
+  if (hasComma && hasDot) {
+    s =
+      s.lastIndexOf(",") > s.lastIndexOf(".")
+        ? s.replace(/\./g, "").replace(",", ".") // „1.234,50" → 1234.50
+        : s.replace(/,/g, ""); // „1,234.50" → 1234.50
+  } else if (hasComma) {
+    s = s.replace(",", "."); // „24,50" → 24.50
+  }
+  return Number(s);
+}
+
+/**
  * Sumă: acceptă virgulă sau punct (tastatură numerică RO), o convertește în număr.
  * Trebuie > 0 (aliniat cu check-ul din DB `amount > 0`).
  */
 const amount = z.preprocess(
-  (v) => (typeof v === "string" ? Number(v.replace(",", ".").trim()) : v),
+  parseAmount,
   z
     .number({ error: "Suma este obligatorie" })
     .positive("Suma trebuie să fie mai mare ca 0")
