@@ -10,6 +10,7 @@ const NAV = [
   { href: "/admin/activity", label: "Activitate" },
   { href: "/admin/security", label: "Securitate" },
   { href: "/admin/debug", label: "Debug" },
+  { href: "/admin/curs", label: "📚 Curs" },
 ];
 
 /** Layout protejat: doar ADMIN_EMAIL trece de `requireAdmin`. */
