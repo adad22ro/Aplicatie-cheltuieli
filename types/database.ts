@@ -178,6 +178,127 @@ export type Database = {
           },
         ]
       }
+      debt_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          debt_id: string
+          deleted_at: string | null
+          household_id: string
+          id: string
+          note: string | null
+          paid_date: string
+          transaction_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          debt_id: string
+          deleted_at?: string | null
+          household_id: string
+          id?: string
+          note?: string | null
+          paid_date?: string
+          transaction_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          debt_id?: string
+          deleted_at?: string | null
+          household_id?: string
+          id?: string
+          note?: string | null
+          paid_date?: string
+          transaction_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "debt_payments_debt_id_fkey"
+            columns: ["debt_id"]
+            isOneToOne: false
+            referencedRelation: "debts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "debt_payments_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "debt_payments_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      debts: {
+        Row: {
+          amount: number
+          borrowed_date: string
+          created_at: string
+          deleted_at: string | null
+          direction: Database["public"]["Enums"]["debt_direction"]
+          household_id: string
+          id: string
+          note: string | null
+          person: string
+          settled_at: string | null
+          transaction_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          borrowed_date?: string
+          created_at?: string
+          deleted_at?: string | null
+          direction?: Database["public"]["Enums"]["debt_direction"]
+          household_id: string
+          id?: string
+          note?: string | null
+          person: string
+          settled_at?: string | null
+          transaction_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          borrowed_date?: string
+          created_at?: string
+          deleted_at?: string | null
+          direction?: Database["public"]["Enums"]["debt_direction"]
+          household_id?: string
+          id?: string
+          note?: string | null
+          person?: string
+          settled_at?: string | null
+          transaction_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "debts_household_id_fkey"
+            columns: ["household_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "debts_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       household_invites: {
         Row: {
           code: string
@@ -282,6 +403,7 @@ export type Database = {
           id: string
           installment_amount: number
           is_active: boolean
+          is_variable: boolean
           name: string
           paid_installments: number
           payment_method_id: string | null
@@ -298,6 +420,7 @@ export type Database = {
           id?: string
           installment_amount: number
           is_active?: boolean
+          is_variable?: boolean
           name: string
           paid_installments?: number
           payment_method_id?: string | null
@@ -314,6 +437,7 @@ export type Database = {
           id?: string
           installment_amount?: number
           is_active?: boolean
+          is_variable?: boolean
           name?: string
           paid_installments?: number
           payment_method_id?: string | null
@@ -612,6 +736,7 @@ export type Database = {
           household_id: string
           id: string
           is_active: boolean
+          is_variable: boolean
           note: string | null
           payment_method_id: string | null
           type: Database["public"]["Enums"]["entry_type"]
@@ -626,6 +751,7 @@ export type Database = {
           household_id: string
           id?: string
           is_active?: boolean
+          is_variable?: boolean
           note?: string | null
           payment_method_id?: string | null
           type: Database["public"]["Enums"]["entry_type"]
@@ -640,6 +766,7 @@ export type Database = {
           household_id?: string
           id?: string
           is_active?: boolean
+          is_variable?: boolean
           note?: string | null
           payment_method_id?: string | null
           type?: Database["public"]["Enums"]["entry_type"]
@@ -926,11 +1053,29 @@ export type Database = {
       generate_due_installments: { Args: never; Returns: number }
       generate_due_recurring: { Args: never; Returns: number }
       get_monthly_summary: {
-        Args: { p_start: string; p_end: string }
-        Returns: { income: number; expense: number; carry_over: number }[]
+        Args: { p_end: string; p_start: string }
+        Returns: {
+          carry_over: number
+          expense: number
+          income: number
+        }[]
       }
       is_household_member: { Args: { hid: string }; Returns: boolean }
       is_household_owner: { Args: { hid: string }; Returns: boolean }
+      list_due_variable_installments: {
+        Args: never
+        Returns: {
+          due_date: string
+          source_id: string
+        }[]
+      }
+      list_due_variable_recurring: {
+        Args: never
+        Returns: {
+          due_date: string
+          source_id: string
+        }[]
+      }
       redeem_invite: { Args: { p_code: string }; Returns: string }
       rls_status: {
         Args: never
@@ -944,10 +1089,16 @@ export type Database = {
     }
     Enums: {
       allocation_mode: "fixed" | "percent"
+      debt_direction: "borrowed" | "lent"
       entry_type: "income" | "expense"
       household_role: "owner" | "member"
       recurring_frequency: "monthly"
-      transaction_source: "manual" | "recurring" | "installment" | "plan"
+      transaction_source:
+        | "manual"
+        | "recurring"
+        | "installment"
+        | "plan"
+        | "debt"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1079,10 +1230,17 @@ export const Constants = {
   public: {
     Enums: {
       allocation_mode: ["fixed", "percent"],
+      debt_direction: ["borrowed", "lent"],
       entry_type: ["income", "expense"],
       household_role: ["owner", "member"],
       recurring_frequency: ["monthly"],
-      transaction_source: ["manual", "recurring", "installment", "plan"],
+      transaction_source: [
+        "manual",
+        "recurring",
+        "installment",
+        "plan",
+        "debt",
+      ],
     },
   },
 } as const

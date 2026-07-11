@@ -58,11 +58,13 @@ export async function confirmVariableAction(
   if (kind === "recurring") {
     const { data: rec } = await supabase
       .from("recurring_transactions")
-      .select("type, category_id, payment_method_id, note, is_variable")
+      .select("type, category_id, payment_method_id, note, is_variable, manual_confirm")
       .eq("id", source_id)
       .is("deleted_at", null)
       .maybeSingle();
-    if (!rec || !rec.is_variable) return { error: "Recurența nu există." };
+    if (!rec || !(rec.is_variable || rec.manual_confirm)) {
+      return { error: "Recurența nu există." };
+    }
 
     const { error } = await supabase.from("transactions").insert({
       household_id: householdId,
@@ -80,11 +82,13 @@ export async function confirmVariableAction(
   } else {
     const { data: plan } = await supabase
       .from("installment_plans")
-      .select("category_id, payment_method_id, name, total_installments, is_variable")
+      .select("category_id, payment_method_id, name, total_installments, is_variable, manual_confirm")
       .eq("id", source_id)
       .is("deleted_at", null)
       .maybeSingle();
-    if (!plan || !plan.is_variable) return { error: "Planul de rate nu există." };
+    if (!plan || !(plan.is_variable || plan.manual_confirm)) {
+      return { error: "Planul de rate nu există." };
+    }
 
     const { error } = await supabase.from("transactions").insert({
       household_id: householdId,

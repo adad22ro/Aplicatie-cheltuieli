@@ -17,32 +17,33 @@ function Card({ item, done }: { item: InstallmentItem; done: boolean }) {
   const [expanded, setExpanded] = useState(false);
   return (
     <li className={`flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4 shadow-sm ${done ? "opacity-70" : ""}`}>
-      <div className="flex items-start justify-between gap-3">
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          aria-expanded={expanded}
-          className="min-w-0 text-left"
-        >
-          <p className="flex items-center gap-1 truncate font-semibold">
-            <span className={`text-xs text-muted transition-transform ${expanded ? "rotate-90" : ""}`}>
-              ›
-            </span>
-            <span className="truncate">{item.name}</span>
-          </p>
-          <p className="truncate pl-4 text-xs text-muted">
+      {/* Header clicabil: numele pe rând propriu, pe toată lățimea */}
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        className="flex w-full items-start gap-2 text-left"
+      >
+        <span className={`mt-0.5 shrink-0 text-xs text-muted transition-transform ${expanded ? "rotate-90" : ""}`}>
+          ›
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-semibold">{item.name}</span>
+          <span className="block truncate text-xs text-muted">
             {item.category?.icon ? `${item.category.icon} ` : ""}
             {item.category?.name ?? "—"} · ziua {item.day_of_month}
-            {item.is_variable ? " · rată variabilă" : ""}
-          </p>
-        </button>
-        <p className="shrink-0 text-right">
-          <span className="block font-semibold tabular-nums text-expense">
-            {ron.format(item.installment_amount)}
+            {item.is_variable ? " · rată variabilă" : item.manual_confirm ? " · confirm manual" : ""}
           </span>
-          <span className="text-xs text-muted">/ lună</span>
-        </p>
-      </div>
+        </span>
+      </button>
+
+      {/* Suma ratei, pe rândul ei */}
+      <p className="flex items-baseline justify-between text-sm">
+        <span className="text-muted">{item.is_variable ? "Rată (variabilă)" : "Rată / lună"}</span>
+        <span className="font-semibold tabular-nums text-expense">
+          {ron.format(item.installment_amount)}
+        </span>
+      </p>
 
       {expanded ? (
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 border-t border-border pt-2 text-xs">
@@ -70,6 +71,14 @@ function Card({ item, done }: { item: InstallmentItem; done: boolean }) {
           <dd>{item.day_of_month}</dd>
           <dt className="text-muted">Început</dt>
           <dd>{item.start_date}</dd>
+          <dt className="text-muted">Mod</dt>
+          <dd>
+            {item.is_variable
+              ? "Rată variabilă (o completezi tu)"
+              : item.manual_confirm
+                ? "Confirm manual (o marchezi tu)"
+                : "Automat"}
+          </dd>
           <dt className="text-muted">Stare</dt>
           <dd>{done ? "Finalizat" : "Activ"}</dd>
         </dl>

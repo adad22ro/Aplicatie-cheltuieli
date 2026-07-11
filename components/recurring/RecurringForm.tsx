@@ -21,6 +21,7 @@ export type RecurringInitial = {
   day_of_month: number;
   note: string | null;
   is_variable: boolean;
+  manual_confirm: boolean;
 };
 
 export function RecurringForm({
@@ -43,6 +44,7 @@ export function RecurringForm({
   const [type, setType] = useState<EntryType>(initial?.type ?? "expense");
   const [categoryId, setCategoryId] = useState<string>(initial?.category_id ?? "");
   const [isVariable, setIsVariable] = useState<boolean>(initial?.is_variable ?? false);
+  const [manualConfirm, setManualConfirm] = useState<boolean>(initial?.manual_confirm ?? false);
 
   const visibleCategories = useMemo(
     () => categories.filter((c) => c.type === type),
@@ -100,6 +102,26 @@ export function RecurringForm({
           </span>
         </span>
       </label>
+
+      {/* Confirmare manuală (pentru întârzieri) — irelevant dacă e deja variabilă */}
+      {!isVariable ? (
+        <label className="flex items-start gap-2 rounded-xl border border-border bg-surface p-3">
+          <input
+            type="checkbox"
+            name="manual_confirm"
+            checked={manualConfirm}
+            onChange={(e) => setManualConfirm(e.target.checked)}
+            className="mt-0.5"
+          />
+          <span className="text-sm">
+            <span className="font-medium">O confirm manual</span> (pot exista întârzieri)
+            <span className="mt-0.5 block text-xs text-muted">
+              Nu se generează automat. Apare la „De completat" cu suma precompletată, iar tu o
+              marchezi plătită/încasată când chiar are loc.
+            </span>
+          </span>
+        </label>
+      ) : null}
 
       <div className="grid grid-cols-2 gap-2" role="group" aria-label="Tip">
         <button

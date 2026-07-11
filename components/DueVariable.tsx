@@ -29,7 +29,8 @@ function DueRow({ item }: { item: DueVariableItem }) {
           <p className="truncate text-sm font-medium">{item.name}</p>
           <p className="truncate text-xs text-muted">
             Scadentă {fmtDate(item.due_date)} ·{" "}
-            {item.kind === "recurring" ? "recurență" : "rată"} variabilă
+            {item.kind === "recurring" ? "recurență" : "rată"}{" "}
+            {item.reason === "variable" ? "variabilă" : "(confirm manual)"}
           </p>
         </div>
       </div>
@@ -74,7 +75,8 @@ export function DueVariable({ items }: { items: DueVariableItem[] }) {
         </span>
       </div>
       <p className="text-xs text-muted">
-        Facturi/rate cu sumă variabilă ajunse la scadență. Introdu suma reală ca să intre în sold.
+        Plăți/încasări ajunse la scadență (sumă variabilă sau confirmate manual). Verifică suma și
+        confirmă ca să intre în sold.
       </p>
       <ul className="flex flex-col gap-2">
         {items.map((item) => (

@@ -9,6 +9,7 @@ export type RecurringItem = {
   day_of_month: number;
   is_active: boolean;
   is_variable: boolean;
+  manual_confirm: boolean;
   note: string | null;
   category_id: string;
   payment_method_id: string | null;
@@ -22,7 +23,7 @@ export async function listRecurring(): Promise<RecurringItem[]> {
   const { data } = await supabase
     .from("recurring_transactions")
     .select(
-      "id, amount, type, day_of_month, is_active, is_variable, note, category_id, payment_method_id, category:categories(name, icon, color), payment_method:payment_methods(name)",
+      "id, amount, type, day_of_month, is_active, is_variable, manual_confirm, note, category_id, payment_method_id, category:categories(name, icon, color), payment_method:payment_methods(name)",
     )
     .is("deleted_at", null)
     .order("is_active", { ascending: false })
@@ -38,6 +39,7 @@ export async function listRecurring(): Promise<RecurringItem[]> {
     day_of_month: r.day_of_month,
     is_active: r.is_active,
     is_variable: r.is_variable,
+    manual_confirm: r.manual_confirm,
     note: r.note,
     category_id: r.category_id,
     payment_method_id: r.payment_method_id,
@@ -51,7 +53,7 @@ export async function getRecurring(id: string) {
   const supabase = await createServerSupabaseClient();
   const { data } = await supabase
     .from("recurring_transactions")
-    .select("id, amount, type, category_id, payment_method_id, day_of_month, note, is_variable")
+    .select("id, amount, type, category_id, payment_method_id, day_of_month, note, is_variable, manual_confirm")
     .eq("id", id)
     .is("deleted_at", null)
     .maybeSingle();

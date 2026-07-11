@@ -33,6 +33,11 @@ const fields = {
     (v) => v === "on" || v === "true" || v === true,
     z.boolean(),
   ),
+  // Confirmare manuală: nu se generează automat, o marchezi tu plătită/încasată la scadență.
+  manual_confirm: z.preprocess(
+    (v) => v === "on" || v === "true" || v === true,
+    z.boolean(),
+  ),
 };
 
 export const createRecurringSchema = z.object(fields);

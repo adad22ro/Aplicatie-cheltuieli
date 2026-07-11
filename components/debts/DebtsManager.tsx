@@ -67,30 +67,34 @@ function DebtCard({ debt }: { debt: DebtItem }) {
         debt.is_settled ? "border-income/40 opacity-70" : "border-border"
       }`}
     >
-      <div className="flex items-start justify-between gap-3">
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          aria-expanded={expanded}
-          className="min-w-0 text-left"
-        >
-          <p className="flex items-center gap-1 font-semibold">
-            <span className={`text-xs text-muted transition-transform ${expanded ? "rotate-90" : ""}`}>
-              ›
-            </span>
-            <span className="truncate">{debt.person}</span>
-          </p>
-          <p className="truncate pl-4 text-xs text-muted">
+      {/* Header clicabil: numele persoanei pe rând propriu, lățime completă */}
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        className="flex w-full items-start gap-2 text-left"
+      >
+        <span className={`mt-0.5 shrink-0 text-xs text-muted transition-transform ${expanded ? "rotate-90" : ""}`}>
+          ›
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-semibold">{debt.person}</span>
+          <span className="block truncate text-xs text-muted">
             {owedByMe ? "Împrumutat de la" : "Împrumutat către"} · {fmtDate(debt.borrowed_date)}
-          </p>
-        </button>
-        <p className="shrink-0 text-right text-sm">
-          <span className={`block font-semibold tabular-nums ${owedByMe ? "text-expense" : "text-income"}`}>
+          </span>
+        </span>
+      </button>
+
+      {/* Rest de dat/primit, pe rândul ei */}
+      <p className="flex items-baseline justify-between text-sm">
+        <span className="text-muted">{debt.is_settled ? "Stare" : "Rest"}</span>
+        <span className="text-right">
+          <span className={`font-semibold tabular-nums ${owedByMe ? "text-expense" : "text-income"}`}>
             {debt.is_settled ? "Închisă" : ron.format(debt.remaining)}
           </span>
-          <span className="text-xs text-muted">din {ron.format(debt.amount)}</span>
-        </p>
-      </div>
+          <span className="ml-1 text-xs text-muted">din {ron.format(debt.amount)}</span>
+        </span>
+      </p>
 
       {/* Progres restituire */}
       <div className="h-2 overflow-hidden rounded-full bg-background">

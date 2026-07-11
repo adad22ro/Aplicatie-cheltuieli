@@ -6,11 +6,12 @@ import { listInstallments } from "@/lib/data/installments";
 
 export type DueVariableItem = {
   kind: "recurring" | "installment";
+  reason: "variable" | "manual"; // sumă variabilă (necunoscută) sau doar confirmare manuală
   source_id: string;
   due_date: string;
   name: string;
   icon: string | null;
-  estimate: number; // sumă estimată (prefill în formular)
+  estimate: number; // sumă precompletată (estimare la variabile, sumă fixă la manuale)
 };
 
 type Slot = { source_id: string; due_date: string };
@@ -37,6 +38,7 @@ export async function listDueVariable(): Promise<DueVariableItem[]> {
     if (!r) continue;
     items.push({
       kind: "recurring",
+      reason: r.is_variable ? "variable" : "manual",
       source_id: s.source_id,
       due_date: s.due_date,
       name: r.category?.name ?? r.note ?? "Recurență",
@@ -49,6 +51,7 @@ export async function listDueVariable(): Promise<DueVariableItem[]> {
     if (!i) continue;
     items.push({
       kind: "installment",
+      reason: i.is_variable ? "variable" : "manual",
       source_id: s.source_id,
       due_date: s.due_date,
       name: i.name,

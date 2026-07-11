@@ -178,6 +178,12 @@ export default function HelpPage() {
           la scadență îți apar la <B>„De completat”</B> pe pagina de start, unde treci suma reală a
           lunii. Suma pe care o pui la creare rămâne doar ca estimare.
         </P>
+        <P>
+          <B>Vrei să le marchezi tu, pentru întârzieri?</B> Dacă suma e fixă dar plata/încasarea
+          vine uneori mai târziu, bifează <B>„O confirm manual”</B>. Atunci nu se mai notează
+          automat, ci apare tot la <B>„De completat”</B> cu suma deja pusă — o confirmi când chiar
+          are loc.
+        </P>
       </Section>
 
       <Section id="rate" title="💳 Cumpărături în rate">
@@ -191,6 +197,11 @@ export default function HelpPage() {
           Bifează <B>„Rată variabilă”</B>: fiecare rată îți apare la <B>„De completat”</B> la
           scadență și-i treci tu suma reală. Numărul total de rate rămâne cel stabilit, iar planul
           se închide când le-ai plătit pe toate.
+        </P>
+        <P>
+          Ca la recurențe, ai și opțiunea <B>„O confirm manual”</B> (pentru rate fixe care pot veni
+          cu întârziere): fiecare rată apare la „De completat” cu suma pusă, iar tu o confirmi când
+          ai plătit-o.
         </P>
       </Section>
 
@@ -233,8 +244,9 @@ export default function HelpPage() {
       <Section id="completat" title="📝 „De completat” — facturi cu sumă variabilă">
         <P>
           Când ai recurențe sau rate cu <B>sumă variabilă</B> (facturi de curent/gaz, credit cu
-          dobândă variabilă), aplicația nu inventează suma. La scadență, pe pagina de start apare o
-          căsuță <B>„De completat”</B> cu lista lor.
+          dobândă variabilă) sau lucruri pe care ai ales <B>să le confirmi manual</B>, aplicația nu
+          le notează singură. La scadență, pe pagina de start apare o căsuță <B>„De completat”</B>{" "}
+          cu lista lor.
         </P>
         <Ul>
           <Li>Fiecare rând îți arată ce e și când a ajuns scadent.</Li>

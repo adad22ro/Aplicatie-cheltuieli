@@ -18,77 +18,82 @@ const ron = new Intl.NumberFormat("ro-RO", {
 function Row({ item }: { item: RecurringItem }) {
   const sign = item.type === "income" ? "+" : "−";
   const [expanded, setExpanded] = useState(false);
+  const tags = [
+    `Ziua ${item.day_of_month}`,
+    item.is_variable ? "sumă variabilă" : null,
+    item.manual_confirm ? "confirm manual" : null,
+    item.payment_method?.name ?? null,
+    item.note ?? null,
+  ].filter(Boolean);
   return (
     <li
-      className={`flex flex-col rounded-xl border border-border bg-surface p-3 ${
+      className={`flex flex-col gap-2 rounded-xl border border-border bg-surface p-3 ${
         item.is_active ? "" : "opacity-60"
       }`}
     >
-    <div className="flex items-center gap-3">
-      <span
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-base"
-        style={{ backgroundColor: item.category?.color ?? "var(--color-background)" }}
-        aria-hidden
-      >
-        {item.category?.icon ?? "•"}
-      </span>
+      {/* Header clicabil (icon + nume pe rând propriu, lățime completă) */}
       <button
         type="button"
         onClick={() => setExpanded((v) => !v)}
         aria-expanded={expanded}
-        className="min-w-0 flex-1 text-left"
+        className="flex w-full items-start gap-2 text-left"
       >
-        <p className="flex items-center gap-1 truncate font-medium">
-          <span className={`text-xs text-muted transition-transform ${expanded ? "rotate-90" : ""}`}>
-            ›
-          </span>
-          <span className="truncate">{item.category?.name ?? "Fără categorie"}</span>
-        </p>
-        <p className="truncate pl-4 text-xs text-muted">
-          Ziua {item.day_of_month}
-          {item.is_variable ? " · sumă variabilă" : ""}
-          {item.payment_method?.name ? ` · ${item.payment_method.name}` : ""}
-          {item.note ? ` · ${item.note}` : ""}
-        </p>
-      </button>
-      <span
-        className={`shrink-0 tabular-nums font-semibold ${
-          item.type === "income" ? "text-income" : "text-expense"
-        }`}
-      >
-        {sign}
-        {ron.format(item.amount)}
-      </span>
-      <div className="flex shrink-0 items-center gap-1">
-        <Link
-          href={`/recurring/${item.id}/edit`}
-          aria-label="Editează"
-          className="rounded-lg border border-border px-2 py-1 text-xs font-medium hover:bg-background"
+        <span
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-base"
+          style={{ backgroundColor: item.category?.color ?? "var(--color-background)" }}
+          aria-hidden
         >
-          ✎
-        </Link>
-        <form action={toggleRecurringAction}>
-          <input type="hidden" name="id" value={item.id} />
-          <input type="hidden" name="active" value={String(item.is_active)} />
-          <button
-            type="submit"
+          {item.category?.icon ?? "•"}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-medium">{item.category?.name ?? "Fără categorie"}</span>
+          <span className="block truncate text-xs text-muted">{tags.join(" · ")}</span>
+        </span>
+        <span className={`mt-1 shrink-0 text-xs text-muted transition-transform ${expanded ? "rotate-90" : ""}`}>
+          ›
+        </span>
+      </button>
+
+      {/* Rândul de jos: sumă + acțiuni */}
+      <div className="flex items-center justify-between gap-2">
+        <span
+          className={`tabular-nums font-semibold ${
+            item.type === "income" ? "text-income" : "text-expense"
+          }`}
+        >
+          {sign}
+          {ron.format(item.amount)}
+        </span>
+        <div className="flex shrink-0 items-center gap-1">
+          <Link
+            href={`/recurring/${item.id}/edit`}
+            aria-label="Editează"
             className="rounded-lg border border-border px-2 py-1 text-xs font-medium hover:bg-background"
           >
-            {item.is_active ? "Oprește" : "Pornește"}
-          </button>
-        </form>
-        <form action={deleteRecurringAction}>
-          <input type="hidden" name="id" value={item.id} />
-          <button
-            type="submit"
-            aria-label="Șterge"
-            className="rounded-lg border border-border px-2 py-1 text-xs font-medium text-expense hover:bg-background"
-          >
-            🗑
-          </button>
-        </form>
+            ✎
+          </Link>
+          <form action={toggleRecurringAction}>
+            <input type="hidden" name="id" value={item.id} />
+            <input type="hidden" name="active" value={String(item.is_active)} />
+            <button
+              type="submit"
+              className="rounded-lg border border-border px-2 py-1 text-xs font-medium hover:bg-background"
+            >
+              {item.is_active ? "Oprește" : "Pornește"}
+            </button>
+          </form>
+          <form action={deleteRecurringAction}>
+            <input type="hidden" name="id" value={item.id} />
+            <button
+              type="submit"
+              aria-label="Șterge"
+              className="rounded-lg border border-border px-2 py-1 text-xs font-medium text-expense hover:bg-background"
+            >
+              🗑
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
 
       {expanded ? (
         <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 border-t border-border pt-2 text-xs">
@@ -106,6 +111,14 @@ function Row({ item }: { item: RecurringItem }) {
           </dd>
           <dt className="text-muted">Ziua lunii</dt>
           <dd>{item.day_of_month}</dd>
+          <dt className="text-muted">Mod</dt>
+          <dd>
+            {item.is_variable
+              ? "Sumă variabilă (o completezi tu)"
+              : item.manual_confirm
+                ? "Confirm manual (o marchezi tu)"
+                : "Automat"}
+          </dd>
           {item.payment_method?.name ? (
             <>
               <dt className="text-muted">Metodă</dt>
