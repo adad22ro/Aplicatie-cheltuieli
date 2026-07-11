@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import {
   setBudgetAction,
@@ -22,6 +22,7 @@ function BudgetRow({ item }: { item: BudgetItem }) {
     undefined,
   );
 
+  const [expanded, setExpanded] = useState(false);
   const near = !item.over && item.pct >= 80;
   // Culoare bară: depășit → roșu, aproape (>80%) → ambră, altfel culoarea categoriei.
   const fillColor = item.over
@@ -32,8 +33,13 @@ function BudgetRow({ item }: { item: BudgetItem }) {
 
   return (
     <li className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-3">
-      {/* Nume pe rând propriu (lățime completă) */}
-      <span className="flex min-w-0 items-center gap-2 font-medium">
+      {/* Header clicabil: icon + nume pe rând propriu (lățime completă) */}
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        className="flex w-full items-center gap-2 text-left font-medium"
+      >
         <span
           className="grid h-8 w-8 shrink-0 place-items-center rounded-xl text-sm"
           style={{ backgroundColor: item.category?.color ?? "var(--color-background)" }}
@@ -41,8 +47,11 @@ function BudgetRow({ item }: { item: BudgetItem }) {
         >
           {item.category?.icon ?? "•"}
         </span>
-        <span className="min-w-0 flex-1">{item.category?.name ?? "—"}</span>
-      </span>
+        <span className="min-w-0 flex-1 truncate">{item.category?.name ?? "—"}</span>
+        <span className={`shrink-0 text-xs text-muted transition-transform ${expanded ? "rotate-90" : ""}`}>
+          ›
+        </span>
+      </button>
 
       {/* Consum / limită, pe rândul lor */}
       <p className="flex items-baseline justify-between text-sm">
@@ -64,6 +73,24 @@ function BudgetRow({ item }: { item: BudgetItem }) {
           ? `Depășit cu ${ron.format(-item.remaining)}`
           : `Rămas: ${ron.format(item.remaining)}`}
       </p>
+
+      {expanded ? (
+        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 border-t border-border pt-2 text-xs">
+          <dt className="text-muted">Categorie</dt>
+          <dd className="font-medium">
+            {item.category?.icon ? `${item.category.icon} ` : ""}
+            {item.category?.name ?? "—"}
+          </dd>
+          <dt className="text-muted">Limită lunară</dt>
+          <dd className="tabular-nums">{ron.format(item.amount)}</dd>
+          <dt className="text-muted">Cheltuit</dt>
+          <dd className="tabular-nums">{ron.format(item.spent)} ({item.pct}%)</dd>
+          <dt className="text-muted">{item.over ? "Depășit" : "Rămas"}</dt>
+          <dd className={`tabular-nums ${item.over ? "text-expense font-semibold" : ""}`}>
+            {ron.format(Math.abs(item.remaining))}
+          </dd>
+        </dl>
+      ) : null}
 
       <div className="flex items-center gap-2">
         <form action={formAction} className="flex flex-1 items-center gap-2">

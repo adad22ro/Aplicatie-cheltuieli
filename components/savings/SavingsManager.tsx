@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 
 import {
@@ -64,17 +64,28 @@ function Contribute({ id }: { id: string }) {
 }
 
 function GoalCard({ goal }: { goal: SavingsGoal }) {
+  const [expanded, setExpanded] = useState(false);
   return (
     <li className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4 shadow-sm">
-      {/* Nume pe rând propriu (lățime completă) */}
-      <div className="min-w-0">
-        <p className="font-semibold">{goal.name}</p>
-        {goal.deadline ? (
-          <p className="text-xs text-muted">
-            Termen: {new Date(goal.deadline).toLocaleDateString("ro-RO")}
-          </p>
-        ) : null}
-      </div>
+      {/* Header clicabil: numele pe rând propriu (lățime completă) */}
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        className="flex w-full items-start gap-2 text-left"
+      >
+        <span className="min-w-0 flex-1">
+          <span className="block font-semibold">{goal.name}</span>
+          {goal.deadline ? (
+            <span className="block text-xs text-muted">
+              Termen: {new Date(goal.deadline).toLocaleDateString("ro-RO")}
+            </span>
+          ) : null}
+        </span>
+        <span className={`mt-1 shrink-0 text-xs text-muted transition-transform ${expanded ? "rotate-90" : ""}`}>
+          ›
+        </span>
+      </button>
 
       {/* Strâns / țintă, pe rândul lor */}
       <p className="flex items-baseline justify-between text-sm">
@@ -84,6 +95,27 @@ function GoalCard({ goal }: { goal: SavingsGoal }) {
           <span className="text-muted"> / {ron.format(goal.target_amount)}</span>
         </span>
       </p>
+
+      {expanded ? (
+        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 border-t border-border pt-2 text-xs">
+          <dt className="text-muted">Obiectiv</dt>
+          <dd className="font-medium">{goal.name}</dd>
+          <dt className="text-muted">Țintă</dt>
+          <dd className="tabular-nums">{ron.format(goal.target_amount)}</dd>
+          <dt className="text-muted">Strâns</dt>
+          <dd className="tabular-nums">{ron.format(goal.current_amount)} ({goal.pct}%)</dd>
+          <dt className="text-muted">{goal.reached ? "Stare" : "Rămas"}</dt>
+          <dd className="tabular-nums">
+            {goal.reached ? "🎉 Atins" : ron.format(goal.remaining)}
+          </dd>
+          {goal.deadline ? (
+            <>
+              <dt className="text-muted">Termen</dt>
+              <dd>{new Date(goal.deadline).toLocaleDateString("ro-RO")}</dd>
+            </>
+          ) : null}
+        </dl>
+      ) : null}
 
       <div className="flex flex-col gap-1">
         <div className="h-2 overflow-hidden rounded-full bg-background">
