@@ -124,65 +124,75 @@ export function TransactionsList({
               return (
                 <li
                   key={t.id}
-                  className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3"
+                  className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-3"
                 >
-                  <span
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-base"
-                    style={{
-                      backgroundColor: t.category?.color ?? "var(--color-background)",
-                    }}
-                    aria-hidden
-                  >
-                    {t.category?.icon ?? "•"}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">
-                      {t.category?.name ?? "Fără categorie"}
-                    </p>
-                    <p className="truncate text-xs text-muted">
-                      {[t.payment_method?.name, t.note].filter(Boolean).join(" · ") || "—"}
-                    </p>
-                  </div>
-                  <span
-                    className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-background text-[10px] font-semibold text-muted"
-                    title={who}
-                  >
-                    {(who[0] ?? "?").toUpperCase()}
-                  </span>
-                  <span
-                    className={`shrink-0 tabular-nums font-semibold ${
-                      t.type === "income" ? "text-income" : "text-expense"
-                    }`}
-                  >
-                    {sign}
-                    {ron.format(t.amount)}
-                  </span>
-                  <div className="flex shrink-0 items-center gap-1">
-                    <Link
-                      href={`/transactions/${t.id}/edit`}
-                      aria-label="Editează"
-                      className="rounded-lg border border-border px-2 py-1 text-xs font-medium hover:bg-background"
+                  {/* Rând principal: icon + nume + sumă */}
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-base"
+                      style={{
+                        backgroundColor: t.category?.color ?? "var(--color-background)",
+                      }}
+                      aria-hidden
                     >
-                      ✎
-                    </Link>
-                    <form action={duplicateTransactionAction}>
-                      <input type="hidden" name="id" value={t.id} />
-                      <button
-                        type="submit"
-                        aria-label="Duplică"
+                      {t.category?.icon ?? "•"}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium">
+                        {t.category?.name ?? "Fără categorie"}
+                      </p>
+                      <p className="truncate text-xs text-muted">
+                        {[t.payment_method?.name, t.note].filter(Boolean).join(" · ") || "—"}
+                      </p>
+                    </div>
+                    <span
+                      className={`shrink-0 tabular-nums font-semibold ${
+                        t.type === "income" ? "text-income" : "text-expense"
+                      }`}
+                    >
+                      {sign}
+                      {ron.format(t.amount)}
+                    </span>
+                  </div>
+
+                  {/* Rând secundar: autor + acțiuni */}
+                  <div className="flex items-center justify-between gap-2 border-t border-border pt-2">
+                    <span className="flex items-center gap-1.5 text-xs text-muted">
+                      <span
+                        className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-background text-[10px] font-semibold"
+                        aria-hidden
+                      >
+                        {(who[0] ?? "?").toUpperCase()}
+                      </span>
+                      {who}
+                    </span>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <Link
+                        href={`/transactions/${t.id}/edit`}
+                        aria-label="Editează"
                         className="rounded-lg border border-border px-2 py-1 text-xs font-medium hover:bg-background"
                       >
-                        ⧉
+                        ✎
+                      </Link>
+                      <form action={duplicateTransactionAction}>
+                        <input type="hidden" name="id" value={t.id} />
+                        <button
+                          type="submit"
+                          aria-label="Duplică"
+                          className="rounded-lg border border-border px-2 py-1 text-xs font-medium hover:bg-background"
+                        >
+                          ⧉
+                        </button>
+                      </form>
+                      <button
+                        type="button"
+                        onClick={() => remove(t.id)}
+                        aria-label="Șterge"
+                        className="rounded-lg border border-border px-2 py-1 text-xs font-medium text-expense hover:bg-background"
+                      >
+                        🗑
                       </button>
-                    </form>
-                    <button
-                      type="button"
-                      onClick={() => remove(t.id)}
-                      aria-label="Șterge"
-                      className="rounded-lg border border-border px-2 py-1 text-xs font-medium text-expense hover:bg-background"
-                    >
-                      🗑
-                    </button>
+                    </div>
                   </div>
                 </li>
               );

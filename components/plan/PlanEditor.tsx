@@ -350,32 +350,8 @@ function AllocationRow({
         alloc.is_paid ? "border-income/40 bg-income/5" : "border-border bg-surface"
       }`}
     >
+    {/* Rând sus: bifă „plătit" + nume pe lățime completă (clicabil pt. detalii) */}
     <div className="flex items-center gap-2">
-      {/* Reordonare (prioritizare) — doar în vizualizarea listă */}
-      {showReorder ? (
-        <div className="flex flex-col">
-          <button
-            type="button"
-            aria-label="Mută mai sus"
-            disabled={index === 0}
-            onClick={() => onMove(index, -1)}
-            className="px-1 text-xs leading-none text-muted hover:text-foreground disabled:opacity-30"
-          >
-            ▲
-          </button>
-          <button
-            type="button"
-            aria-label="Mută mai jos"
-            disabled={index === count - 1}
-            onClick={() => onMove(index, 1)}
-            className="px-1 text-xs leading-none text-muted hover:text-foreground disabled:opacity-30"
-          >
-            ▼
-          </button>
-        </div>
-      ) : null}
-
-      {/* Toggle „plătit" */}
       <form action={togglePaidAction}>
         <input type="hidden" name="id" value={alloc.id} />
         <button
@@ -395,9 +371,9 @@ function AllocationRow({
         type="button"
         onClick={() => setExpanded((v) => !v)}
         aria-expanded={expanded}
-        className="flex flex-1 items-center gap-1 truncate text-left text-sm font-medium"
+        className="flex min-w-0 flex-1 items-center gap-1 text-left text-sm font-medium"
       >
-        <span className={`text-xs text-muted transition-transform ${expanded ? "rotate-90" : ""}`}>
+        <span className={`shrink-0 text-xs text-muted transition-transform ${expanded ? "rotate-90" : ""}`}>
           ›
         </span>
         <span className="truncate">
@@ -407,12 +383,47 @@ function AllocationRow({
         </span>
       </button>
 
-      {/* Selector de săptămână */}
+      <button
+        type="button"
+        aria-label="Șterge alocarea"
+        disabled={pending}
+        onClick={() => start(() => deleteAllocationAction(alloc.id))}
+        className="shrink-0 rounded-lg px-2 py-1 text-muted hover:text-expense"
+      >
+        ✕
+      </button>
+    </div>
+
+    {/* Rând jos: reordonare + săptămână + sumă */}
+    <div className="mt-2 flex items-center gap-2">
+      {showReorder ? (
+        <div className="flex shrink-0">
+          <button
+            type="button"
+            aria-label="Mută mai sus"
+            disabled={index === 0}
+            onClick={() => onMove(index, -1)}
+            className="px-1 text-sm leading-none text-muted hover:text-foreground disabled:opacity-30"
+          >
+            ▲
+          </button>
+          <button
+            type="button"
+            aria-label="Mută mai jos"
+            disabled={index === count - 1}
+            onClick={() => onMove(index, 1)}
+            className="px-1 text-sm leading-none text-muted hover:text-foreground disabled:opacity-30"
+          >
+            ▼
+          </button>
+        </div>
+      ) : null}
+
       <select
         aria-label={`Săptămâna pentru ${name}`}
         value={weekValue ?? ""}
         onChange={(e) => onWeek(e.target.value === "" ? null : Number(e.target.value))}
-        className="rounded-lg border border-border bg-background px-1.5 py-1.5 text-xs text-muted outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="shrink-0 rounded-lg border border-border bg-background px-1.5 py-1.5 text-xs text-muted outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <option value="">oricând</option>
         {Array.from({ length: weekCount }, (_, i) => i + 1).map((w) => (
@@ -433,17 +444,8 @@ function AllocationRow({
           const v = parseAmount(e.target.value);
           start(() => setAllocationAmountAction(alloc.id, v));
         }}
-        className="w-24 rounded-lg border border-border bg-background px-2 py-1.5 text-right text-sm font-semibold tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60"
+        className="min-w-0 flex-1 rounded-lg border border-border bg-background px-2 py-1.5 text-right text-sm font-semibold tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-60"
       />
-      <button
-        type="button"
-        aria-label="Șterge alocarea"
-        disabled={pending}
-        onClick={() => start(() => deleteAllocationAction(alloc.id))}
-        className="rounded-lg px-2 py-1 text-muted hover:text-expense"
-      >
-        ✕
-      </button>
     </div>
 
       {/* Panou de detalii — numele complet + info care nu încap pe rândul compact */}
