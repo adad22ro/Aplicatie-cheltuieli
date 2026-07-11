@@ -26,6 +26,7 @@ export type InstallmentInitial = {
   payment_method_id: string | null;
   day_of_month: number;
   start_date: string;
+  is_variable: boolean;
 };
 
 function todayLocal() {
@@ -57,6 +58,7 @@ export function InstallmentForm({
   const [count, setCount] = useState<string>(
     initial ? String(initial.total_installments) : "",
   );
+  const [isVariable, setIsVariable] = useState<boolean>(initial?.is_variable ?? false);
 
   const expenseCategories = categories.filter((c) => c.type === "expense");
   const noCategories = expenseCategories.length === 0;
@@ -129,9 +131,28 @@ export function InstallmentForm({
 
       {rata !== null ? (
         <p className="rounded-lg bg-background px-3 py-2 text-sm">
-          Rata lunară: <span className="font-semibold tabular-nums">{ron.format(rata)}</span>
+          {isVariable ? "Rata medie estimată: " : "Rata lunară: "}
+          <span className="font-semibold tabular-nums">{ron.format(rata)}</span>
         </p>
       ) : null}
+
+      {/* Rată variabilă (ex: credit cu dobândă variabilă) */}
+      <label className="flex items-start gap-2 rounded-xl border border-border bg-surface p-3">
+        <input
+          type="checkbox"
+          name="is_variable"
+          checked={isVariable}
+          onChange={(e) => setIsVariable(e.target.checked)}
+          className="mt-0.5"
+        />
+        <span className="text-sm">
+          <span className="font-medium">Rată variabilă</span> (ex: credit cu dobândă variabilă)
+          <span className="mt-0.5 block text-xs text-muted">
+            Nu se generează automat. Fiecare rată apare la „De completat" pe pagina principală și
+            introduci suma reală a lunii. Totalul de mai sus e doar o estimare.
+          </span>
+        </span>
+      </label>
 
       <div className="flex flex-col gap-1.5">
         <label htmlFor="category_id" className="text-sm font-medium">

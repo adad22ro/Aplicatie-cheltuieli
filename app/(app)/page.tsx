@@ -11,6 +11,8 @@ import { TransactionsList } from "@/components/transactions/TransactionsList";
 import { WeeklyView } from "@/components/WeeklyView";
 import { InstallButton } from "@/components/InstallButton";
 import { GenerateDueOnLoad } from "@/components/GenerateDueOnLoad";
+import { DueVariable } from "@/components/DueVariable";
+import { listDueVariable } from "@/lib/data/variable-due";
 import {
   normalizeMonth,
   prevMonth,
@@ -52,6 +54,7 @@ export default async function DashboardPage({
     weekly ? getWeeklyBreakdown(month) : Promise.resolve([]),
   ]);
   const digest = await getMonthDigest(month, summary);
+  const dueVariable = digest.isCurrentMonth ? await listDueVariable() : [];
 
   const atCurrent = isCurrentOrFuture(month);
 
@@ -216,6 +219,9 @@ export default async function DashboardPage({
           </p>
         </div>
       ) : null}
+
+      {/* De completat: facturi/rate cu sumă variabilă ajunse la scadență */}
+      <DueVariable items={dueVariable} />
 
       {/* Scurtături — rând compact de pastile scrollabile (varianta 1a) */}
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

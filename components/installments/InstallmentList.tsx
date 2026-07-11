@@ -33,6 +33,7 @@ function Card({ item, done }: { item: InstallmentItem; done: boolean }) {
           <p className="truncate pl-4 text-xs text-muted">
             {item.category?.icon ? `${item.category.icon} ` : ""}
             {item.category?.name ?? "—"} · ziua {item.day_of_month}
+            {item.is_variable ? " · rată variabilă" : ""}
           </p>
         </button>
         <p className="shrink-0 text-right">
@@ -52,10 +53,13 @@ function Card({ item, done }: { item: InstallmentItem; done: boolean }) {
             {item.category?.icon ? `${item.category.icon} ` : ""}
             {item.category?.name ?? "—"}
           </dd>
-          <dt className="text-muted">Total</dt>
+          <dt className="text-muted">{item.is_variable ? "Total estimat" : "Total"}</dt>
           <dd className="tabular-nums">{ron.format(item.total_amount)}</dd>
-          <dt className="text-muted">Rată / lună</dt>
-          <dd className="font-semibold tabular-nums">{ron.format(item.installment_amount)}</dd>
+          <dt className="text-muted">{item.is_variable ? "Rată medie est." : "Rată / lună"}</dt>
+          <dd className="font-semibold tabular-nums">
+            {ron.format(item.installment_amount)}
+            {item.is_variable ? <span className="ml-1 font-normal text-muted">(variabilă)</span> : null}
+          </dd>
           <dt className="text-muted">Rate</dt>
           <dd>
             {item.paid_installments}/{item.total_installments} plătite · {item.remaining_installments} rămase

@@ -20,6 +20,7 @@ export type RecurringInitial = {
   payment_method_id: string | null;
   day_of_month: number;
   note: string | null;
+  is_variable: boolean;
 };
 
 export function RecurringForm({
@@ -41,6 +42,7 @@ export function RecurringForm({
 
   const [type, setType] = useState<EntryType>(initial?.type ?? "expense");
   const [categoryId, setCategoryId] = useState<string>(initial?.category_id ?? "");
+  const [isVariable, setIsVariable] = useState<boolean>(initial?.is_variable ?? false);
 
   const visibleCategories = useMemo(
     () => categories.filter((c) => c.type === type),
@@ -66,7 +68,7 @@ export function RecurringForm({
 
       <div className="flex flex-col gap-1.5">
         <label htmlFor="amount" className="text-sm font-medium">
-          Sumă (RON)
+          {isVariable ? "Sumă estimată (RON)" : "Sumă (RON)"}
         </label>
         <input
           id="amount"
@@ -80,6 +82,24 @@ export function RecurringForm({
           className="rounded-xl border border-border bg-surface px-4 py-3 text-2xl font-semibold tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-primary"
         />
       </div>
+
+      {/* Sumă variabilă (ex: factură curent) */}
+      <label className="flex items-start gap-2 rounded-xl border border-border bg-surface p-3">
+        <input
+          type="checkbox"
+          name="is_variable"
+          checked={isVariable}
+          onChange={(e) => setIsVariable(e.target.checked)}
+          className="mt-0.5"
+        />
+        <span className="text-sm">
+          <span className="font-medium">Sumă variabilă</span> (ex: factură de curent/gaz)
+          <span className="mt-0.5 block text-xs text-muted">
+            Nu se generează automat. La scadență apare la „De completat" pe pagina principală și
+            introduci suma reală a lunii. Suma de mai sus e doar o estimare.
+          </span>
+        </span>
+      </label>
 
       <div className="grid grid-cols-2 gap-2" role="group" aria-label="Tip">
         <button

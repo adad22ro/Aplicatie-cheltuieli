@@ -28,6 +28,11 @@ const fields = {
     .max(200, "Nota e prea lungă (max 200)")
     .optional()
     .transform((v) => (v && v.length > 0 ? v : null)),
+  // Sumă variabilă (ex: factură curent): nu se generează automat, se completează la scadență.
+  is_variable: z.preprocess(
+    (v) => v === "on" || v === "true" || v === true,
+    z.boolean(),
+  ),
 };
 
 export const createRecurringSchema = z.object(fields);

@@ -12,6 +12,7 @@ export type InstallmentItem = {
   day_of_month: number;
   start_date: string;
   is_active: boolean;
+  is_variable: boolean;
   category_id: string;
   payment_method_id: string | null;
   category: { name: string; icon: string | null; color: string | null } | null;
@@ -33,7 +34,7 @@ export async function listInstallments(): Promise<InstallmentItem[]> {
   const { data } = await supabase
     .from("installment_plans")
     .select(
-      "id, name, total_amount, installment_amount, total_installments, paid_installments, day_of_month, start_date, is_active, category_id, payment_method_id, category:categories(name, icon, color)",
+      "id, name, total_amount, installment_amount, total_installments, paid_installments, day_of_month, start_date, is_active, is_variable, category_id, payment_method_id, category:categories(name, icon, color)",
     )
     .is("deleted_at", null)
     .order("is_active", { ascending: false })
@@ -53,6 +54,7 @@ export async function listInstallments(): Promise<InstallmentItem[]> {
       day_of_month: r.day_of_month,
       start_date: r.start_date,
       is_active: r.is_active,
+      is_variable: r.is_variable,
       category_id: r.category_id,
       payment_method_id: r.payment_method_id,
       category: one(r.category),
@@ -68,7 +70,7 @@ export async function getInstallment(id: string) {
   const { data } = await supabase
     .from("installment_plans")
     .select(
-      "id, name, total_amount, total_installments, category_id, payment_method_id, day_of_month, start_date",
+      "id, name, total_amount, total_installments, category_id, payment_method_id, day_of_month, start_date, is_variable",
     )
     .eq("id", id)
     .is("deleted_at", null)

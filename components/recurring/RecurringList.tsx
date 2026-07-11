@@ -46,6 +46,7 @@ function Row({ item }: { item: RecurringItem }) {
         </p>
         <p className="truncate pl-4 text-xs text-muted">
           Ziua {item.day_of_month}
+          {item.is_variable ? " · sumă variabilă" : ""}
           {item.payment_method?.name ? ` · ${item.payment_method.name}` : ""}
           {item.note ? ` · ${item.note}` : ""}
         </p>
@@ -98,8 +99,11 @@ function Row({ item }: { item: RecurringItem }) {
           </dd>
           <dt className="text-muted">Tip</dt>
           <dd>{item.type === "income" ? "Venit" : "Cheltuială"}</dd>
-          <dt className="text-muted">Sumă</dt>
-          <dd className="font-semibold tabular-nums">{ron.format(item.amount)}</dd>
+          <dt className="text-muted">{item.is_variable ? "Sumă estimată" : "Sumă"}</dt>
+          <dd className="font-semibold tabular-nums">
+            {ron.format(item.amount)}
+            {item.is_variable ? <span className="ml-1 font-normal text-muted">(variabilă)</span> : null}
+          </dd>
           <dt className="text-muted">Ziua lunii</dt>
           <dd>{item.day_of_month}</dd>
           {item.payment_method?.name ? (

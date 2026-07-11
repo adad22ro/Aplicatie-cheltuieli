@@ -30,6 +30,11 @@ const fields = {
     .min(1, "Ziua trebuie să fie între 1 și 31")
     .max(31, "Ziua trebuie să fie între 1 și 31"),
   start_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Dată invalidă"),
+  // Rată variabilă (ex: credit cu dobândă variabilă): suma fiecărei rate o completezi la scadență.
+  is_variable: z.preprocess(
+    (v) => v === "on" || v === "true" || v === true,
+    z.boolean(),
+  ),
 };
 
 export const createInstallmentSchema = z.object(fields);
