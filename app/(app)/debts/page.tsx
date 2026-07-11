@@ -25,8 +25,8 @@ export default async function DebtsPage() {
       </header>
 
       <p className="text-sm text-muted">
-        Bani împrumutați de la sau către alte persoane. Marchezi manual restituirile (parțial sau
-        „am înapoiat tot"). Nu afectează soldul lunii.
+        Bani împrumutați de la sau către alte persoane. Fiecare mișcare (împrumut și restituire)
+        intră automat în soldul lunii ca venit sau cheltuială, pe categoria „Datorii".
       </p>
 
       <DebtsManager debts={debts} />
