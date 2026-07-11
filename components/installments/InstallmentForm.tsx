@@ -156,25 +156,29 @@ export function InstallmentForm({
         </span>
       </label>
 
-      {/* Confirmare manuală (pentru întârzieri) — irelevant dacă e deja variabilă */}
-      {!isVariable ? (
-        <label className="flex items-start gap-2 rounded-xl border border-border bg-surface p-3">
-          <input
-            type="checkbox"
-            name="manual_confirm"
-            checked={manualConfirm}
-            onChange={(e) => setManualConfirm(e.target.checked)}
-            className="mt-0.5"
-          />
-          <span className="text-sm">
-            <span className="font-medium">O confirm manual</span> (pot exista întârzieri)
-            <span className="mt-0.5 block text-xs text-muted">
-              Nu se generează automat. Fiecare rată apare la „De completat" cu suma precompletată,
-              iar tu o marchezi plătită când chiar are loc.
-            </span>
+      {/* Confirmare manuală (pentru întârzieri). Când e variabilă, e deja inclusă → dezactivată. */}
+      <label
+        className={`flex items-start gap-2 rounded-xl border border-border bg-surface p-3 ${
+          isVariable ? "opacity-60" : ""
+        }`}
+      >
+        <input
+          type="checkbox"
+          name="manual_confirm"
+          checked={isVariable || manualConfirm}
+          disabled={isVariable}
+          onChange={(e) => setManualConfirm(e.target.checked)}
+          className="mt-0.5"
+        />
+        <span className="text-sm">
+          <span className="font-medium">O confirm manual</span> (pot exista întârzieri)
+          <span className="mt-0.5 block text-xs text-muted">
+            {isVariable
+              ? "Deja inclus în „rată variabilă" — o completezi tu la scadență."
+              : "Nu se generează automat. Fiecare rată apare la „De completat" cu suma precompletată, iar tu o marchezi plătită când chiar are loc."}
           </span>
-        </label>
-      ) : null}
+        </span>
+      </label>
 
       <div className="flex flex-col gap-1.5">
         <label htmlFor="category_id" className="text-sm font-medium">
