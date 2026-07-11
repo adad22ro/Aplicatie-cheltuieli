@@ -47,6 +47,8 @@ export default function HelpPage() {
             ["#recurente", "🔁 Plăți care se repetă lună de lună"],
             ["#rate", "💳 Cumpărături în rate"],
             ["#bugete", "🎯 Limite pe categorii (bugete)"],
+            ["#datorii", "🤝 Bani împrumutați (datorii)"],
+            ["#completat", "📝 „De completat” — facturi cu sumă variabilă"],
             ["#economii", "🐷 Pun bani deoparte"],
             ["#grafice", "📊 Văd totul în grafice"],
             ["#setari", "⚙️ Personalizez aplicația"],
@@ -101,8 +103,12 @@ export default function HelpPage() {
             la finalul lunii.
           </Li>
           <Li>
-            <B>Scurtăturile colorate</B> (Plan, Recurențe, Rate, Grafice, Obiective) te duc la
-            fiecare parte a aplicației.
+            <B>Scurtăturile colorate</B> (Plan, Recurențe, Rate, Grafice, Obiective, Datorii) te
+            duc la fiecare parte a aplicației.
+          </Li>
+          <Li>
+            <B>De completat</B> — dacă ai facturi sau rate cu sumă variabilă (vezi mai jos), aici
+            apar cele ajunse la scadență, ca să le treci suma reală.
           </Li>
         </Ul>
         <P>
@@ -166,6 +172,12 @@ export default function HelpPage() {
           zi a lunii vin, iar aplicația ți le notează automat de fiecare dată, fără să le dublezi.
           Poți opri sau reporni oricare, oricând.
         </P>
+        <P>
+          <B>Sumă variabilă?</B> Unele facturi diferă de la o lună la alta (curent, gaz, apă). La
+          acestea bifează <B>„Sumă variabilă”</B> când le creezi. Aplicația nu mai ghicește suma:
+          la scadență îți apar la <B>„De completat”</B> pe pagina de start, unde treci suma reală a
+          lunii. Suma pe care o pui la creare rămâne doar ca estimare.
+        </P>
       </Section>
 
       <Section id="rate" title="💳 Cumpărături în rate">
@@ -173,6 +185,12 @@ export default function HelpPage() {
           Ai luat ceva în rate? Treci suma totală și în câte rate o plătești, iar aplicația
           calculează rata lunară. Vezi mereu cât ai plătit și cât mai ai. Când termini, se închide
           singură.
+        </P>
+        <P>
+          <B>Rate care se schimbă?</B> La un credit cu dobândă variabilă, rata nu e mereu aceeași.
+          Bifează <B>„Rată variabilă”</B>: fiecare rată îți apare la <B>„De completat”</B> la
+          scadență și-i treci tu suma reală. Numărul total de rate rămâne cel stabilit, iar planul
+          se închide când le-ai plătit pe toate.
         </P>
       </Section>
 
@@ -182,6 +200,50 @@ export default function HelpPage() {
           categoria aceea. O bară colorată îți arată cât ai consumat, se face galbenă când te
           apropii și roșie dacă ai depășit.
         </P>
+      </Section>
+
+      <Section id="datorii" title="🤝 Bani împrumutați (datorii)">
+        <P>
+          Aici ții socoteala banilor împrumutați — fie că ai luat tu de la cineva, fie că ai dat tu
+          altcuiva. Deschizi secțiunea din scurtătura <B>Datorii</B> de pe pagina de start.
+        </P>
+        <Ul>
+          <Li>
+            Alegi sensul: <B>„Datorez eu”</B> (ai luat bani de la cineva) sau{" "}
+            <B>„Mi se datorează”</B> (ai dat tu bani).
+          </Li>
+          <Li>Treci persoana, suma și, dacă vrei, data și o notă.</Li>
+          <Li>
+            Când dai sau primești bani înapoi, apeși <B>„+ Restituire”</B> și treci suma. Poți
+            restitui de mai multe ori, în tranșe. Butonul <B>„Am înapoiat tot”</B> închide datoria
+            dintr-o atingere.
+          </Li>
+          <Li>
+            Sus vezi pe scurt <B>cât datorezi</B> și <B>cât ți se datorează</B>. Datoriile achitate
+            trec în secțiunea „Închise”.
+          </Li>
+        </Ul>
+        <P>
+          <B>Important:</B> aceste mișcări intră în socoteala lunii. Când <B>primești</B> bani (fie
+          împrumutul, fie o restituire către tine) apare ca <B>venit</B>; când <B>dai</B> bani apare
+          ca <B>cheltuială</B>. Toate apar la categoria <B>„Datorii”</B> în tranzacții și grafice.
+        </P>
+      </Section>
+
+      <Section id="completat" title="📝 „De completat” — facturi cu sumă variabilă">
+        <P>
+          Când ai recurențe sau rate cu <B>sumă variabilă</B> (facturi de curent/gaz, credit cu
+          dobândă variabilă), aplicația nu inventează suma. La scadență, pe pagina de start apare o
+          căsuță <B>„De completat”</B> cu lista lor.
+        </P>
+        <Ul>
+          <Li>Fiecare rând îți arată ce e și când a ajuns scadent.</Li>
+          <Li>
+            Câmpul e precompletat cu estimarea ta — o schimbi cu <B>suma reală</B> a lunii și apeși{" "}
+            <B>„Confirmă”</B>.
+          </Li>
+          <Li>Atât: devine o cheltuială reală și intră în soldul lunii, iar rândul dispare.</Li>
+        </Ul>
       </Section>
 
       <Section id="economii" title="🐷 Pun bani deoparte">

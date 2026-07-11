@@ -1,5 +1,5 @@
 # Status proiect: Gospodărie — gestiune financiară
-Ultima actualizare: 2026-07-05
+Ultima actualizare: 2026-07-11
 
 ## Profil și decizii de bază
 - Profil: **B** (multi-tenant pe gospodărie) | Auth: **Supabase Auth** (RLS pe `auth.uid()`)
@@ -63,6 +63,14 @@ Ultima actualizare: 2026-07-05
 - **Test funcțional (2026-07-06)**: script temporar 8/8 OK (coloana `week` + constrângere week 1-6/null, redeem ATOMIC cod = exact 1 câștigător la concurență, `rls_status()` fără tabele dezactivate, numărare rate-limit). Date de test curățate. Script șters după.
 - Google OAuth: **CONFIGURAT ȘI FUNCȚIONAL** (testat live cu cont real, 2026-07-06). Google Cloud OAuth client + provider Supabase enable. Login doar pt. conturi existente (disable_signup).
 
+## ✅ Datorii + sume variabile + detalii pe telefon (2026-07-11)
+- **Fix bug plan**: adăugarea unui venit pica validarea când NU era bifat „recurent" (`day_of_month` sosea `null`, `.optional()` nu-l prindea, `z.coerce` → 0 → `.min(1)` eșua). `lib/schemas/plan.ts` tratează gol/`null` ca absent.
+- **Detalii desfășurabile** (fix nume tăiate pe telefon): rânduri tap-abile cu panou „info complet" pe `/plan` (`PlanEditor`), `/recurring` (`RecurringList`), `/installments` (`InstallmentList`).
+- **Datorii** (`/debts`) — bani împrumutați de la / către persoane. Migrări `20260707130000_debts.sql` (`debts` + `debt_payments`, RLS `is_household_member`, soft delete) + `20260707140000_debts_transactions.sql` (enum `transaction_source += 'debt'` + coloane `transaction_id`). **Integrate în soldul lunii**: fiecare mișcare creează o tranzacție reală (categoria „Datorii" 🤝 creată lazy per gospodărie). Împrumut inițial: borrowed→venit, lent→cheltuială; restituire = invers. Restituiri parțiale sau „Am înapoiat tot"; ștergere în cascadă a tranzacțiilor legate. `lib/{schemas,data,actions}/debts.ts`, `components/debts/DebtsManager.tsx`, pastilă în dashboard.
+- **Recurențe & rate variabile** (sumă diferită de la o lună la alta). Migrare `20260707150000_variable_recurring_installments.sql`: coloană `is_variable` pe `recurring_transactions` + `installment_plans`; `generate_due_*` sar peste cele variabile (ratele tot recalculează `paid_installments`/`is_active`); RPC-uri `list_due_variable_recurring/installments` întorc sloturile scadente necompletate. Checkbox „sumă variabilă" în formulare (suma devine estimare). Secțiune **„De completat"** pe dashboard (`components/DueVariable.tsx`, `lib/data/variable-due.ts`, `lib/actions/variable-due.ts`): introduci suma reală → tranzacție (index unic previne dubluri).
+- **Manual `/help`** actualizat: secțiuni noi Datorii + „De completat", extinderi la recurențe/rate variabile.
+- ⚠️ **De rulat de user**: `npm run db:push` + `npm run db:types` (aplică migrările `20260707130000`, `140000`, `150000`). Verificat typecheck; testat pe live doar fix-ul de plan + detaliile (confirmate de user).
+
 ## Stare curentă (handoff) — actualizat 2026-07-06
 - **APP FUNCȚIONAL COMPLET pentru uz privat.** Tot ce e mai jos e LIVE pe Vercel (`main`, auto-deploy). Ultim commit: `ff699f6`.
 - **Livrat:** Faza 1+2, plan lunar (+ extinderi A-D, săptămâni, economii), vizualizare săptămânală, funcții utile E/F/G/H/I, 13 grafice în `/reports`, ghid de utilizare `/help`, admin+PWA+profiluri, securitate val 1+2.
@@ -84,7 +92,7 @@ Ultima actualizare: 2026-07-05
 - Generare recurențe/rate: „lazy" la deschiderea dashboard-ului prin RPC-uri SECURITY DEFINER (fără cron).
 
 ## Migrări aplicate (remote) — TOATE aplicate
-`20260704150519` schema+RLS · `20260705120000` redeem_invite · `20260705140000` generate_due_recurring · `20260705160000` generate_due_installments · `20260705180000` signup_codes+admin_audit · `20260705200000` profiles+shares_household · `20260706100000` monthly_plans · `20260706110000` recurring_expense_only · `20260706120000` plan_income_contributor · `20260706130000` allocation_templates · `20260706140000` plan_allocation_savings · `20260706150000` plan_allocation_week · `20260706160000` security (security_events + rls_status)
+`20260704150519` schema+RLS · `20260705120000` redeem_invite · `20260705140000` generate_due_recurring · `20260705160000` generate_due_installments · `20260705180000` signup_codes+admin_audit · `20260705200000` profiles+shares_household · `20260706100000` monthly_plans · `20260706110000` recurring_expense_only · `20260706120000` plan_income_contributor · `20260706130000` allocation_templates · `20260706140000` plan_allocation_savings · `20260706150000` plan_allocation_week · `20260706160000` security (security_events + rls_status) · `20260707120000` monthly_summary_rpc · `20260707130000` debts · `20260707140000` debts_transactions · `20260707150000` variable_recurring_installments (⚠️ ultimele 3 de aplicat: `npm run db:push`)
 - ⚠️ tipuri: pe lângă `db:types`, unele coloane noi au fost adăugate MANUAL în `types/database.ts` (`plan_allocations.week`, `security_events`, `rls_status`) — o regenerare `npm run db:types` le confirmă.
 
 ## ✅ „Plan lunar" (alocare venit + planificare lună viitoare) — implementat 2026-07-06
