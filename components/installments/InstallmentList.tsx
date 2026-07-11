@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 
 import { deleteInstallmentAction } from "@/lib/actions/installments";
 import type { InstallmentItem } from "@/lib/data/installments";
@@ -13,16 +14,27 @@ const ron = new Intl.NumberFormat("ro-RO", {
 
 function Card({ item, done }: { item: InstallmentItem; done: boolean }) {
   const pct = Math.round((item.paid_installments / item.total_installments) * 100);
+  const [expanded, setExpanded] = useState(false);
   return (
     <li className={`flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4 shadow-sm ${done ? "opacity-70" : ""}`}>
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="truncate font-semibold">{item.name}</p>
-          <p className="text-xs text-muted">
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          aria-expanded={expanded}
+          className="min-w-0 text-left"
+        >
+          <p className="flex items-center gap-1 truncate font-semibold">
+            <span className={`text-xs text-muted transition-transform ${expanded ? "rotate-90" : ""}`}>
+              ›
+            </span>
+            <span className="truncate">{item.name}</span>
+          </p>
+          <p className="truncate pl-4 text-xs text-muted">
             {item.category?.icon ? `${item.category.icon} ` : ""}
             {item.category?.name ?? "—"} · ziua {item.day_of_month}
           </p>
-        </div>
+        </button>
         <p className="shrink-0 text-right">
           <span className="block font-semibold tabular-nums text-expense">
             {ron.format(item.installment_amount)}
@@ -30,6 +42,34 @@ function Card({ item, done }: { item: InstallmentItem; done: boolean }) {
           <span className="text-xs text-muted">/ lună</span>
         </p>
       </div>
+
+      {expanded ? (
+        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 border-t border-border pt-2 text-xs">
+          <dt className="text-muted">Denumire</dt>
+          <dd className="font-medium">{item.name}</dd>
+          <dt className="text-muted">Categorie</dt>
+          <dd>
+            {item.category?.icon ? `${item.category.icon} ` : ""}
+            {item.category?.name ?? "—"}
+          </dd>
+          <dt className="text-muted">Total</dt>
+          <dd className="tabular-nums">{ron.format(item.total_amount)}</dd>
+          <dt className="text-muted">Rată / lună</dt>
+          <dd className="font-semibold tabular-nums">{ron.format(item.installment_amount)}</dd>
+          <dt className="text-muted">Rate</dt>
+          <dd>
+            {item.paid_installments}/{item.total_installments} plătite · {item.remaining_installments} rămase
+          </dd>
+          <dt className="text-muted">Rest de plată</dt>
+          <dd className="tabular-nums">{ron.format(item.remaining_amount)}</dd>
+          <dt className="text-muted">Ziua lunii</dt>
+          <dd>{item.day_of_month}</dd>
+          <dt className="text-muted">Început</dt>
+          <dd>{item.start_date}</dd>
+          <dt className="text-muted">Stare</dt>
+          <dd>{done ? "Finalizat" : "Activ"}</dd>
+        </dl>
+      ) : null}
 
       <div className="flex flex-col gap-1">
         <div className="h-2 overflow-hidden rounded-full bg-background">

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 
 import {
   toggleRecurringAction,
@@ -16,12 +17,14 @@ const ron = new Intl.NumberFormat("ro-RO", {
 
 function Row({ item }: { item: RecurringItem }) {
   const sign = item.type === "income" ? "+" : "−";
+  const [expanded, setExpanded] = useState(false);
   return (
     <li
-      className={`flex items-center gap-3 rounded-xl border border-border bg-surface p-3 ${
+      className={`flex flex-col rounded-xl border border-border bg-surface p-3 ${
         item.is_active ? "" : "opacity-60"
       }`}
     >
+    <div className="flex items-center gap-3">
       <span
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-base"
         style={{ backgroundColor: item.category?.color ?? "var(--color-background)" }}
@@ -29,16 +32,24 @@ function Row({ item }: { item: RecurringItem }) {
       >
         {item.category?.icon ?? "•"}
       </span>
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-medium">
-          {item.category?.name ?? "Fără categorie"}
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        className="min-w-0 flex-1 text-left"
+      >
+        <p className="flex items-center gap-1 truncate font-medium">
+          <span className={`text-xs text-muted transition-transform ${expanded ? "rotate-90" : ""}`}>
+            ›
+          </span>
+          <span className="truncate">{item.category?.name ?? "Fără categorie"}</span>
         </p>
-        <p className="truncate text-xs text-muted">
+        <p className="truncate pl-4 text-xs text-muted">
           Ziua {item.day_of_month}
           {item.payment_method?.name ? ` · ${item.payment_method.name}` : ""}
           {item.note ? ` · ${item.note}` : ""}
         </p>
-      </div>
+      </button>
       <span
         className={`shrink-0 tabular-nums font-semibold ${
           item.type === "income" ? "text-income" : "text-expense"
@@ -76,6 +87,37 @@ function Row({ item }: { item: RecurringItem }) {
           </button>
         </form>
       </div>
+    </div>
+
+      {expanded ? (
+        <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 border-t border-border pt-2 text-xs">
+          <dt className="text-muted">Categorie</dt>
+          <dd className="font-medium">
+            {item.category?.icon ? `${item.category.icon} ` : ""}
+            {item.category?.name ?? "Fără categorie"}
+          </dd>
+          <dt className="text-muted">Tip</dt>
+          <dd>{item.type === "income" ? "Venit" : "Cheltuială"}</dd>
+          <dt className="text-muted">Sumă</dt>
+          <dd className="font-semibold tabular-nums">{ron.format(item.amount)}</dd>
+          <dt className="text-muted">Ziua lunii</dt>
+          <dd>{item.day_of_month}</dd>
+          {item.payment_method?.name ? (
+            <>
+              <dt className="text-muted">Metodă</dt>
+              <dd>{item.payment_method.name}</dd>
+            </>
+          ) : null}
+          {item.note ? (
+            <>
+              <dt className="text-muted">Notă</dt>
+              <dd>{item.note}</dd>
+            </>
+          ) : null}
+          <dt className="text-muted">Stare</dt>
+          <dd>{item.is_active ? "Activă" : "Oprită"}</dd>
+        </dl>
+      ) : null}
     </li>
   );
 }
