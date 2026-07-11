@@ -32,21 +32,25 @@ function BudgetRow({ item }: { item: BudgetItem }) {
 
   return (
     <li className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-3">
-      <div className="flex items-center justify-between gap-2">
-        <span className="flex min-w-0 items-center gap-2 font-medium">
-          <span
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-xl text-sm"
-            style={{ backgroundColor: item.category?.color ?? "var(--color-background)" }}
-            aria-hidden
-          >
-            {item.category?.icon ?? "•"}
-          </span>
-          <span className="truncate">{item.category?.name ?? "—"}</span>
+      {/* Nume pe rând propriu (lățime completă) */}
+      <span className="flex min-w-0 items-center gap-2 font-medium">
+        <span
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-xl text-sm"
+          style={{ backgroundColor: item.category?.color ?? "var(--color-background)" }}
+          aria-hidden
+        >
+          {item.category?.icon ?? "•"}
         </span>
-        <span className={`text-sm tabular-nums ${item.over ? "text-expense font-semibold" : "text-muted"}`}>
+        <span className="min-w-0 flex-1">{item.category?.name ?? "—"}</span>
+      </span>
+
+      {/* Consum / limită, pe rândul lor */}
+      <p className="flex items-baseline justify-between text-sm">
+        <span className="text-muted">Cheltuit</span>
+        <span className={`tabular-nums ${item.over ? "text-expense font-semibold" : "text-foreground"}`}>
           {ron.format(item.spent)} / {ron.format(item.amount)}
         </span>
-      </div>
+      </p>
 
       <div className="h-2 overflow-hidden rounded-full bg-background">
         <div

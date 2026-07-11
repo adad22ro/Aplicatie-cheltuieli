@@ -25,6 +25,8 @@ function parseForm(formData: FormData) {
     payment_method_id: formData.get("payment_method_id"),
     day_of_month: formData.get("day_of_month"),
     start_date: formData.get("start_date"),
+    is_variable: formData.get("is_variable"),
+    manual_confirm: formData.get("manual_confirm"),
   };
 }
 

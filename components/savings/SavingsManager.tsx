@@ -66,20 +66,24 @@ function Contribute({ id }: { id: string }) {
 function GoalCard({ goal }: { goal: SavingsGoal }) {
   return (
     <li className="flex flex-col gap-3 rounded-2xl border border-border bg-surface p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="truncate font-semibold">{goal.name}</p>
-          {goal.deadline ? (
-            <p className="text-xs text-muted">
-              Termen: {new Date(goal.deadline).toLocaleDateString("ro-RO")}
-            </p>
-          ) : null}
-        </div>
-        <p className="shrink-0 text-right text-sm">
+      {/* Nume pe rând propriu (lățime completă) */}
+      <div className="min-w-0">
+        <p className="font-semibold">{goal.name}</p>
+        {goal.deadline ? (
+          <p className="text-xs text-muted">
+            Termen: {new Date(goal.deadline).toLocaleDateString("ro-RO")}
+          </p>
+        ) : null}
+      </div>
+
+      {/* Strâns / țintă, pe rândul lor */}
+      <p className="flex items-baseline justify-between text-sm">
+        <span className="text-muted">Strâns</span>
+        <span>
           <span className="font-semibold tabular-nums">{ron.format(goal.current_amount)}</span>
           <span className="text-muted"> / {ron.format(goal.target_amount)}</span>
-        </p>
-      </div>
+        </span>
+      </p>
 
       <div className="flex flex-col gap-1">
         <div className="h-2 overflow-hidden rounded-full bg-background">
