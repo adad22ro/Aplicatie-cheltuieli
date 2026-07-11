@@ -174,8 +174,8 @@ export function InstallmentForm({
           <span className="font-medium">O confirm manual</span> (pot exista întârzieri)
           <span className="mt-0.5 block text-xs text-muted">
             {isVariable
-              ? "Deja inclus în „rată variabilă" — o completezi tu la scadență."
-              : "Nu se generează automat. Fiecare rată apare la „De completat" cu suma precompletată, iar tu o marchezi plătită când chiar are loc."}
+              ? "Deja inclus în rata variabilă — o completezi tu la scadență."
+              : "Nu se generează automat. Fiecare rată apare la „De completat” cu suma precompletată, iar tu o marchezi plătită când chiar are loc."}
           </span>
         </span>
       </label>

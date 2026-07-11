@@ -121,8 +121,8 @@ export function RecurringForm({
           <span className="font-medium">O confirm manual</span> (pot exista întârzieri)
           <span className="mt-0.5 block text-xs text-muted">
             {isVariable
-              ? "Deja inclus în „sumă variabilă" — o completezi tu la scadență."
-              : "Nu se generează automat. Apare la „De completat" cu suma precompletată, iar tu o marchezi plătită/încasată când chiar are loc."}
+              ? "Deja inclus în suma variabilă — o completezi tu la scadență."
+              : "Nu se generează automat. Apare la „De completat” cu suma precompletată, iar tu o marchezi plătită/încasată când chiar are loc."}
           </span>
         </span>
       </label>
