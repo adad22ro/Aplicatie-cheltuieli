@@ -29,7 +29,11 @@ export const addIncomeSchema = z
     is_recurring: z.preprocess((v) => v === "on" || v === "true" || v === true, z.boolean()),
     // necesare doar dacă e recurent (recurring_transactions cere categorie + zi)
     category_id: optionalUuid,
-    day_of_month: z.coerce.number().int().min(1).max(31).optional(),
+    // Câmpul nu e randat când venitul nu e recurent → poate sosi null/"" (îl tratăm ca absent).
+    day_of_month: z.preprocess(
+      (v) => (v === null || v === undefined || v === "" ? undefined : v),
+      z.coerce.number().int().min(1).max(31).optional(),
+    ),
   })
   .refine((d) => !d.is_recurring || d.category_id, {
     message: "Alege o categorie de venit pentru sursa recurentă",

@@ -337,17 +337,20 @@ function AllocationRow({
   onAmount: (v: number) => void;
 }) {
   const [pending, start] = useTransition();
+  const [expanded, setExpanded] = useState(false);
   const isSavings = Boolean(alloc.savings_goal_id);
   const name = isSavings
     ? (alloc.savings_goal?.name ?? "Economii")
     : (alloc.category?.name ?? alloc.label ?? "Cheltuială");
   const icon = isSavings ? "🐷 " : alloc.category?.icon ? `${alloc.category.icon} ` : "";
+  const weekLabel = weekValue ? `Săptămâna ${weekValue}` : "Oricând";
   return (
     <div
-      className={`flex items-center gap-2 rounded-xl border p-2.5 ${
+      className={`flex flex-col rounded-xl border p-2.5 ${
         alloc.is_paid ? "border-income/40 bg-income/5" : "border-border bg-surface"
       }`}
     >
+    <div className="flex items-center gap-2">
       {/* Reordonare (prioritizare) — doar în vizualizarea listă */}
       {showReorder ? (
         <div className="flex flex-col">
@@ -388,11 +391,21 @@ function AllocationRow({
         </button>
       </form>
 
-      <span className="flex-1 truncate text-sm font-medium">
-        {icon}
-        {name}
-        {alloc.recurring_id ? <span className="ml-1 text-muted">🔁</span> : null}
-      </span>
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        className="flex flex-1 items-center gap-1 truncate text-left text-sm font-medium"
+      >
+        <span className={`text-xs text-muted transition-transform ${expanded ? "rotate-90" : ""}`}>
+          ›
+        </span>
+        <span className="truncate">
+          {icon}
+          {name}
+          {alloc.recurring_id ? <span className="ml-1 text-muted">🔁</span> : null}
+        </span>
+      </button>
 
       {/* Selector de săptămână */}
       <select
@@ -431,6 +444,45 @@ function AllocationRow({
       >
         ✕
       </button>
+    </div>
+
+      {/* Panou de detalii — numele complet + info care nu încap pe rândul compact */}
+      {expanded ? (
+        <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 border-t border-border pt-2 text-xs">
+          <dt className="text-muted">Denumire</dt>
+          <dd className="font-medium">
+            {icon}
+            {name}
+          </dd>
+          {isSavings ? null : alloc.category ? (
+            <>
+              <dt className="text-muted">Categorie</dt>
+              <dd>
+                {alloc.category.icon ? `${alloc.category.icon} ` : ""}
+                {alloc.category.name}
+              </dd>
+            </>
+          ) : null}
+          {alloc.label ? (
+            <>
+              <dt className="text-muted">Detaliu</dt>
+              <dd>{alloc.label}</dd>
+            </>
+          ) : null}
+          <dt className="text-muted">Când</dt>
+          <dd>{weekLabel}</dd>
+          <dt className="text-muted">Sumă planificată</dt>
+          <dd className="font-semibold tabular-nums">{ron.format(alloc.planned_amount)}</dd>
+          <dt className="text-muted">Stare</dt>
+          <dd>{alloc.is_paid ? "✓ Plătit" : "Neplătit"}</dd>
+          {alloc.recurring_id ? (
+            <>
+              <dt className="text-muted">Sursă</dt>
+              <dd>🔁 Recurentă</dd>
+            </>
+          ) : null}
+        </dl>
+      ) : null}
     </div>
   );
 }
