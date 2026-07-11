@@ -225,6 +225,7 @@ export default async function DashboardPage({
           { href: "/installments", icon: "💳", label: "Rate", tint: "tint-warning" },
           { href: "/reports", icon: "📊", label: "Grafice", tint: "tint-income" },
           { href: "/savings", icon: "🐷", label: "Obiective", tint: "tint-expense" },
+          { href: "/debts", icon: "🤝", label: "Datorii", tint: "tint-accent" },
         ].map(({ href, icon, label, tint }) => (
           <Link
             key={href}
